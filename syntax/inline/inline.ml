@@ -20,6 +20,19 @@ and inline_source_block = {
   options: string option;
   code: string;
 }
+and url = 
+  | File of string
+  | Search of string
+  | Complex of complex
+and complex = {
+  protocol: string;
+  link: string
+}
+    
+and link = {
+  url: url;
+  label: t list;
+}
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
@@ -29,6 +42,7 @@ and t =
   | Inline_Source_Block of inline_source_block
   | Latex_Fragment of string
   | Break_Line
+  | Link of link
   | Plain of string
 
 (* chars because occurences make identation screw up *)
@@ -81,6 +95,11 @@ let inside delim rest =
   else match D.enclosing_delimiter rest delim with
     | Some (c, d) -> Some c, d
     | None -> None, rest
+
+let inside_force delim rest = 
+  match inside delim rest with
+    | Some c, d -> c, d
+    | _ -> failwith ""
 
 let see s rest = 
   let (before, after) = Substring.split_at (Batteries.String.length s) rest in
@@ -172,10 +191,36 @@ let break_line_parser _ rest =
   let rest = see "\\\\\n" rest in
   Some ([Break_Line], rest)
 
+(** {2 Link parser} *)
+let link_parser parse rest =
+  let contents, rest = inside_force obracket rest in
+  let descr, url = inside_force obracket (all contents) in
+  let url, _ = inside obracket url in
+  let url = 
+      match url with
+        | None -> Search descr
+        | Some url -> 
+          if (all url).[0] = '/' || (all url).[0] = '.' then
+            File url
+          else try Scanf.sscanf url "%[^:]://%[^\n]" 
+                     (fun protocol link -> Complex {protocol; link})
+            with _ -> Search url
+  in
+  Some ([Link {label = parse descr; url}], rest)
+
+let link_inline_parser _ rest = 
+  let protocol, rest = until_space ((=) ':') rest in
+  let rest = see "://" rest in
+  let link, rest = until_space (fun x -> false) rest in
+  Some ([Link {label = [Plain (protocol ^ "://" ^ link)];
+               url = Complex { protocol; link }}],
+        rest)
+  
+        
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
    inline_source_block_parser; latex_fragment_parser;
-   break_line_parser
+   break_line_parser; link_parser; link_inline_parser
   ]
   

@@ -86,6 +86,23 @@ and inline_source_block = {
   options: string option;
   code: string;
 }
+(** {2 Links} *)
+(** Links are composed of two parts : an url and a label.
+    An url may be pointed to a file, to a search or to an actual url *)
+and url = 
+  | File of string
+  | Search of string
+  | Complex of complex
+and complex = {
+  protocol: string;
+  link: string
+}
+    
+and link = {
+  url: url;
+  label: t list;
+}
+
 (** {2 The type of inline contents} *)
 (** The final type for {!Inline.t} is as follows: *)
 and t = 
@@ -97,6 +114,7 @@ and t =
   | Inline_Source_Block of inline_source_block
   | Latex_Fragment of string
   | Break_Line
+  | Link of link
   | Plain of string
 
 (** {1 Parsers} *)
