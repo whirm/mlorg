@@ -12,3 +12,5 @@ doc:
 
 view: doc
 	xdg-open $$PWD/_build/mlorg.docdir/index.html
+
+.PHONY: _build/$(TARGET) top doc view
