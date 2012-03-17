@@ -1,10 +1,10 @@
 INC=-I common -I syntax/inline
 OCAMLBUILDFLAGS=-use-ocamlfind $(INC)
-all:
-	ocamlbuild $(OCAMLBUILDFLAGS) -ocamlc ocp-ocamlc -ocamlopt ocp-ocamlopt \
-	syntax/inline/inline.cma 
+TARGET=syntax/inline/inline.cma
+_build/$(TARGET):
+	ocamlbuild $(OCAMLBUILDFLAGS) -ocamlc ocp-ocamlc -ocamlopt ocp-ocamlopt $(TARGET)
 
-top:
+top: _build/$(TARGET)
 	rlwrap ocaml -I _build/common -I _build/syntax/inline $(INC) -init ocaml.init
 
 doc:
