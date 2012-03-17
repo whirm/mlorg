@@ -28,6 +28,7 @@ let obracket, cbracket = ('[', ']')
 let oparen,   cparen   = ('(', ')')
 let obrace,   cbrace   = ('{', '}')
 (** {1 Parsers} *)
+
 type parser = (string -> t list) -> Substring.t -> (t list * Substring.t) option
 let rec run_parsers parsers string =
   let substring = Substring.all string in
@@ -65,6 +66,24 @@ module D = Delimiters.Make (struct let table = delim_table end)
 open Substring
 module String = Substring
 
+(** {2 Interesting routines} *)
+open Option
+let inside delim rest = 
+  if String.is_empty rest then None, rest
+  else match D.enclosing_delimiter rest delim with
+    | Some (c, d) -> Some c, d
+    | None -> None, rest
+
+let see s rest = 
+  let (before, after) = Substring.split_at (Batteries.String.length s) rest in
+  if Substring.to_string before = s then after
+  else raise (Failure "")
+
+let until pred rest = 
+  splitl (pred |- not) rest |> fun (x, y) -> Substring.to_string x, y
+let one_of l c = List.mem c l
+let ( ||| ) f g = fun x -> f x || g x
+let until_space f = until (Char.is_whitespace ||| f)
 (** {2 Emphasis} *)
 let emphasis_parser parse sub = 
   let delims = ['*', `Bold; '_', `Underline; '/', `Italic] in
@@ -120,30 +139,21 @@ let footnote_reference_parser parse s =
       in Some ([Footnote_Reference data], rest)
 
 (** {2 Inline call parser} *)
-let inline_call_parser _ s = 
-  Scanf.sscanf (Substring.to_string s) "call_%[^[(]%[^\n]"
-    (fun program rest ->
-      print_endline rest;
-      let rest = Substring.all rest in
-      let inside_headers, rest = 
-        match D.enclosing_delimiter rest obracket  with
-          | Some (header, rest) -> Some header, rest
-          | None -> None, rest
-      in
-      let arguments, rest = 
-        match D.enclosing_delimiter rest oparen with
-          | Some (arguments, rest) ->
-            Config.parse_comma arguments, rest
-          | None -> [], rest
-      in
-      let end_headers, rest = 
-        match D.enclosing_delimiter rest obracket with
-          | Some (end_header, rest) ->
-            Some end_header, rest
-          | None -> None, rest
-      in
-      Some ([Inline_Call { program; end_headers; arguments; inside_headers }],
-            rest))
+let inline_call_parser _ rest = 
+  let rest = see "call_" rest in
+  print_endline (Substring.to_string rest);
+  let program, rest = until_space (one_of [oparen; obracket]) rest in
+  print_endline (Substring.to_string rest);
+  let inside_headers, rest = inside obracket rest in
+  print_endline (Substring.to_string rest);
+  let arguments, rest = inside oparen rest in
+  print_endline (Substring.to_string rest);
+  let end_headers, rest = inside obracket rest in
+  print_endline (Substring.to_string rest);
+  Some ([
+    Inline_Call { program; end_headers; inside_headers;
+                  arguments = map_default Config.parse_comma [] arguments }],
+        rest)
 
 
 let parse = run_parsers
