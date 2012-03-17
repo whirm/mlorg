@@ -78,7 +78,7 @@ let see s rest =
   let (before, after) = Substring.split_at (Batteries.String.length s) rest in
   if Substring.to_string before = s then after
   else raise (Failure "")
-
+let skip ?(n = 1) rest = triml n rest
 let until pred rest = 
   splitl (pred |- not) rest |> fun (x, y) -> Substring.to_string x, y
 let one_of l c = List.mem c l
@@ -96,47 +96,39 @@ let emphasis_parser parse sub =
   else None
 
 (** {2 Entity parser} *)
-let entity_parser _ s = 
-  if s.[0] = '\\' then
-    let name, rest = splitl 
-      (fun c -> Char.is_letter c || Char.is_digit c) (triml 1 s)
-    in
-    Some ([Entity (Entity.find (to_string name))], rest)
-  else
-    None
+let entity_parser _ rest = 
+  let rest = see "\\" rest in
+  let name, rest = until_space (fun _ -> false) rest in
+  Some ([Entity (Entity.find name)], rest)
 
 (** {2 Export snippet parser} *)
-let export_snippet_parser _ s = 
-  if s.[0] = '@' then
-    let name, rest = splitl Char.is_letter (triml 1 s) in
-    (if rest.[0] = '{' then
-        (match D.enclosing_delimiter rest '{' with
-          | Some (s, rest) -> 
-            Some ([Export_Snippet (to_string name, unescape (all s))], rest)
-          | None -> None)
-      else
-        None)
-  else
-    None
+let export_snippet_parser _ rest = 
+  let rest = see "@" rest in
+  let name, rest = until (Char.is_letter |- not) rest in
+  let contents, rest = inside obrace rest in
+  match contents with
+    | None -> None
+    | Some s -> Some ([Export_Snippet (name, unescape (all s))], rest)
 
 (** {2 Footnote reference parser} *)
-let footnote_reference_parser parse s = 
-  match D.enclosing_delimiter s obracket with
+let footnote_reference_parser parse rest = 
+  let contents, rest = inside obracket rest in
+  match contents with
     | None -> None
-    | Some (s, rest) -> 
-      let data = 
-        try
-          let _ = int_of_string s in
-          { name = Some s;
-            definition = None }
-        with _ -> 
-          let parse' l = parse (Batteries.String.concat ":" l) in
-          match Batteries.String.nsplit s ":" with
-            | "fn" :: "" :: def -> { name = None; definition = Some (parse' def) }
-            | ["fn"; name] -> { name = Some name; definition = None }
-            | "fn" :: name :: def ->
-              { name = Some name; definition = Some (parse' def) }
-      in Some ([Footnote_Reference data], rest)
+    | Some contents ->
+      if (try int_of_string contents; true with _ -> false) then
+        Some ([Footnote_Reference { name = Some contents; definition = None }], 
+              rest)
+      else
+        let contents = see "fn:" (Substring.all contents) in
+        let name, contents = until ((=) ':') contents in
+        let contents = skip contents in
+        let name = if name = "" then None else Some name in
+        let definition = 
+          if String.is_empty contents then None 
+          else Some (parse (String.to_string contents))
+        in
+        Some ([Footnote_Reference{ name; definition}], rest)
 
 (** {2 Inline call parser} *)
 let inline_call_parser _ rest = 
