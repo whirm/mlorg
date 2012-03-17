@@ -95,6 +95,8 @@ and t =
   | Footnote_Reference of footnote_reference
   | Inline_Call of inline_call
   | Inline_Source_Block of inline_source_block
+  | Latex_Fragment of string
+  | Break_Line
   | Plain of string
 
 (** {1 Parsers} *)

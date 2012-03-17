@@ -27,6 +27,8 @@ and t =
   | Footnote_Reference of footnote_reference
   | Inline_Call of inline_call
   | Inline_Source_Block of inline_source_block
+  | Latex_Fragment of string
+  | Break_Line
   | Plain of string
 
 (* chars because occurences make identation screw up *)
@@ -157,9 +159,23 @@ let inline_source_block_parser _ rest =
     | None -> None
     | Some code ->
       Some ([Inline_Source_Block {language; options; code}], rest)
+
+(** {2 Latex Fragment parser} *)
+let latex_fragment_parser _ rest = 
+  let data, rest = inside '$' rest in
+  match data with
+    | Some s -> Some ([Latex_Fragment s], rest)
+    | None -> None
+
+(** {2 Break Line parser} *)
+let break_line_parser _ rest = 
+  let rest = see "\\\\\n" rest in
+  Some ([Break_Line], rest)
+
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
-   inline_source_block_parser
+   inline_source_block_parser; latex_fragment_parser;
+   break_line_parser
   ]
   
