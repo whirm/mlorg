@@ -119,6 +119,7 @@ let footnote_reference_parser parse s =
               { name = Some name; definition = Some (parse' def) }
       in Some ([Footnote_Reference data], rest)
 
+(** {2 Inline call parser} *)
 let inline_call_parser _ s = 
   Scanf.sscanf (Substring.to_string s) "call_%[^[(]%[^\n]"
     (fun program rest ->
