@@ -15,12 +15,18 @@ and inline_call = {
   inside_headers : string option;
   end_headers : string option;
 }
+and inline_source_block = {
+  language: string;
+  options: string option;
+  code: string;
+}
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
   | Export_Snippet of export_snippet
   | Footnote_Reference of footnote_reference
   | Inline_Call of inline_call
+  | Inline_Source_Block of inline_source_block
   | Plain of string
 
 (* chars because occurences make identation screw up *)
@@ -133,23 +139,27 @@ let footnote_reference_parser parse rest =
 (** {2 Inline call parser} *)
 let inline_call_parser _ rest = 
   let rest = see "call_" rest in
-  print_endline (Substring.to_string rest);
   let program, rest = until_space (one_of [oparen; obracket]) rest in
-  print_endline (Substring.to_string rest);
   let inside_headers, rest = inside obracket rest in
-  print_endline (Substring.to_string rest);
   let arguments, rest = inside oparen rest in
-  print_endline (Substring.to_string rest);
   let end_headers, rest = inside obracket rest in
-  print_endline (Substring.to_string rest);
   Some ([
     Inline_Call { program; end_headers; inside_headers;
                   arguments = map_default Config.parse_comma [] arguments }],
         rest)
-
-
+(** {2 Inline Source Block parser} *)
+let inline_source_block_parser _ rest = 
+  let rest = see "src_" rest in
+  let language, rest = until_space (one_of [obracket; obrace]) rest in
+  let options, rest = inside obracket rest in
+  let code, rest = inside obrace rest in
+  match code with
+    | None -> None
+    | Some code ->
+      Some ([Inline_Source_Block {language; options; code}], rest)
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
-   footnote_reference_parser; inline_call_parser
+   footnote_reference_parser; inline_call_parser;
+   inline_source_block_parser
   ]
   

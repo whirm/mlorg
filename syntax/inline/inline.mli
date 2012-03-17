@@ -80,6 +80,12 @@ and inline_call = {
   inside_headers : string option;
   end_headers : string option;
 }
+(** {2 Inline source block} *)
+and inline_source_block = {
+  language: string;
+  options: string option;
+  code: string;
+}
 (** {2 The type of inline contents} *)
 (** The final type for {!Inline.t} is as follows: *)
 and t = 
@@ -88,6 +94,7 @@ and t =
   | Export_Snippet of export_snippet
   | Footnote_Reference of footnote_reference
   | Inline_Call of inline_call
+  | Inline_Source_Block of inline_source_block
   | Plain of string
 
 (** {1 Parsers} *)
