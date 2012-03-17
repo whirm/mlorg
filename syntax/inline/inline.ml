@@ -5,10 +5,15 @@ open Batteries
 type emphasis = [`Bold | `Italic | `Underline] * t list
 and entity = Entity.t
 and export_snippet = string * string
+and footnote_reference = {
+  name : string option;
+  definition : t list option;
+}
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
   | Export_Snippet of export_snippet
+  | Footnote_Reference of footnote_reference
   | Plain of string
 
 
@@ -85,8 +90,28 @@ let export_snippet_parser _ s =
   else
     None
 
-
+(** {2 Footnote reference parser} *)
+let footnote_reference_parser parse s = 
+  if s.[0] <> '[' then None
+  else match D.enclosing_delimiter s '[' with
+    | None -> None
+    | Some (s, rest) -> 
+      let data = 
+        try
+          let _ = int_of_string s in
+          { name = Some s;
+            definition = None }
+        with _ -> 
+          let parse' l = parse (Batteries.String.concat ":" l) in
+          match Batteries.String.nsplit s ":" with
+          | "fn" :: "" :: def -> { name = None; definition = Some (parse' def) }
+          | ["fn"; name] -> { name = Some name; definition = None }
+          | "fn" :: name :: def ->
+            { name = Some name; definition = Some (parse' def) }
+      in Some ([Footnote_Reference data], rest)
 
 let parse = run_parsers
-  [emphasis_parser; entity_parser; export_snippet_parser]
+  [emphasis_parser; entity_parser; export_snippet_parser;
+   footnote_reference_parser
+  ]
   

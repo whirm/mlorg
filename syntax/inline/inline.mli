@@ -57,12 +57,22 @@ and entity = Entity.t
 (** An export snippet is given by a couple [(language, text)].*)
 and export_snippet = string * string
 
+(** {2 Footnote reference} *)
+(** A footnote reference contains:
+    - a name (optional)
+    - a definition (optional) *)
+and footnote_reference = {
+  name : string option;
+  definition : t list option;
+}
+
 (** {2 The type of inline contents} *)
 (** The final type for {!Inline.t} is as follows: *)
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
   | Export_Snippet of export_snippet
+  | Footnote_Reference of footnote_reference
   | Plain of string
 
 (** {1 Parsers} *)
