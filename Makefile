@@ -1,11 +1,11 @@
-INC=-I common
+INC=-I common -I syntax/inline
 OCAMLBUILDFLAGS=-use-ocamlfind $(INC)
 all:
 	ocamlbuild $(OCAMLBUILDFLAGS) -ocamlc ocp-ocamlc -ocamlopt ocp-ocamlopt \
-	common/numbering.cma 
+	syntax/inline/inline.cma 
 
 top:
-	rwlrap ocaml -I _build/common $(INC) -init ocaml.init
+	rlwrap ocaml -I _build/common -I _build/syntax/inline $(INC) -init ocaml.init
 
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html

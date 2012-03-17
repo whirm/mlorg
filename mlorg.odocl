@@ -5,3 +5,5 @@ common/Config
 common/ExtList
 common/Numbering
 common/Timestamp
+syntax/inline/Entity
+syntax/inline/Inline

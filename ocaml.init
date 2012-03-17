@@ -7,7 +7,8 @@
 #load "_build/common/delimiters.cmo";;
 #load "_build/common/config.cmo";;
 #load "_build/common/numbering.cmo";;
-#load "syntax/inline.cmo";;
+#load "_build/syntax/inline/entity.cmo";;
+#load "_build/syntax/inline/inline.cmo";;
 #load "syntax/automaton.cmo";;
 #load "syntax/context.cmo";;
 #load "syntax/block.cmo";;
