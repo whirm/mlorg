@@ -68,7 +68,11 @@ val add : t -> string -> 'a serializable -> string -> 'a -> 'a item
 
 val get : 'a item -> 'a
 (** Retrieves an item's content *)
-    
+
+
+(** {1 Parsing strings} *)
+val parse_comma : string -> (string * string) list
+(** Parse a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
 (** {1 Configuration parsing} *)
 
 val fill_comma : t -> string -> unit

@@ -9,14 +9,24 @@ and footnote_reference = {
   name : string option;
   definition : t list option;
 }
+and inline_call = {
+  program : string;
+  arguments : (string * string) list;
+  inside_headers : string option;
+  end_headers : string option;
+}
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
   | Export_Snippet of export_snippet
   | Footnote_Reference of footnote_reference
+  | Inline_Call of inline_call
   | Plain of string
 
-
+(* chars because occurences make identation screw up *)
+let obracket, cbracket = ('[', ']')
+let oparen,   cparen   = ('(', ')')
+let obrace,   cbrace   = ('{', '}')
 (** {1 Parsers} *)
 type parser = (string -> t list) -> Substring.t -> (t list * Substring.t) option
 let rec run_parsers parsers string =
@@ -47,7 +57,7 @@ let rec run_parsers parsers string =
 
 (* The table of delimiters used to parse inline contents *)
 let delim_table = [('[', (']', false)); ('<', ('>', false));
-                   ('{', ('}', false));
+                   ('{', ('}', false)); ('(', (')', false));
                    ('*', ('*', true)); ('_', ('_', true));
                    ('~', ('~', true)); ('$', ('$', true)); 
                    ('=', ('=', true)); ('/', ('/', true))]
@@ -92,8 +102,7 @@ let export_snippet_parser _ s =
 
 (** {2 Footnote reference parser} *)
 let footnote_reference_parser parse s = 
-  if s.[0] <> '[' then None
-  else match D.enclosing_delimiter s '[' with
+  match D.enclosing_delimiter s obracket with
     | None -> None
     | Some (s, rest) -> 
       let data = 
@@ -104,14 +113,40 @@ let footnote_reference_parser parse s =
         with _ -> 
           let parse' l = parse (Batteries.String.concat ":" l) in
           match Batteries.String.nsplit s ":" with
-          | "fn" :: "" :: def -> { name = None; definition = Some (parse' def) }
-          | ["fn"; name] -> { name = Some name; definition = None }
-          | "fn" :: name :: def ->
-            { name = Some name; definition = Some (parse' def) }
+            | "fn" :: "" :: def -> { name = None; definition = Some (parse' def) }
+            | ["fn"; name] -> { name = Some name; definition = None }
+            | "fn" :: name :: def ->
+              { name = Some name; definition = Some (parse' def) }
       in Some ([Footnote_Reference data], rest)
+
+let inline_call_parser _ s = 
+  Scanf.sscanf (Substring.to_string s) "call_%[^[(]%[^\n]"
+    (fun program rest ->
+      print_endline rest;
+      let rest = Substring.all rest in
+      let inside_headers, rest = 
+        match D.enclosing_delimiter rest obracket  with
+          | Some (header, rest) -> Some header, rest
+          | None -> None, rest
+      in
+      let arguments, rest = 
+        match D.enclosing_delimiter rest oparen with
+          | Some (arguments, rest) ->
+            Config.parse_comma arguments, rest
+          | None -> [], rest
+      in
+      let end_headers, rest = 
+        match D.enclosing_delimiter rest obracket with
+          | Some (end_header, rest) ->
+            Some end_header, rest
+          | None -> None, rest
+      in
+      Some ([Inline_Call { program; end_headers; arguments; inside_headers }],
+            rest))
+
 
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
-   footnote_reference_parser
+   footnote_reference_parser; inline_call_parser
   ]
   

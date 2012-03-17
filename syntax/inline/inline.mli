@@ -66,6 +66,20 @@ and footnote_reference = {
   definition : t list option;
 }
 
+(** {2 Inline call} *)
+(** An inline call consists in
+    - The name of the block to call
+    - The arguments
+    - Inside header arguments
+    - End header arguments.
+    Cf org's doc for more information
+*)
+and inline_call = {
+  program : string;
+  arguments : (string * string) list;
+  inside_headers : string option;
+  end_headers : string option;
+}
 (** {2 The type of inline contents} *)
 (** The final type for {!Inline.t} is as follows: *)
 and t = 
@@ -73,6 +87,7 @@ and t =
   | Entity of entity
   | Export_Snippet of export_snippet
   | Footnote_Reference of footnote_reference
+  | Inline_Call of inline_call
   | Plain of string
 
 (** {1 Parsers} *)
