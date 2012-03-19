@@ -115,6 +115,7 @@ and t =
   | Latex_Fragment of string
   | Break_Line
   | Link of link
+  | Macro of string * string list
   | Plain of string
 
 (** {1 Parsers} *)

@@ -1,6 +1,8 @@
 
 open Prelude
 open Batteries
+
+module Substring = BatSubstring
 (** {1 Type definition} *)
 type emphasis = [`Bold | `Italic | `Underline] * t list
 and entity = Entity.t
@@ -43,6 +45,7 @@ and t =
   | Latex_Fragment of string
   | Break_Line
   | Link of link
+  | Macro of string * string list
   | Plain of string
 
 (* chars because occurences make identation screw up *)
@@ -216,11 +219,24 @@ let link_inline_parser _ rest =
                url = Complex { protocol; link }}],
         rest)
   
-        
+(** {2 Macro parser} *)
+let macro_parser _ rest = 
+  let trim = Batteries.String.trim and nsplit = Batteries.String.nsplit in
+  let rest = see "{{" rest in
+  let contents, rest = inside_force obrace rest in
+  let rest = see "}}" rest in
+  let contents = all contents in
+  let name, contents = until ((=) oparen) contents in
+  let name = trim name in
+  let contents = see "(" contents in
+  let arguments, contents = until ((=) cparen) contents in
+  Some ([Macro (name, List.map trim (nsplit arguments ","))],
+        rest)
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
    inline_source_block_parser; latex_fragment_parser;
-   break_line_parser; link_parser; link_inline_parser
+   break_line_parser; link_parser; link_inline_parser;
+   macro_parser
   ]
   
