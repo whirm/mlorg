@@ -35,6 +35,9 @@ and link = {
   url: url;
   label: t list;
 }
+and stats_cookie = 
+  | Percent of int
+  | Absolute of int * int (** current, max *)
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
@@ -46,10 +49,16 @@ and t =
   | Break_Line
   | Link of link
   | Macro of string * string list
+  | Radio_Target of string
+  | Subscript of t list
+  | Superscript of t list
+  | Verbatim of string
+  | Cookie of stats_cookie
   | Plain of string
 
 (* chars because occurences make identation screw up *)
 let obracket, cbracket = ('[', ']')
+let ochev,    cchev    = ('<', '>')
 let oparen,   cparen   = ('(', ')')
 let obrace,   cbrace   = ('{', '}')
 (** {1 Parsers} *)
@@ -232,11 +241,29 @@ let macro_parser _ rest =
   let arguments, contents = until ((=) cparen) contents in
   Some ([Macro (name, List.map trim (nsplit arguments ","))],
         rest)
+
+(** {2 Radio Target parser} *)
+let radio_target_parser _ rest = 
+  let rest = see "<<" rest in
+  let contents, rest = inside_force ochev rest in
+  let rest = see ">>" rest in
+  Some ([Radio_Target contents], rest)
+
+(** {2 Subscript and Superscript parser} *)
+let subscript_parser, superscript_parser = 
+  let gen c f parse rest = 
+    let rest = see c rest in
+    let contents, rest = inside_force obrace rest in
+    Some ([f (parse contents)], rest)
+  in gen "_" (fun x -> Subscript x),
+     gen "^" (fun x -> Superscript x)
+
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
    inline_source_block_parser; latex_fragment_parser;
    break_line_parser; link_parser; link_inline_parser;
-   macro_parser
+   macro_parser; radio_target_parser; subscript_parser;
+   superscript_parser;
   ]
   

@@ -102,6 +102,13 @@ and link = {
   url: url;
   label: t list;
 }
+(** {2 Cookies} *)
+and stats_cookie = 
+  | Percent of int
+  | Absolute of int * int (** current, max *)
+(** Cookies are a way to indicate the progress of a task. 
+    They can be of two form : percentage or absolute value *)
+
 
 (** {2 The type of inline contents} *)
 (** The final type for {!Inline.t} is as follows: *)
@@ -116,6 +123,11 @@ and t =
   | Break_Line
   | Link of link
   | Macro of string * string list
+  | Radio_Target of string
+  | Subscript of t list
+  | Superscript of t list
+  | Verbatim of string
+  | Cookie of stats_cookie
   | Plain of string
 
 (** {1 Parsers} *)
