@@ -16,11 +16,11 @@ This is the list of possible elements:
 - line break : =\\\\= at the end of a line
 - link : =[[descr][target]]= 
 - macro : text substitution [{{{name(arg1, arg2)}}}]. Documentation [[http://orgmode.org/manual/Macro-replacement.html][here]].
-- radio target : special links
+- radio target : special links  [<<<target>>>]
 - statistics-cookie : statistics about the percentage of done children
 - verbatim : [=plaincode=]
 - superscript/subscript : [^\{foo\}] and [_\{foo\}]
-- targets : special links [<<<target>>>]
+- targets : special links (?)
 - timestamp : scheduled/deadline or plain/inactive timestamp
 
 The file is organized as follows :
@@ -110,6 +110,13 @@ and stats_cookie =
     They can be of two form : percentage or absolute value *)
 
 
+(** {2 Timestamps} *)
+and timestamp = 
+  | Scheduled of Timestamp.t
+  | Deadline of Timestamp.t
+  | Date of Timestamp.t
+  | Range of Timestamp.range
+
 (** {2 The type of inline contents} *)
 (** The final type for {!Inline.t} is as follows: *)
 and t = 
@@ -128,6 +135,7 @@ and t =
   | Superscript of t list
   | Verbatim of string
   | Cookie of stats_cookie
+  | Timestamp of timestamp
   | Plain of string
 
 (** {1 Parsers} *)

@@ -38,6 +38,11 @@ and link = {
 and stats_cookie = 
   | Percent of int
   | Absolute of int * int (** current, max *)
+and timestamp = 
+  | Scheduled of Timestamp.t
+  | Deadline of Timestamp.t
+  | Date of Timestamp.t
+  | Range of Timestamp.range
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
@@ -54,6 +59,7 @@ and t =
   | Superscript of t list
   | Verbatim of string
   | Cookie of stats_cookie
+  | Timestamp of timestamp
   | Plain of string
 
 (* chars because occurences make identation screw up *)
@@ -258,12 +264,44 @@ let subscript_parser, superscript_parser =
   in gen "_" (fun x -> Subscript x),
      gen "^" (fun x -> Superscript x)
 
+
+(** {2 Statistics cookie parser} *)
+let statistics_cookie_parser _ rest =
+  let contents, rest = inside_force obracket rest in
+  let cookie = 
+    (try Scanf.sscanf contents "%d/%d" (fun n n' -> Absolute (n, n'))
+     with _ -> Scanf.sscanf contents "%d%%" (fun n -> Percent n))
+  in
+  Some ([Cookie cookie], rest)
+
+(** {2 Timestamp parser} *)
+let timestamp_parser _ rest = 
+  match Timestamp.parse_range_substring rest with
+    | Some (a, rest) -> Some ([Timestamp (Range a)], rest)
+    | None -> match Timestamp.parse_substring rest with
+        | Some (a, rest) -> Some ([Timestamp (Date a)], rest)
+        | None ->
+          let timestamp, rest = 
+            try
+              let rest = see "SCHEDULED: " rest in
+              match Timestamp.parse_substring rest with
+                | Some (a, rest) -> Scheduled a, rest
+                | None -> raise (Failure "")
+            with _ -> 
+              let rest = see "DEADLINE: " rest in
+              match Timestamp.parse_substring rest with
+                | Some (a, rest) -> Deadline a, rest
+                | None -> raise (Failure "")
+          in
+          Some ([Timestamp timestamp], rest)
+
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
    inline_source_block_parser; latex_fragment_parser;
    break_line_parser; link_parser; link_inline_parser;
    macro_parser; radio_target_parser; subscript_parser;
-   superscript_parser;
+   superscript_parser; statistics_cookie_parser; 
+   timestamp_parser
   ]
   
