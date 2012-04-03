@@ -1,8 +1,6 @@
 open Batteries
 open Prelude
 
-Finally a range is simply a couple of two timestamps.
-
 type date = {
   year: int;
   month: int;
@@ -57,8 +55,6 @@ let normalize t =
 
 let weekday t = (to_tm t).Unix.tm_wday
 
-(* *)
-
 let parse_time s = 
   try
     Scanf.sscanf s "%d:%d" (fun hour min -> Some {hour; min})
@@ -93,7 +89,7 @@ let parse s =
           | None -> None
           | Some date ->
               let timestamp = List.fold_left parse_timestamp_part
-                { null_t with date }
+                { null with date }
                 rem_parts
               in Some (timestamp, rest))
   with _ -> None

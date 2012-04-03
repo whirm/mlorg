@@ -63,20 +63,22 @@ val weekday : t -> int
 (** Returns the weekday of a timestamp *)
 
 (** {1 Reading and writing timestamps} *)
-val parse : string -> t option
+val parse : string -> (t * string) option
 (** Parse a timestamp *)
 
-val parse_range : string -> t option
+val parse_range : string -> (range * string) option
 (** Parse a timestamp range *)
 
-val parse_substring : BatSubstring.t -> t option
+val parse_substring : BatSubstring.t -> (t * BatSubstring.t) option
 (** Parse a substring as a timestamp *)
 
-val parse_range_substring : BatSubstring.t -> range option
+val parse_range_substring : BatSubstring.t -> (range * BatSubstring.t) option
 (** Parse a substring as a range *)
 
-val to_string : t -> string
-(** Converts a timestamp to a string *)
+val to_string : ?wday: string array -> t -> string
+(** Converts a timestamp to a string.
+    The optional array wday specifies the name of the weekday
+*)
 
 val range_to_string : range -> string
 (** Converts a range to a string *)
