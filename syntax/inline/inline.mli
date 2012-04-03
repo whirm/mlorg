@@ -155,3 +155,17 @@ val run_parsers : parser list -> string -> t list
 val parse : string -> t list
 (** Parse a string *)
 
+
+(** {1 Mappers and folders} *)
+(** In this section we define mapper and folders overline *)
+class ['a] mapper :
+object
+  method inline : 'a -> t -> t
+  method inline_list : 'a -> t list -> t list
+end
+
+class ['a] folder :
+object
+  method inline : 'a -> t -> 'a
+  method inline_list : 'a -> t list -> 'a
+end

@@ -305,3 +305,55 @@ let parse = run_parsers
    timestamp_parser
   ]
   
+(* *)
+
+class ['a] mapper = object(self)
+  method inline (v:'a) = function
+    | Emphasis (a, b) ->
+      Emphasis (a, self#inline_list v b)
+    | Footnote_Reference ref ->
+      Footnote_Reference { ref with definition = 
+          Option.map (self#inline_list v) ref.definition }
+    | Link l ->
+      Link { l with label = self#inline_list v l.label }
+    | Subscript t -> Subscript (self#inline_list v t)
+    | Superscript t -> Superscript (self#inline_list v t)
+    | (Macro _
+    | Radio_Target _
+    | Verbatim _
+    | Cookie _
+    | Timestamp _
+    | Plain _
+    | Inline_Call _
+    | Inline_Source_Block _
+    | Latex_Fragment _
+    | Break_Line 
+    | Export_Snippet _ 
+    | Entity _) as x -> x
+  method inline_list v = List.map (self#inline v)
+end
+
+class ['a] folder = object(self)
+  method inline (v:'a) = function
+    | Emphasis (a, b) ->
+      self#inline_list v b
+    | Footnote_Reference ref ->
+      Option.map_default (self#inline_list v) v ref.definition
+    | Link l ->
+      self#inline_list v l.label
+    | Subscript t -> self#inline_list v t
+    | Superscript t -> self#inline_list v t
+    | Macro _
+    | Radio_Target _
+    | Verbatim _
+    | Cookie _
+    | Timestamp _
+    | Plain _
+    | Inline_Call _
+    | Inline_Source_Block _
+    | Latex_Fragment _
+    | Break_Line 
+    | Export_Snippet _ 
+    | Entity _ -> v
+  method inline_list v = List.fold_left self#inline v
+end
