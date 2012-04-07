@@ -13,6 +13,6 @@ and list_item = {
 and t = 
   | Paragraph of Inline.t list
   | Heading of heading
-  | List of list_item list
+  | List of list_item list * bool
   | Directive of string * string
 
