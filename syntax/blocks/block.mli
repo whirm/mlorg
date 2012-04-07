@@ -32,12 +32,12 @@ and list_item = {
   checkbox: bool option; (** Does it have a checkbox ([[ ]]) and is it checked ? *)
 }
 (** A list item *)
-and list = list_item list
 
 (** {2 Blocks} *)
 and t = 
   | Paragraph of Inline.t list
   | Heading of heading
-  | List of list
+  | List of list_item list
+  | Directive of string * string
 
 
