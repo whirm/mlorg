@@ -121,7 +121,7 @@ let rec parse number list context lines =
     aux [] (list, None)
 
 
-let parse = parse (ref 0) [(*(module Aut_paragraph : Automaton.Automaton);
- (module Aut_custom_block : Automaton.Automaton);*)
+let parse = parse (ref 0) [(module Aut_paragraph : Automaton.Automaton);
+(* (module Aut_custom_block : Automaton.Automaton);*)
  (module Aut_list : Automaton.Automaton)
 ] Context.default
