@@ -36,8 +36,11 @@ and list_item = {
 (** {2 Blocks} *)
 and t = 
   | Paragraph of Inline.t list
+  (** A paragraph containing only inline text *)
   | Heading of heading
-  | List of list_item list
+  (** A heading *)
+  | List of list_item list * bool
+  (** A list [item, ordered?] *)
   | Directive of string * string
-
+  (** A directive [name, value] *)
 

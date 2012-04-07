@@ -1,6 +1,6 @@
 INC=-I common -I syntax/inline
 OCAMLBUILDFLAGS=-use-ocamlfind $(INC)
-TARGET=syntax/blocks/automaton.cma
+TARGET=syntax/blocks/parser.cma
 _build/$(TARGET):
 	ocamlbuild $(OCAMLBUILDFLAGS) -ocamlc ocp-ocamlc -ocamlopt ocp-ocamlopt $(TARGET)
 
