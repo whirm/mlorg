@@ -44,3 +44,17 @@ and t =
   | Directive of string * string
   (** A directive [name, value] *)
 
+(** {1 Mapper and folders} *)
+class ['a] mapper : object
+  inherit ['a] Inline.mapper
+  method block : 'a -> t -> t
+  method blocks : 'a -> t list -> t list
+  method list_item : 'a -> list_item -> list_item
+end
+
+class ['a] folder : object
+  inherit ['a] Inline.folder
+  method block : 'a -> t -> 'a
+  method blocks : 'a -> t list -> 'a
+  method list_item : 'a -> list_item -> 'a
+end

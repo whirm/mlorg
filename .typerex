@@ -1,0 +1,5 @@
+CMT _build/
+common/
+syntax/inline/
+syntax/blocks/
+document/
