@@ -132,26 +132,28 @@ let handle_directives doc =
 let empty_meta = {
   timestamps = []; ranges = []; scheduled = []; deadlines = []; footnotes = [] 
 }
-(* [from_blocks filename blocks] transforms the list of blocks [blocks] into a structured document
-corresponding to filename [filename]. *)
+
+(* [from_blocks filename blocks] transforms the list of blocks [blocks] into a
+   structured document corresponding to filename [filename]. *)
 let from_blocks filename blocks = 
-  let directives = ref [] in
-  let token2block = 
-    List.filter_map (function
-      | Block.Special (Block.Directive (a, b)) -> 
-        directives := (a, b) :: !directives; None
-      | Block.Special _ -> None
-      | Block.Block t -> Some t)
-  in
-(* [leave_heading] is called when the end of a heading is found, it updates the
-  fields that need to be : the metadata, and the children (that are in reverse
-  order). It takes an extra parameter which is the content of the heading. *)
+  (* [leave_heading] is called when the end of a heading is found, it updates the
+     fields that need to be : the metadata, and the children (that are in reverse
+     order). It takes an extra parameter which is the content of the heading. *)
   let leave_heading heading c =
     { heading with children = List.rev heading.children;
       content = c;
       meta = collect c}
-    in
-(* The recursive function processing block by block. =has_contents= tells
+  in
+  let directives = 
+    let o = object
+      inherit [(string * string) list] Block.folder as super
+      method block l = function
+        | Block.Directive (a, b) -> (a, b) :: l
+        | x -> super#block l x
+    end
+    in o#blocks [] blocks 
+  in
+(* The recursive function processing block by block. [has_contents] tells
   whether the current block has already some content.
   The algorithm is simple:
   - Look for the next heading, if there is none, we are done.
@@ -160,7 +162,7 @@ let from_blocks filename blocks =
   - Otherwise, parse this heading in a recursive call, and continue *)
   let rec aux has_contents heading blocks = 
     let up_contents c = if has_contents then heading.content
-      else token2block c
+      else c
     in
     match look_for_heading blocks with
       | all, None, _ -> 
@@ -179,7 +181,7 @@ let from_blocks filename blocks =
           } rest
         else
           leave_heading heading (up_contents start), 
-          (Block.Special (Block.Heading h) :: rest)
+          (Block.Heading h :: rest)
   in
 (* In the end, don't forget to parse the directives *)
   let main, _ = 
@@ -188,8 +190,7 @@ let from_blocks filename blocks =
                 meta = empty_meta } blocks
     in
   handle_directives
-    { beginning = main.content;
-      directives = !directives;
+    { beginning = main.content; directives;
       exts = []; ext_opts = [];
       headings = main.children;
       beg_meta = main.meta;
@@ -200,9 +201,7 @@ let from_blocks filename blocks =
 let from_chan filename channel = 
     BatIO.lines_of channel |> 
     Parser.parse |> 
-    List.of_enum |>
-    List.concat |>
-    from_blocks
+    from_blocks filename
 
 let from_file filename = 
     BatFile.with_file_in filename (from_chan filename)
