@@ -25,3 +25,6 @@ val is_escaping : BatSubstring.t -> int -> bool
 
 val unescape : BatSubstring.t -> string
 (** Removes all the escapes appearing in a string. *)
+
+val escape : char list -> string -> string
+(** Escape the given character in a string *)

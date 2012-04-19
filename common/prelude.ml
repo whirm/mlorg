@@ -24,3 +24,10 @@ let rec concat_fmt f sep ppf l = match l with
   | [x] -> f ppf x
   | t :: q -> Format.fprintf ppf "%a%s%a" f t sep 
       (concat_fmt f sep) q
+
+let escape chars s = 
+  let regexp =
+    Str.regexp
+      (String.concat "\\|" (List.map Str.quote chars))
+  in
+  Str.global_replace regexp "\\\\\\0" s
