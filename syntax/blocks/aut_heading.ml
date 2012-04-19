@@ -53,6 +53,7 @@ let get_tags s =
 
 let parse_heading context s = 
   let level, s = count_stars (Substring.of_string s) in
+  if level = 0 then failwith "level = 0";
   let marker, s = get_marker context s in
   let priority, s = get_priority s in
   let title, tags = get_title s in
