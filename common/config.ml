@@ -108,7 +108,7 @@ let get (type u) (r : u item) =
   let module I = (val r : Item with type t = u) in
   !I.ref
     
-let fill_comma config s = 
+let fill config l = 
   let handle (name, v) = 
     try
       let get_name x = 
@@ -121,7 +121,9 @@ let fill_comma config s =
             v name I.T.description
     with _ -> Log.warning "Unknown field %s" name
   in
-  parse_comma s |> List.iter handle
+  List.iter handle l
+
+let fill_comma config s = parse_comma s |> fill config
       
 let reinit conf = 
   let iter x = 

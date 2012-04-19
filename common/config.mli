@@ -79,5 +79,8 @@ val fill_comma : t -> string -> unit
 (** [fill_comma config s] parses [s] as a key-value pair separated by comma,
     and uses the values to fill the configuration [config]. *)
 
+val fill : t -> (string * string) list -> unit
+(** [fill t assoc] fills the configuration [t] using the data in [assoc] *)
+
 val reinit : t -> unit
 (** [reinit config] reinits every item to the default. *)
