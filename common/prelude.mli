@@ -26,5 +26,8 @@ val is_escaping : BatSubstring.t -> int -> bool
 val unescape : BatSubstring.t -> string
 (** Removes all the escapes appearing in a string. *)
 
-val escape : char list -> string -> string
+val escape : string list -> string -> string
 (** Escape the given character in a string *)
+
+val substitute : (string -> string) -> string -> string
+(** Substitute a string with variables in it (uses [Buffer.add_substitute]) *)

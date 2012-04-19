@@ -31,3 +31,8 @@ let escape chars s =
       (String.concat "\\|" (List.map Str.quote chars))
   in
   Str.global_replace regexp "\\\\\\0" s
+
+let substitute f s = 
+  let b = Buffer.create (String.length s) in
+  Buffer.add_substitute b f s;
+  Buffer.contents b
