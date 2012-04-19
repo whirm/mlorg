@@ -45,7 +45,7 @@ type t = {
   (** The timestamp present in the beginning *)
   exts : string list;
   (** The extensions used by the documents *)
-  ext_opts : (string * string) list
+  ext_opts : (string * (string * string) list) list
   (** The options of the extensions *)
 }
 (** 

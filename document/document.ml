@@ -44,7 +44,7 @@ type t = {
   (** The timestamp present in the beginning *)
   exts : string list;
   (** The extensions used by the documents *)
-  ext_opts : (string * string) list
+  ext_opts : (string * (string * string) list) list
   (** The options of the extensions *)
 }
 (** 
@@ -125,9 +125,12 @@ extensions to load *)
 let handle_directives doc = 
   { doc with exts = (try words (List.assoc "extensions" doc.directives)
     with _ -> []);
-    ext_opts = List.filter_map (fun (name, value) ->
-      try Scanf.sscanf name "opt_%s" (fun n -> Some (n, value))
-      with _ -> None) doc.directives }
+    ext_opts = List.filter_map (fun (mod_name, value) ->
+      try Scanf.sscanf value "%s-%s" (fun name value -> Some (mod_name, (name, value)))
+      with _ -> None) doc.directives
+    |> List.group (fun (x,_) (y, _) -> compare x y)
+    |> List.map (fun g -> fst (List.hd g), List.map snd g)
+ }
 
 let empty_meta = {
   timestamps = []; ranges = []; scheduled = []; deadlines = []; footnotes = [] 
