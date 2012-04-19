@@ -33,6 +33,8 @@ val string : string serializable
 val couple : 'a serializable -> 'b serializable -> ('a * 'b) serializable
 (** Serializable for couples ([(a, b)]) *)
 
+val list : 'a serializable -> 'a list serializable
+(** Serializable for lists ([[a1, a2, ...]]) *)
 
 (** {1 Configurations} *)
 

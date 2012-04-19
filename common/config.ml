@@ -75,6 +75,25 @@ let couple (type v) (type u) (s1:u serializable) (s2:v serializable) =
     in
     (module Couple : SerializableType with type t = u * v)
 
+
+let list (type u) (s: u serializable) =
+  let module S = (val s : SerializableType with type t = u) in
+  let module List = struct
+    type t = u list
+    let description = Printf.sprintf "List of %s" S.description
+    let show l = Printf.sprintf "[%s]" (String.concat ", " (List.map S.show l))
+    let read s = 
+      if String.length s = 0 
+      || s.[0] <> '[' || s.[String.length s - 1] <> ']' then
+        None
+      else       
+        let sub = BatSubstring.substring s 1 (String.length s - 2) in
+        match D.split sub ',' with
+          | l -> Some (List.filter_map S.read l)
+  end
+  in
+  (module List : SerializableType with type t = u list)
+
 let split c string = D.split (BatSubstring.all string) c
 let parse_keyvalue s = 
   try Scanf.sscanf s "%[^=]=%[^\\00]" (fun key v -> (key, v))  
