@@ -1,0 +1,5 @@
+#+TITLE: Un titre
+#+AUTHOR: Un auteur
+#+latex-classname: book
+
+Salut.
