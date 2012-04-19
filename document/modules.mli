@@ -2,7 +2,6 @@
 
 module type Meta = sig
   val name : string
-  val author : string
   val config : Config.t
 end
 (** The metadata of a module *)
