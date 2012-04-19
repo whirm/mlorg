@@ -44,8 +44,13 @@ type t = {
   (** The timestamp present in the beginning *)
   exts : string list;
   (** The extensions used by the documents *)
-  ext_opts : (string * (string * string) list) list
+  ext_opts : (string * (string * string) list) list;
   (** The options of the extensions *)
+  title: string;
+  (** The document's title *)
+  author: string;
+  (** The document's author *)
+
 }
 (** 
     A document is:
@@ -197,6 +202,9 @@ let from_blocks filename blocks =
       exts = []; ext_opts = [];
       headings = main.children;
       beg_meta = main.meta;
+      title = (try List.assoc "TITLE" directives with _ -> "");
+      author = (try List.assoc "AUTHOR" directives with _ -> "");
+        
       filename;
     }
 
