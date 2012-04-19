@@ -130,8 +130,8 @@ extensions to load *)
 let handle_directives doc = 
   { doc with exts = (try words (List.assoc "extensions" doc.directives)
     with _ -> []);
-    ext_opts = List.filter_map (fun (mod_name, value) ->
-      try Scanf.sscanf value "%s-%s" (fun name value -> Some (mod_name, (name, value)))
+    ext_opts = List.filter_map (fun (key, value) ->
+      try Scanf.sscanf key "%[^-]-%s" (fun mod_name name -> Some (mod_name, (name, value)))
       with _ -> None) doc.directives
     |> List.group (fun (x,_) (y, _) -> compare x y)
     |> List.map (fun g -> fst (List.hd g), List.map snd g)
