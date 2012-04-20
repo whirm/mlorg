@@ -3,3 +3,4 @@ common/
 syntax/inline/
 syntax/blocks/
 document/
+exports

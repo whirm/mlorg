@@ -29,6 +29,10 @@ $extraheader
     let footer = add config "footer" string "The LaTeX footer"
 "\\end{document}"
     let extraheader = add config "extraheader" string "Extra LaTeX header" ""
+
+    let sections = add config "sections" (list string)
+      "The name of the sections"
+      ["section"; "subsection"; "subsubsection"; "paragraph"; "subparagraph"]
   end
   open Meta
   let assoc l s = try List.assoc s l with _ -> ""
@@ -43,7 +47,7 @@ $extraheader
                     "packages", "";
                     "extraheader", Config.get extraheader;
                     "title", self#escape_inside doc.title;
-                    "author", self#escape_inside doc.author
+                    "author", self#escape_inside doc.author;
                    ] in
         IO.nwrite out (substitute (assoc vars) (get header))
       method footer () = 
@@ -68,6 +72,13 @@ $extraheader
       method block () = function
         | Paragraph l -> self#inline_list () l; IO.printf out "\n\n"
         | x -> super#block () x
+      method heading () d = 
+        let command = List.nth (Config.get sections) (d.level - 1) in
+        IO.printf out "\\%s{" command;
+        self#inline_list () d.name;
+        IO.printf out "}\n";
+        self#blocks () d.content;
+        List.iter (self#heading ()) d.children
       method document () d = 
         self#header ();
         super#document () d;
