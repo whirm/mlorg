@@ -37,6 +37,9 @@ module E = struct
             (self#inlines d.name)) ::
           (self#blocks [] d.content
            @ List.concat (List.map (self#heading []) d.children))
+      method document _ d =
+        [Xml.block "div" ~attr:["id", "content"]
+            (super#document [] d)]
     end
     in 
     List.iter (Xml.output out) (o#document [] doc)
