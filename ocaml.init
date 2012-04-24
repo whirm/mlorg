@@ -1,6 +1,6 @@
 #use "topfind";;
 #require "batteries";;
-#load "_build/exports/latex.cma";;
+#load "_build/exports/html.cma";;
 open Batteries;;
 open Prelude;;
 open Timestamp;;
