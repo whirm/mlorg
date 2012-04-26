@@ -70,6 +70,6 @@ let is_start { line; context } =
   with _ -> None
 
 let parse_line heading p = 
-  Done (interrupt heading p, true)
+  Done (interrupt heading p, false)
 
 let priority = 100
