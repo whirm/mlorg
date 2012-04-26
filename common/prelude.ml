@@ -15,8 +15,9 @@ let unescape s =
   filteri (is_escaping s |- not) (BatSubstring.to_string s)
 
 
-let change_ext file ext =
-  Filename.chop_extension file ^ "." ^ ext
+let change_ext ext file =
+  if file = "-" then file
+  else Filename.chop_extension file ^ "." ^ ext
 
 
 let rec concat_fmt f sep ppf l = match l with
