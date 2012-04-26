@@ -1,6 +1,6 @@
 INC=-I common -I syntax/inline -I syntax/blocks -I document -I exports
 OCAMLBUILDFLAGS=-use-ocamlfind $(INC)
-TARGET=main.nativem
+TARGET=main.native
 _build/$(TARGET):
 	ocamlbuild $(OCAMLBUILDFLAGS) -ocamlc ocp-ocamlc -ocamlopt ocp-ocamlopt $(TARGET)
 
