@@ -14,8 +14,10 @@ module Exporters = struct
     module Meta : Meta
     (** The exporter's metadata *)
       
+    val default_filename : string -> string
     val export : Document.t -> 'a BatIO.output -> unit
     (** The exporter function *)
+
   end
   (** A module that defines an exporters *)
   type t = (module Signature)

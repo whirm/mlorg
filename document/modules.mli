@@ -11,7 +11,9 @@ module Exporters : sig
   module type Signature = sig
     module Meta : Meta
     (** The exporter's metadata *)
-      
+
+    val default_filename : string -> string
+    (** From the source, builds the default filename *)
     val export : Document.t -> 'a BatIO.output -> unit
     (** The exporter function *)
   end

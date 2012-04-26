@@ -85,6 +85,8 @@ $extraheader
         self#footer ()
     end
     in o#document () doc
+
+  let default_filename = change_ext "tex"
 end
 
 let _ = Modules.Exporters.add (module E : Exporters.Signature)        

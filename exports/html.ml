@@ -43,6 +43,6 @@ module E = struct
     end
     in 
     List.iter (Xml.output out) (o#document [] doc)
+  let default_filename = change_ext "html"
 end
-
 let _ = Modules.Exporters.add (module E : Exporters.Signature)        
