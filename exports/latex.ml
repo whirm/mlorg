@@ -71,6 +71,11 @@ $extraheader
         | x -> super#inline () x
       method block () = function
         | Paragraph l -> self#inline_list () l; IO.printf out "\n\n"
+        | Custom (name, opts, l) ->
+          IO.printf out "\\begin{%s}{%s}\n" (self#escape_inside name)
+            (self#escape_inside opts);
+          self#blocks () l;
+          IO.printf out "\\end{%s}\n" (self#escape_inside name)
         | x -> super#block () x
       method heading () d = 
         let command = List.nth (Config.get sections) (d.level - 1) in
