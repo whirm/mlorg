@@ -100,7 +100,7 @@ let rec run_parsers parsers string =
 let delim_table = [('[', (']', false)); ('<', ('>', false));
                    ('{', ('}', false)); ('(', (')', false));
                    ('*', ('*', true)); ('_', ('_', true));
-                   ('~', ('~', true)); ('$', ('$', true)); 
+                   ('~', ('~', true)); ('$', ('$', false)); 
                    ('=', ('=', true)); ('/', ('/', true))]
 module D = Delimiters.Make (struct let table = delim_table end)
 open Substring
