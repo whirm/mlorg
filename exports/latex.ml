@@ -69,8 +69,18 @@ $extraheader
         | Verbatim s -> 
           IO.printf out "\\texttt{%s}" (self#escape s)
         | x -> super#inline () x
+      method list_item () i = (match i.number with
+        | Some c -> IO.printf out "  \\item[%s] " c
+        | _ -> IO.printf out "\\item ");
+        self#blocks () i.contents
+
       method block () = function
         | Paragraph l -> self#inline_list () l; IO.printf out "\n\n"
+        | List (i, _) ->
+          IO.printf out "\\begin{itemize}\n";
+          List.fold_left self#list_item () i;
+          IO.printf out "\\end{itemize}\n";
+
         | Custom (name, opts, l) ->
           IO.printf out "\\begin{%s}{%s}\n" (self#escape_inside name)
             (self#escape_inside opts);
