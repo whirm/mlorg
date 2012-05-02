@@ -124,5 +124,6 @@ let rec parse number list context lines =
 let parse = parse (ref 0) [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_heading : Automaton.Automaton);
  (module Aut_list : Automaton.Automaton);
- (module Aut_directive : Automaton.Automaton)
+ (module Aut_directive : Automaton.Automaton);
+ (module Aut_blocks : Automaton.Automaton)
 ] Context.default
