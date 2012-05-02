@@ -43,7 +43,17 @@ and t =
   (** A list [item, ordered?] *)
   | Directive of string * string
   (** A directive [name, value] *)
-
+  | Math of string
+  (** Math, enclosed by $$ ... $$ *)
+  | Quote of t list
+  (** Quoted text *)
+  | Example of string list
+  (** [Examples] used to typeset random code snippet *)
+  | Custom of string * string * t list
+  (** Custom block of the form
+  #+begin_name opts
+      DATA
+  #+end *)
 (** {1 Mapper and folders} *)
 class ['a] mapper : object
   inherit ['a] Inline.mapper
