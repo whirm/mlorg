@@ -24,7 +24,7 @@ let alphabetic_sys alphabet =
   in 
   let encode n = 
     let rec aux acc n = 
-      if n < lg then alphabet.(n) :: acc
+      if n < base then alphabet.(n) :: acc
       else aux (alphabet.(n mod base) :: acc) (n/base)
     in
     String.concat "" (aux [] n)
