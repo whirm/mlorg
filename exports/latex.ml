@@ -25,6 +25,8 @@ $extraheader
 \\title{$title}
 \\author{$author}
 \\begin{document}
+\\maketitle
+\\tableofcontents
 "
     let footer = add config "footer" string "The LaTeX footer"
 "\\end{document}"
@@ -64,8 +66,10 @@ $extraheader
             IO.printf out "%s" e.latex
           else
             IO.printf out "$%s$" e.latex
-        | Latex_Fragment s ->
+        | Latex_Fragment (Inline.Math s) ->
           IO.printf out "$%s$" (escape ["$"] s)
+        | Latex_Fragment (Command (name, option)) ->
+          IO.printf out "\\%s{%s}" name (self#escape_inside option)
         | Verbatim s -> 
           IO.printf out "\\texttt{%s}" (self#escape s)
         | x -> super#inline () x

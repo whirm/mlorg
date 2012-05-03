@@ -86,6 +86,12 @@ and inline_source_block = {
   options: string option;
   code: string;
 }
+(** {2 Latex fragments} *)
+and latex_fragment = 
+  | Math of string
+  | Command of string * string
+(** A latex fragment is either math contents [$foo$] or commands [$\ref{x}$] *)
+
 (** {2 Links} *)
 (** Links are composed of two parts : an url and a label.
     An url may be pointed to a file, to a search or to an actual url *)
@@ -126,7 +132,7 @@ and t =
   | Footnote_Reference of footnote_reference
   | Inline_Call of inline_call
   | Inline_Source_Block of inline_source_block
-  | Latex_Fragment of string
+  | Latex_Fragment of latex_fragment
   | Break_Line
   | Link of link
   | Macro of string * string list

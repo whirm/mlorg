@@ -43,6 +43,9 @@ and timestamp =
   | Deadline of Timestamp.t
   | Date of Timestamp.t
   | Range of Timestamp.range
+and latex_fragment = 
+  | Math of string
+  | Command of string * string
 and t = 
   | Emphasis of emphasis 
   | Entity of entity
@@ -50,7 +53,7 @@ and t =
   | Footnote_Reference of footnote_reference
   | Inline_Call of inline_call
   | Inline_Source_Block of inline_source_block
-  | Latex_Fragment of string
+  | Latex_Fragment of latex_fragment
   | Break_Line
   | Link of link
   | Macro of string * string list
@@ -201,8 +204,13 @@ let inline_source_block_parser _ rest =
 let latex_fragment_parser _ rest = 
   let data, rest = inside '$' rest in
   match data with
-    | Some s -> Some ([Latex_Fragment s], rest)
-    | None -> None
+    | Some s -> Some ([Latex_Fragment (Math s)], rest)
+    | None -> 
+      let rest = see "\\" rest in
+      let command, rest = until_space (fun _ -> true) rest in
+      let options, rest = inside_force obrace rest in
+      Some ([Latex_Fragment (Command (command, options))], rest)
+
 
 (** {2 Break Line parser} *)
 let break_line_parser _ rest = 
