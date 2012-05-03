@@ -26,14 +26,15 @@ let output out =
   in
   let rec aux indent = function
     | Data s ->
-      List.iter (fun s -> spaces indent; IO.nwrite out s; IO.write out '\n') (lines s)
+      List.iter (fun s -> IO.nwrite out s) (lines s)
     | Block (attr, _, name, []) ->
       spaces indent;
       IO.printf out "<%s %s/>\n" name (print_attr attr)
     | Block (attr, shallindent, name, children) ->
       spaces indent;
-      IO.printf out "<%s %s>\n" name (print_attr attr);
+      IO.printf out "<%s %s>" name (print_attr attr);
       List.iter (aux (if shallindent then indent + 2 else 0)) children;
+      IO.nwrite out "\n";
       spaces indent;
       IO.printf out "</%s>\n" name
   in aux 0
