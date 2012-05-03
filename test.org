@@ -2,6 +2,7 @@
 #+AUTHOR: Un auteur
 #+latex-classname: book
 
+$x$
 Salut.
 
 * Un premier titre

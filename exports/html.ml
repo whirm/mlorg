@@ -26,8 +26,10 @@ module E = struct
           [Xml.block "title" [Xml.data (Xml.escape_entities d.title)];
            Xml.block "meta" ~attr: ["http-equiv", "Content-Type"; "content", "text/html";
                                    "charset", Config.get encoding] [];
+           Xml.block "script" ~attr:["type","text/javascript"; 
+                                     "src","http://orgmode.org/mathjax/MathJax.js"] [Xml.data " "];
            Xml.block "link" ~attr: ["rel", "stylesheet"; "href", Config.get style;
-                                   "type", "text/css"; "media", "screen"] []]
+                                    "type", "text/css"; "media", "screen"] []]
         in
         Xml.block "html"
           ~attr:["xmlns", "http://www.w3.org/1999/xhtml"]
@@ -39,7 +41,7 @@ module E = struct
           [Xml.block (List.assoc kind l) (self#inlines data)]
         | Entity e -> 
           [Xml.data e.html]
-        | Latex_Fragment (Inline.Math s) -> [Xml.data (Xml.escape_entities s)]
+        | Latex_Fragment (Inline.Math s) -> [Xml.data (Xml.escape_entities ("\\("^s^"\\)"))]
         | Verbatim s -> 
           [Xml.block "code" [Xml.data (Xml.escape_entities s)]]
         | x -> super#inline [] x
