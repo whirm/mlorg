@@ -34,10 +34,11 @@ let output = ref "" and filename = ref "-"
 let backend = ref "html"
 
 
-let _ = 
+let _ = if not !Sys.interactive then (
   let open Arg in
       parse ["--filename", Set_string filename, "Filename to convert (default: stdin)";
              "--output", Set_string output, "Output file";
              "--backend", Set_string backend, "Output backend"]
       (fun _ -> ()) "mlorg";
       generate !filename !backend !output
+)
