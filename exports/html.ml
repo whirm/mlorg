@@ -76,7 +76,7 @@ module E = struct
     end
     in 
     if Config.get full then
-      (IO.printf out "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+      (Printf.fprintf out "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
        Xml.output out (o#wrap doc (o#document [] doc)))
     else
       List.iter (Xml.output out) (o#document [] doc)

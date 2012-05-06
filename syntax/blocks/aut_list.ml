@@ -49,7 +49,7 @@ let parse_first_line s =
     | Some (k, ordered) ->
       let module D = Delimiters.Make 
             (struct let table = ['[', (']', false)] end) in
-      let open Substring in
+      let open BatSubstring in
       let s = trim (triml k (all s)) in
       (* If we have the start of a list, we look for a checkbox, *)
       match D.enclosing_delimiter s '[' with
@@ -73,7 +73,7 @@ let is_start { Automaton.line } =
     | Some (ordered, checkbox, format, contents) ->
       let format' = Option.default "1" format in
       Some { items = []; last_line_empty = false;
-             current = [Substring.to_string contents]; 
+             current = [BatSubstring.to_string contents]; 
              format = format'; checkbox; ordered;
              number = compute_number ordered format 1;
            }
@@ -107,7 +107,7 @@ let parse_line st { Automaton.line; Automaton.parse } =
       let format' = Option.default st.format format in
       let number = Option.default 0 st.number in
       let st' = { st with
-        current = [Substring.to_string contents];
+        current = [BatSubstring.to_string contents];
         format = format'; checkbox;
         number = compute_number st.ordered format (number+1);
         items = update_current parse st

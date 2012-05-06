@@ -58,44 +58,44 @@ $extraheader
         | Plain s -> IO.nwrite out (self#escape s)
         | Emphasis (kind, data) ->
           let l = [`Bold, "textbf"; `Italic, "emph"; `Underline, "underline"] in
-          IO.printf out "\\%s{" (List.assoc kind l);
+          Printf.fprintf out "\\%s{" (List.assoc kind l);
           self#inline_list () data;
-          IO.printf out "}"
+          Printf.fprintf out "}"
         | Entity e -> 
           if not e.latex_mathp then 
-            IO.printf out "%s" e.latex
+            Printf.fprintf out "%s" e.latex
           else
-            IO.printf out "$%s$" e.latex
+            Printf.fprintf out "$%s$" e.latex
         | Latex_Fragment (Inline.Math s) ->
-          IO.printf out "$%s$" (escape ["$"] s)
+          Printf.fprintf out "$%s$" (escape ["$"] s)
         | Latex_Fragment (Command (name, option)) ->
-          IO.printf out "\\%s{%s}" name (self#escape_inside option)
+          Printf.fprintf out "\\%s{%s}" name (self#escape_inside option)
         | Verbatim s -> 
-          IO.printf out "\\texttt{%s}" (self#escape s)
+          Printf.fprintf out "\\texttt{%s}" (self#escape s)
         | x -> super#inline () x
       method list_item () i = (match i.number with
-        | Some c -> IO.printf out "  \\item[%s] " c
-        | _ -> IO.printf out "\\item ");
+        | Some c -> Printf.fprintf out "  \\item[%s] " c
+        | _ -> Printf.fprintf out "\\item ");
         self#blocks () i.contents
 
       method block () = function
-        | Paragraph l -> self#inline_list () l; IO.printf out "\n\n"
+        | Paragraph l -> self#inline_list () l; Printf.fprintf out "\n\n"
         | List (i, _) ->
-          IO.printf out "\\begin{itemize}\n";
+          Printf.fprintf out "\\begin{itemize}\n";
           List.fold_left self#list_item () i;
-          IO.printf out "\\end{itemize}\n";
+          Printf.fprintf out "\\end{itemize}\n";
 
         | Custom (name, opts, l) ->
-          IO.printf out "\\begin{%s}{%s}\n" (self#escape_inside name)
+          Printf.fprintf out "\\begin{%s}{%s}\n" (self#escape_inside name)
             (self#escape_inside opts);
           self#blocks () l;
-          IO.printf out "\\end{%s}\n" (self#escape_inside name)
+          Printf.fprintf out "\\end{%s}\n" (self#escape_inside name)
         | x -> super#block () x
       method heading () d = 
         let command = List.nth (Config.get sections) (d.level - 1) in
-        IO.printf out "\\%s{" command;
+        Printf.fprintf out "\\%s{" command;
         self#inline_list () d.name;
-        IO.printf out "}\n";
+        Printf.fprintf out "}\n";
         self#blocks () d.content;
         List.iter (self#heading ()) d.children
       method document () d = 

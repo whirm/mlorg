@@ -106,12 +106,12 @@ let parse_range s =
             | None -> None
 
 let parse_substring sub = 
-  Option.map (fun (x, s) -> x, Substring.of_string s) 
-    (parse (Substring.to_string sub))
+  Option.map (fun (x, s) -> x, BatSubstring.of_string s) 
+    (parse (BatSubstring.to_string sub))
     
 let parse_range_substring sub = 
-  Option.map (fun (x, s) -> x, Substring.of_string s) 
-    (parse_range (Substring.to_string sub))
+  Option.map (fun (x, s) -> x, BatSubstring.of_string s) 
+    (parse_range (BatSubstring.to_string sub))
 
 let date_to_string d = 
   Printf.sprintf "%d-%2d-%02d" d.year d.month d.day
