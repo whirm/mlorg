@@ -207,7 +207,8 @@ let latex_fragment_parser _ rest =
     | Some s -> Some ([Latex_Fragment (Math s)], rest)
     | None -> 
       let rest = see "\\" rest in
-      let command, rest = until_space (fun _ -> true) rest in
+      let command, rest = until_space ((=) '{') rest in
+      print_endline command;
       let options, rest = inside_force obrace rest in
       Some ([Latex_Fragment (Command (command, options))], rest)
 
