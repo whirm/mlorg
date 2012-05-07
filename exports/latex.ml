@@ -85,6 +85,8 @@ $extraheader
           List.fold_left self#list_item () i;
           Printf.fprintf out "\\end{itemize}\n";
 
+        | Math b ->
+            Printf.fprintf out "$$%s$$\n" b
         | Custom (name, opts, l) ->
           Printf.fprintf out "\\begin{%s}{%s}\n" (self#escape_inside name)
             (self#escape_inside opts);
