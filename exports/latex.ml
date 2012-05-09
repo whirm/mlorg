@@ -42,7 +42,7 @@ $extraheader
     let o = object(self)
       inherit [unit] Document.folder as super
 
-      method escape_inside = escape ["}"]
+      method escape_inside s = s
       method escape = escape ["}"; "{"; "$"; "\\"; "["; "]"]
       method header () = 
         let vars = ["classname", self#escape_inside (get classname);
