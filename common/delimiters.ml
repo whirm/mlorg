@@ -36,7 +36,7 @@ module Make (T : sig val table : (char * (char * bool)) list end) = struct
     let rec aux k = 
       if k = String.size s then None
       else if s.[k] = c && valid_delimiter s k then Some k
-      else if is_delimiter s.[k]  && valid_delimiter s k then
+      else if is_delimiter s.[k] && closing s.[k] <> s.[k]  && valid_delimiter s k then
         match closing_delimiter ~k:(k+1) s s.[k] with
           | Some k' -> aux (1+k')
           | None ->    aux (k+1)
