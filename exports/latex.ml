@@ -61,6 +61,7 @@ $extraheader
           Printf.fprintf out "\\%s{" (List.assoc kind l);
           self#inline_list () data;
           Printf.fprintf out "}"
+        | Break_Line -> Printf.fprintf out "\\\\\n"
         | Entity e -> 
           if not e.latex_mathp then 
             Printf.fprintf out "%s" e.latex
