@@ -69,10 +69,12 @@ $extraheader
             Printf.fprintf out "$%s$" e.latex
         | Latex_Fragment (Inline.Math s) ->
           Printf.fprintf out "$%s$" (escape ["$"] s)
+        | Latex_Fragment (Command (name, "")) ->
+          Printf.fprintf out "\\%s" name
         | Latex_Fragment (Command (name, option)) ->
           Printf.fprintf out "\\%s{%s}" name (self#escape_inside option)
         | Verbatim s -> 
-          Printf.fprintf out "\\texttt{%s}" (self#escape s)
+          Printf.fprintf out "\\texttt{%s}" (escape ["}"] s)
         | x -> super#inline () x
       method list_item () i = (match i.number with
         | Some c -> Printf.fprintf out "  \\item[%s] " c
