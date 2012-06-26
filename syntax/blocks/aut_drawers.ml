@@ -13,7 +13,7 @@ let is_start { line } =
 
 let parse_properties = 
   List.fold_left (fun acc line ->
-    try Scanf.sscanf line " :%[^:]: %[^\n]"
+    try Scanf.sscanf (String.trim line) ":%[^:]: %[^\n]"
           (fun key value -> (key, value) :: acc)
     with _ ->
       match acc with
@@ -33,7 +33,7 @@ let interrupt (lines, name) _ =
     [Drawer lines]
 
 let parse_line (lines, name) { line } = 
-  try Scanf.sscanf line ":%[^:]:" (fun name' ->
+  try Scanf.sscanf (String.trim line) " :%[^:]:" (fun name' ->
     if name' = "end" || name' = "END" then
       Done (interrupt (lines, name) () , true)
     else
