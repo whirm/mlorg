@@ -366,3 +366,30 @@ class ['a] folder = object(self)
     | Entity _ -> v
   method inline_list v = List.fold_left self#inline v
 end
+
+let string_of_url = function
+  | File s | Search s -> s
+  | Complex {link; protocol} -> protocol ^ ":" ^ link
+let rec ascii = function
+  | Footnote_Reference ref -> 
+    Option.map_default asciis "" ref.definition
+  | Link l -> asciis l.label
+  | Emphasis (_, t)
+  | Subscript t
+  | Superscript t -> asciis t
+  | Macro _ 
+  | Radio_Target _ -> ""
+  | Verbatim s -> s
+  | Cookie _ -> ""
+  | Timestamp _ -> ""
+  | Latex_Fragment (Math s)
+  | Plain s -> s
+  | Latex_Fragment (Command (s, s')) ->
+    "\\" ^ s ^ "{" ^ s' ^ "}"
+  | Inline_Call _ -> ""
+  | Inline_Source_Block _ -> ""
+  | Break_Line -> "\n"
+  | Export_Snippet _ -> ""
+  | Entity e -> e.Entity.unicode
+and asciis l = Batteries.String.concat "" (List.map ascii l)
+

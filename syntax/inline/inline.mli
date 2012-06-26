@@ -175,3 +175,12 @@ object
   method inline : 'a -> t -> 'a
   method inline_list : 'a -> t list -> 'a
 end
+
+
+(** {1 Useful tools about inline} *)
+val ascii : t -> string
+val asciis : t list -> string
+(** Convert inline contents to plain ascii *)
+
+val string_of_url : url -> string
+(** Convert an url to a string *)
