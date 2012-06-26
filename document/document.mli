@@ -17,6 +17,8 @@ type meta = {
   (** The deadlines appearing in the heading *)
   footnotes  : (string * Inline.t list) list;
   (** The footnotes defined in that heading *)
+  properties : (string * string) list
+  (** The properties of that heading *)
 }
 (** The metadata of a heading in a document. *)
 
@@ -24,6 +26,7 @@ type heading = {
   name      : Inline.t list;
   level     : int;
   content   : Block.t list;
+  mutable father : heading option; (* mutable to break the recursion during the construction *)
   children  : heading list;
   tags      : string list;
   marker    : string option;
@@ -80,3 +83,8 @@ val from_chan : string -> BatIO.input -> t
 (** From an input (the first argument is the filename) *)
 val from_file  : string -> t
 (** From a file *)
+
+(** {1 Handling documents} *)
+val descendants : heading -> heading list
+(** Returns the descendants of the given heading (including this one) *)
+

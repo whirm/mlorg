@@ -16,17 +16,20 @@ type meta = {
   (** The deadlines appearing in the heading *)
   footnotes  : (string * Inline.t list) list;
   (** The footnotes defined in that heading *)
+  properties : (string * string) list;
+  (** The properties of the heading *)
 }
 (** The metadata of a heading in a document. *)
 
 type heading = {
-  name      : Inline.t list;
-  level     : int;
-  content   : Block.t list;
-  children  : heading list;
-  tags      : string list;
-  marker    : string option;
-  meta      : meta;
+  name       : Inline.t list;
+  level      : int;
+  content    : Block.t list;
+  mutable father : heading option;
+  children   : heading list;
+  tags       : string list;
+  marker     : string option;
+  meta       : meta;
 }
 (** A heading in a document *)
 
@@ -92,9 +95,17 @@ end
   
 
 (** {1 Importing a tree} *)
+let empty_meta = {
+  timestamps = []; ranges = []; scheduled = []; deadlines = []; footnotes = []; properties = []
+}
+
 let collect = 
   let collector = object(self)
     inherit [meta] Block.folder as super
+    method block meta = function
+      | Block. Property_Drawer p -> 
+        { meta with properties = p @ meta.properties }
+      | _ -> meta (* no recursion *)
     method inline meta = 
       let open Inline in function
         | Timestamp (Date t) -> { meta with timestamps = t :: meta.timestamps }
@@ -106,11 +117,7 @@ let collect =
         | x -> super#inline meta x
   end
   in
-  let default_meta = {
-    footnotes = []; scheduled = []; deadlines = [];
-    ranges = []; timestamps = [] 
-  } in
-  collector#blocks default_meta
+  collector#blocks empty_meta
 
 (* The following function takes a list of blocks, and returns
 - the blocks until next heading
@@ -137,9 +144,6 @@ let handle_directives doc =
     |> List.map (fun g -> fst (List.hd g), List.map snd g)
  }
 
-let empty_meta = {
-  timestamps = []; ranges = []; scheduled = []; deadlines = []; footnotes = [] 
-}
 
 (* [from_blocks filename blocks] transforms the list of blocks [blocks] into a
    structured document corresponding to filename [filename]. *)
@@ -148,9 +152,13 @@ let from_blocks filename blocks =
      fields that need to be : the metadata, and the children (that are in reverse
      order). It takes an extra parameter which is the content of the heading. *)
   let leave_heading heading c =
-    { heading with children = List.rev heading.children;
-      content = c;
-      meta = collect c}
+    let heading = 
+      { heading with children = List.rev heading.children;
+        content = c; 
+        meta = collect c }
+    in 
+    List.iter (fun c -> c.father <- Some heading) heading.children;
+    heading
   in
   let directives = 
     let o = object
@@ -179,7 +187,7 @@ let from_blocks filename blocks =
       | start, Some ({Block.level = k} as h), rest ->
         if k > heading.level then
           let child, rest = 
-            aux false { name = h.Block.title;
+            aux false { name = h.Block.title; father = None;
                         level = k; content = []; children = []; 
                         tags = h.Block.tags; marker = h.Block.marker;
                         meta = empty_meta } rest
@@ -191,9 +199,9 @@ let from_blocks filename blocks =
           leave_heading heading (up_contents start), 
           (Block.Heading h :: rest)
   in
-(* In the end, don't forget to parse the directives *)
+  (* In the end, don't forget to parse the directives *)
   let main, _ = 
-    aux false { name = []; level = 0; content = [];
+    aux false { name = []; level = 0; content = []; father = None;
                 children = []; tags = []; marker = None;
                 meta = empty_meta } blocks
     in
@@ -204,10 +212,8 @@ let from_blocks filename blocks =
       beg_meta = main.meta;
       title = (try List.assoc "TITLE" directives with _ -> "");
       author = (try List.assoc "AUTHOR" directives with _ -> "");
-        
       filename;
     }
-
 (** {1 Parsing from files} *)
 let from_chan filename channel = 
     BatIO.lines_of channel |> 
@@ -216,3 +222,7 @@ let from_chan filename channel =
 
 let from_file filename = 
     BatFile.with_file_in filename (from_chan filename)
+
+
+let rec descendants heading = 
+  heading :: List.concat (List.map descendants heading.children)
