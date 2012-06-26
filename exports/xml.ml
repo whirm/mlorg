@@ -15,26 +15,22 @@ let block ?(attr = []) ?(indent = true) name children =
   Block (attr, indent, name, children)
 let data s = Data s
 let output out = 
-  let spaces k = 
-    for i = 0 to k-1 do
-      IO.write out ' '
-    done
-  in
   let print_attr l = 
     String.concat " " 
       (List.map (fun (key, value) -> Printf.sprintf "%s=%S" key value) l)
   in
-  let rec aux indent = function
+  let print_mark name attr children =
+    Printf.fprintf out "<%s%s%s%s>" name (if attr = [] then "" else " ") 
+      (print_attr attr)
+      (if children = [] then "/" else "")
+  in
+  let rec aux = function
     | Data s ->
-      List.iter (fun s -> IO.nwrite out s) (lines s)
+        IO.nwrite out s
     | Block (attr, _, name, []) ->
-      spaces indent;
-      Printf.fprintf out "<%s %s/>\n" name (print_attr attr)
+        print_mark name attr []
     | Block (attr, shallindent, name, children) ->
-      spaces indent;
-      Printf.fprintf out "<%s %s>" name (print_attr attr);
-      List.iter (aux (if shallindent then indent + 2 else 0)) children;
-      IO.nwrite out "\n";
-      spaces indent;
-      Printf.fprintf out "</%s>\n" name
-  in aux 0
+        print_mark name attr children;
+        List.iter aux children;
+        Printf.fprintf out "</%s>" name
+  in aux
