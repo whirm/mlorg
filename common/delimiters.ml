@@ -31,12 +31,10 @@ module Make (T : sig val table : (char * (char * bool)) list end) = struct
       | c, c' when is_symbol c && is_symbol c' -> false
       | _ -> true
     in
-    let not_the_same = (k = 0 || s.[k-1] <> s.[k]) 
-      && (k = String.size s - 1 || s.[k] <> s.[k+1])
-    in
-    not (shall_be_in_word s.[k])
+    (not (shall_be_in_word s.[k]) 
     || (k = 0 || k = String.size s - 1
-          || (striking () && not_the_same))
+          || striking ()))
+      && not (is_escaped s k)
   let rec closing_delimiter  ?(k=0) s c = 
     let c = closing c in
     let rec aux k = 

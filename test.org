@@ -1,11 +1,1 @@
-#+TITLE: Un titre
-#+AUTHOR: Un auteur
-#+latex-classname: book
-
-$x$
-Salut.
-
-* Un premier titre
-** Un /second/
-
-Du contenu.
+Salut =\=test\==.
