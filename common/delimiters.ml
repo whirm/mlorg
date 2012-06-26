@@ -22,8 +22,13 @@ module Make (T : sig val table : (char * (char * bool)) list end) = struct
   let closing = fst -| delimiter_data 
   let shall_be_in_word = snd -| delimiter_data
   let valid_delimiter s k = 
+    (* for a delimiter to be valid,
+       we don't want it to be surrounded by two spaces OR two delimiters
+       but a delimiter and a space is ok. *)
     let striking c = 
-      not (Char.is_letter c || Char.is_digit c) || is_symbol c 
+      if is_symbol c then 0
+      else if c = ' ' || c = '\t' then 1
+      else 2
     in
     let not_the_same = (k = 0 || s.[k-1] <> s.[k]) 
       && (k = String.size s - 1 || s.[k] <> s.[k+1])
