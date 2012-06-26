@@ -59,8 +59,10 @@ module E = struct
             (Xml.data number :: contents)]
       method block _ = function
         | Paragraph l -> [Xml.block "p" (self#inlines l)]
-        | List (l, false) ->
+        | List (l, _) ->
           [Xml.block "ul" (concatmap (self#list_item []) l)]
+        | Example l ->
+            [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
         | x -> super#block [] x
       method blocks _ l = 
         concatmap (self#block []) l
