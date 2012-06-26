@@ -229,7 +229,7 @@ let link_parser parse rest =
         | Some url -> 
           if (all url).[0] = '/' || (all url).[0] = '.' then
             File url
-          else try Scanf.sscanf url "%[^:]://%[^\n]" 
+          else try Scanf.sscanf url "%[^:]:%[^\n]" 
                      (fun protocol link -> Complex {protocol; link})
             with _ -> Search url
   in
