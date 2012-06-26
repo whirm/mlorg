@@ -4,6 +4,7 @@ open Batteries
 open Prelude
 open Html
 open Latex
+open Filter
 
 (* pure part *)
 let generate filename backend output = 

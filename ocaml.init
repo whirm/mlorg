@@ -7,4 +7,5 @@ open Timestamp;;
 open Inline;;
 open Parser;;
 open Document;;
+open Filter;;
 let _ = Printexc.record_backtrace true;;
