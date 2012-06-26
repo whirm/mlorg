@@ -88,3 +88,14 @@ val from_file  : string -> t
 val descendants : heading -> heading list
 (** Returns the descendants of the given heading (including this one) *)
 
+val name : heading -> string
+(** Returns the ascii encoding of the name of a heading *)
+
+val father : heading -> heading option
+(** Returns the father of a heading *)
+ 
+val prop_val : string -> heading -> string option
+(** Returns the value of a property *)
+
+val dump : heading list -> unit
+(** Dump a list of heading as a tree *)

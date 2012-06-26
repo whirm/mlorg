@@ -226,3 +226,22 @@ let from_file filename =
 
 let rec descendants heading = 
   heading :: List.concat (List.map descendants heading.children)
+
+let name h = Inline.asciis h.name
+let father x = x.father
+let prop_val name h =
+  try Some (List.assoc name h.meta.properties)
+  with Not_found -> None
+
+let dump = 
+  let rec aux i = 
+    List.iter (fun heading ->
+      for j = 1 to i do
+        print_char ' '
+      done;
+      Printf.printf "%s (%s)\n" (Inline.asciis heading.name)
+        (match heading.father with
+          | Some f -> Inline.asciis f.name
+          | None -> "");
+      aux (i + 4) heading.children)
+  in aux 0
