@@ -22,20 +22,21 @@ module Make (T : sig val table : (char * (char * bool)) list end) = struct
   let closing = fst -| delimiter_data 
   let shall_be_in_word = snd -| delimiter_data
   let valid_delimiter s k = 
+    let isspace c = c = ' ' || c = '\t' in
     (* for a delimiter to be valid,
        we don't want it to be surrounded by two spaces OR two delimiters
        but a delimiter and a space is ok. *)
-    let striking c = 
-      if is_symbol c then 0
-      else if c = ' ' || c = '\t' then 1
-      else 2
+    let striking () = match s.[k-1], s.[k+1] with
+      | c, c' when isspace c && isspace c' -> false
+      | c, c' when is_symbol c && is_symbol c' -> false
+      | _ -> true
     in
     let not_the_same = (k = 0 || s.[k-1] <> s.[k]) 
       && (k = String.size s - 1 || s.[k] <> s.[k+1])
     in
     not (shall_be_in_word s.[k])
-    || ((k = 0 || k = String.size s - 1
-          || (striking s.[k-1] != striking s.[k+1])) && not_the_same)
+    || (k = 0 || k = String.size s - 1
+          || (striking () && not_the_same))
   let rec closing_delimiter  ?(k=0) s c = 
     let c = closing c in
     let rec aux k = 
