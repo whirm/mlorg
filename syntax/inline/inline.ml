@@ -264,6 +264,11 @@ let radio_target_parser _ rest =
   let rest = see ">>" rest in
   Some ([Radio_Target contents], rest)
 
+(** {2 Verbatim parser} *)
+let verbatim_parser _ rest =
+  let contents, rest = inside_force '=' rest in
+  Some ([Verbatim contents], rest)
+    
 (** {2 Subscript and Superscript parser} *)
 let subscript_parser, superscript_parser = 
   let gen c f parse rest = 
@@ -309,7 +314,7 @@ let parse = run_parsers
    footnote_reference_parser; inline_call_parser;
    inline_source_block_parser; latex_fragment_parser;
    break_line_parser; link_parser; link_inline_parser;
-   macro_parser; radio_target_parser; subscript_parser;
+   macro_parser; radio_target_parser; verbatim_parser; subscript_parser;
    superscript_parser; statistics_cookie_parser; 
    timestamp_parser
   ]
