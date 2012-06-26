@@ -23,8 +23,8 @@ val is_escaping : BatSubstring.t -> int -> bool
 (** [is_escaping s k] returns true iff s.[k+1] is defined and [is_escaped s
     (k+1)] holds *)
 
-val unescape : BatSubstring.t -> string
-(** Removes all the escapes appearing in a string. *)
+val unescape : ?l : char list -> BatSubstring.t -> string
+(** Removes all the escapes appearing in a string. If l is specified, then only escape the chars in l *)
 
 val escape : string list -> string -> string
 (** Escape the given character in a string *)

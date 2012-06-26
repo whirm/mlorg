@@ -267,7 +267,7 @@ let radio_target_parser _ rest =
 (** {2 Verbatim parser} *)
 let verbatim_parser _ rest =
   let contents, rest = inside_force '=' rest in
-  Some ([Verbatim contents], rest)
+  Some ([Verbatim (unescape ~l:['='] (BatSubstring.all contents))], rest)
     
 (** {2 Subscript and Superscript parser} *)
 let subscript_parser, superscript_parser = 

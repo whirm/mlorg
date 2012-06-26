@@ -11,8 +11,9 @@ let rec is_escaped s k =
   k < String.size s && k > 0 && s.[k-1] = '\\' 
   && not (is_escaped s (k-1))
 let is_escaping s k = is_escaped s (k+1)
-let unescape s = 
-  filteri (is_escaping s |- not) (BatSubstring.to_string s)
+let unescape ?(l = []) s = 
+  filteri (fun k -> not (is_escaping s k) ||  not (List.mem (BatSubstring.get s (k+1)) l))
+    (BatSubstring.to_string s)
 
 
 let change_ext ext file =
