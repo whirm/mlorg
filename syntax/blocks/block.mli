@@ -54,6 +54,12 @@ and t =
   #+begin_name opts
       DATA
   #+end *)
+  | Drawer of string list
+  (** A drawer *)
+  | Property_Drawer of (string * string) list
+  (** A property drawer *)
+
+
 (** {1 Mapper and folders} *)
 class ['a] mapper : object
   inherit ['a] Inline.mapper

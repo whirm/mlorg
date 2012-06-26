@@ -25,7 +25,6 @@ let rec concat_fmt f sep ppf l = match l with
   | [x] -> f ppf x
   | t :: q -> Format.fprintf ppf "%a%s%a" f t sep 
       (concat_fmt f sep) q
-
 let escape chars s = 
   let regexp =
     Str.regexp
