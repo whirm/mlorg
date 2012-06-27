@@ -42,6 +42,9 @@ module E = struct
         | Entity e -> 
           [Xml.data e.html]
         | Latex_Fragment (Inline.Math s) -> [Xml.data (Xml.escape_entities ("\\("^s^"\\)"))]
+        | Link {url; label} ->
+            [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
+                (self#inlines label)]
         | Verbatim s -> 
           [Xml.block "code" [Xml.data (Xml.escape_entities s)]]
         | x -> super#inline [] x
@@ -63,6 +66,8 @@ module E = struct
           [Xml.block "ul" (concatmap (self#list_item []) l)]
         | Example l ->
             [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
+        | Quote l ->
+            [Xml.block "blockquote" (self#blocks [] l)]
         | x -> super#block [] x
       method blocks _ l = 
         concatmap (self#block []) l
