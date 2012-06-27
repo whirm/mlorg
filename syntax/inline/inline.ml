@@ -221,17 +221,16 @@ let break_line_parser _ rest =
 (** {2 Link parser} *)
 let link_parser parse rest =
   let contents, rest = inside_force obracket rest in
-  let descr, url = inside_force obracket (all contents) in
-  let url, _ = inside obracket url in
-  let url = 
-      match url with
-        | None -> Search descr
-        | Some url -> 
-          if (all url).[0] = '/' || (all url).[0] = '.' then
-            File url
-          else try Scanf.sscanf url "%[^:]:%[^\n]" 
-                     (fun protocol link -> Complex {protocol; link})
-            with _ -> Search url
+  let first, second = inside_force obracket (all contents) in
+  let second, _ = inside obracket second in
+  let descr, url = match second with
+    | None -> first, Search first
+    | Some descr ->
+        if (all first).[0] = '/' || (all first).[0] = '.' then
+          descr, File first
+        else try Scanf.sscanf first "%[^:]:%[^\n]" 
+                   (fun protocol link -> descr, Complex {protocol; link})
+          with _ -> descr, Search first
   in
   Some ([Link {label = parse descr; url}], rest)
 
