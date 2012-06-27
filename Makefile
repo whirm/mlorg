@@ -15,4 +15,6 @@ doc:
 view: doc
 	xdg-open $$PWD/_build/mlorg.docdir/index.html
 
+README.html: main.native README.org
+	./main.native --filename README.org --backend html
 .PHONY: _build/$(TARGET) top doc view
