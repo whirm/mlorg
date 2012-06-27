@@ -7,32 +7,45 @@ precesily its two main goals are:
 - Exporting to main formats, eg. html and LaTeX
 - Extracting information from org-mode files through the means of /filters/
 
-* Detailed presentation of =mlorg=
-** Syntax
+
+* How to get it
+You can get the latest version on [[http://gitorious.org/mlorg/mlorg/][gitorious]]. To compile, be sure to =ocaml=
+installed. You will also need the git version from batteries, that you can get
+by doing:
+#+begin_example
+git clone https://github.com/ocaml-batteries-team/batteries-included.git
+cd batteries-included
+make
+sudo make install
+#+end_example
+
+Once you are ready, you just have to type =make= in =mlorg='s source
+directory. You can then play with the =mlorg= binary or the toplevel by issuing =make top=.
+* Syntax recognized by =mlorg=
 The syntax of org-mode is not well-defined. =mlorg= does its best to parse the
 main constructs. Here is detailed list of the construction available in =mlorg=.
 
 Last update of this section: <2012-06-26 mar.>.
-*** Inline constructions
+** Inline constructions
 Inline constructions are found in paragraphs, blocks such as emphasis, links,
 and so on.
 
-**** Plain text
+*** Plain text
 Well, nothing to do about it...
-**** Emphasis
+*** Emphasis
 Emphasis are a way for a piece of text to stand out. =mlorg= handles:
 - bold through the syntax =*foo*= (*foo*)
 - italic through the syntax =/foo/= (/foo/)
 - underline through the syntax =_foo_= (_foo_)
-**** Entities
+*** Entities
 Entity are special characters. See =syntax/inline/entity.ml= for a list of
 pre-defined entities. The syntax is TeX's : =\alpha= (\alpha)
 
-**** Export snippet
+*** Export snippet
 Export snippet provide a way to insert some markup that will be exported only by
 a specific exporter, for instance =@html{some html markup}=.
 
-**** Footnotes references
+*** Footnotes references
 Footnotes references can be introduced by several ways:
 - old way, through a number: =[1]=
 - new way, with a name =[fn:name]=
@@ -40,54 +53,54 @@ Footnotes references can be introduced by several ways:
 
 Note that you can define an anonymous footnote with the syntax =[fn::contents]=.
 
-**** Inline call 
+*** Inline call 
 This is a call to a babel definition. The syntax is the following:
 =call_name[begin_headers](parameters)[end_headers]=.
 
-**** Inline source
+*** Inline source
 This defines an inline source block. The syntax is the following
 =src_language[options]{code}=
 
-**** LaTeX Fragment
+*** LaTeX Fragment
 This defines an inline math formula using LaTeX syntax. Supported construction:
 
 - =$foo$= 
 - =$\command{options}$=
 
 
-**** Break Line
+*** Break Line
 This tells orgmode to break a line. Syntax: =\\=.
 
-**** Links
+*** Links
 Link in =org-mode= are very important and versatile.  The syntax is: =[[label][url]]= where
 =url= can be omitted. If so, then the link points to search this pattern. Otherwise the syntax for links is:
 - =./foo= or =/foo=: then the link points toward a file
 - =protocol:url=
 
-**** Macro parser
+*** Macro parser
 Macro are cheap preprocessing on org-mode files. The syntax is ={{macro(param1, param2, ...)}}=.
 
-**** Radio target
+*** Radio target
 Radio targets are anchors. Syntax =<<foo>>=.
-**** Verbatim content
+*** Verbatim content
 Verbatim is unformatted content. Syntax =\=foo\==.
 
-**** Statistics cookie
+*** Statistics cookie
 Holds count of how many items in a list are done. Syntax =[k/n]= or =[k%]=.
 
-**** Timestamp 
+*** Timestamp 
 A timestamp. It can be either
 - a range =t--t'=
 - a single timestamp =<year-month-day [hour] [repetition marker]>=
 - a scheduled/deadline item: =SCHEDULED: t= and =DEADLINE: t=
 
-*** Blocks
+** Blocks
 Not every block is implemented.
 
-**** Paragraphs
+*** Paragraphs
 Not much to say..
 
-**** Lists
+*** Lists
 Unordered lists are started either by '-' or '+'. Ordered list are started by a
 number. The syntax of a list item is as follows: 
 
@@ -115,17 +128,47 @@ gives
 1. [@(i)] First item
 2. [@(iii)] Third item
 
-**** Directive
+*** Directive
 Directives are a way to tell org about something. Syntax:
 #+begin_example
 #+DIRECTIVE: VALUE
 #+end_example
 
-**** Math
+*** Math
 =mlorg= do not handle all math constructions available in =org-mode=. The supported construction is
 #+begin_example
 $$ foo $$
 #+end_example
 
-**** Quote
-The syntax is a block named 
+*** Quote
+The syntax is a block named =quote=:
+
+#+begin_example
+#+begin_quote
+...your quote...
+#+end_quote
+#+end_example
+
+*** Example
+Same thing as for quotes but with =example=.[fn::I obviously don't typeset the example since I don't know how to make it work]
+*** A custom block
+A custom block, with options. Syntax:
+#+begin_example
+#+begin_name options
+contents
+#+end_name
+#+end_example
+*** Drawers
+Drawers are a way to hide stuff. Syntax:
+#+begin_example
+:DRAWERNAME:
+Contents
+:END:
+#+end_example
+*** Property drawers
+Special drawers with name =PROPERTIES= which hold a key-value configuration.
+#+begin_example
+:PROPERTIES:
+:key: value
+:END:
+#+end_example
