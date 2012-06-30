@@ -19,18 +19,19 @@ module E = struct
     
   let write_ml_source fd lines file number = 
     Printf.fprintf fd
-"open Batteries;;
-open Printf;;
+"open Batteries
+open Printf
+open Block
+open Inline
 module D = Document
 module F = Filter
 let write s o = IO.nwrite o s
-open Block
-open Inline
 let _ = Quote.register (
 # %d %S 1
 %s
 )"
-      number file (String.concat "\n" lines)
+      number file (String.concat "\n" lines);
+      close_out fd
 
   let run ocamlc input lines number document out = 
     let fd, filename = File.open_temporary_out ~suffix:".ml" () in
@@ -44,11 +45,8 @@ let _ = Quote.register (
       (try Dynlink.loadfile obj
        with Dynlink.Error e ->
          (Log.fatal "Error while loading %s: %s" obj (Dynlink.error_message e);
-          failwith "Cannot load module"));
+          failwith "Cannot load module"))
     in
-    Sys.remove filename; Sys.remove obj;
-    Sys.remove (change_ext "cmi" obj);
-    print_endline "ALLO";
     !r document stdout
 
   let export { get } doc out = 
