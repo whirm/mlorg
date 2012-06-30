@@ -65,5 +65,7 @@ val make : t -> (string * string) list -> instance
 (** Make an instance out of a configuration and a few defined values *)
 
 (** {1 Parsing strings} *)
-val parse_comma : t -> string -> instance
+val from_comma : t -> string -> instance
+(** Make an instance out of a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
+val parse_comma : string -> (string * string) list
 (** Parse a comma-separated keyvalue string : [foo=bar, bar=foo]...*)

@@ -15,7 +15,7 @@ module Exporters = struct
     (** The exporter's metadata *)
       
     val default_filename : string -> string
-    val export : Document.t -> unit BatIO.output -> unit
+    val export : Config.instance -> Document.t -> unit BatIO.output -> unit
     (** The exporter function *)
 
   end
@@ -38,10 +38,11 @@ module Exporters = struct
       M.name = name)
       (Exporters.get ())
 
-  let run exporter doc output = 
+  let run exporter opts doc output = 
     let module M = (val find exporter : Signature) in
-    Config.fill M.Meta.config (try List.assoc exporter doc.ext_opts with _ -> []);
-    M.export doc output
+    let instance = Config.make M.Meta.config 
+      (opts @ (try List.assoc exporter doc.ext_opts with _ -> [])) in
+    M.export instance doc output
       
   let add = Exporters.push
 end
