@@ -38,51 +38,32 @@ val list : 'a serializable -> 'a list serializable
 
 (** {1 Configurations} *)
 
-module type Item = sig
-  type t
-  (** The type of the values that the item expect *)
-  module T : SerializableType with type t = t
-  (** An instance of {!SerializableType} for [t] *)
-  val name : string
-  (** The item's name. *)
-  val description : string
-  (** A description for the user of what the item configures *)
-  val default : t
-  (** The item's default value. *)
-  val ref : t ref
-  (** The item's current value. *)
-end
-(** A configuration option (or item).
-    Each module will specify a list of those *)
+type 'a item
+(** An item, that is a configuration entry *)
 
-type 'a item = (module Item with type t = 'a)
-(** Usual wrapper around {!Item} *)
+type preconfig
+(** A preconfiguration -- something you can add items to. *)
 
 type t
-(** A configuration will denote a list of {!Item}'s *)
+(** A set of configuration entry. It is definitive, you cannot add anything to it *)
 
-val create : unit -> t
-(** Creates an empty configuration *)
+val create : unit -> preconfig
+(** Creates an empty preconfiguration *)
 
-val add : t -> string -> 'a serializable -> string -> 'a -> 'a item
+val add : preconfig -> string -> 'a serializable -> string -> 'a -> 'a item
 (** [add config name serial description default] adds a new item composed with
     the arguments in the configuration [config]. It returns the created item *)
 
-val get : 'a item -> 'a
-(** Retrieves an item's content *)
+val validate : preconfig -> t
+(** Make the preconfiguration definitive *)
 
+type instance = {get : 'a. 'a item -> 'a}
+(** An instance of a configuration -- defining a value of a finite number of item *)
+
+(** {1 Configuration parsing} *)
+val make : t -> (string * string) list -> instance
+(** Make an instance out of a configuration and a few defined values *)
 
 (** {1 Parsing strings} *)
-val parse_comma : string -> (string * string) list
+val parse_comma : t -> string -> instance
 (** Parse a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
-(** {1 Configuration parsing} *)
-
-val fill_comma : t -> string -> unit
-(** [fill_comma config s] parses [s] as a key-value pair separated by comma,
-    and uses the values to fill the configuration [config]. *)
-
-val fill : t -> (string * string) list -> unit
-(** [fill t assoc] fills the configuration [t] using the data in [assoc] *)
-
-val reinit : t -> unit
-(** [reinit config] reinits every item to the default. *)

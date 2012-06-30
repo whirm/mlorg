@@ -107,45 +107,53 @@ module type Item = sig
   module T : SerializableType with type t = t
   val name : string
   val description : string
-    val default : t
-    val ref : t ref
+  val default : t
+  val tmp : t ref
+  val index: int
 end
 type 'a item = (module Item with type t = 'a)
-type t = (module Item) list ref
+type preconfig = (module Item) list ref
+type t = (module Item) array
+
+type instance = 
+    {get : 'a. 'a item -> 'a}
+
 let create () = ref []
 let add (type u) config name (typ : u serializable) description default = 
   let module I = struct
     type t = u
     module T = (val typ : SerializableType with type t = u)
     let name = name and description = description
-    and default = default and ref = ref default
+    and default = default and tmp = ref default
+    let index = List.length !config
   end in
   config := (module I : Item) :: !config;
   (module I : Item with type t = u)
     
-let get (type u) (r : u item) = 
-  let module I = (val r : Item with type t = u) in
-  !I.ref
-    
-let fill config l = 
-  let handle (name, v) = 
-    try
-      let get_name x = 
-        let module I = (val x : Item) in I.name
-      in
-      let module I = (val List.find (fun x -> get_name x = name) !config : Item) in
-      match I.T.read v with
-        | Some v -> I.ref := v
-        | None -> Log.warning "Parsing value (%s) for field %s failed. Expected %s"
-            v name I.T.description
-    with _ -> Log.warning "Unknown field %s" name
-  in
-  List.iter handle l
 
-let fill_comma config s = parse_comma s |> fill config
+let validate t = Array.of_list (List.rev !t)
+(* this takes a config and a list of string * string 
+   an existing instance, and create a composed instance *)
+let append config list instance = 
+  let array = Array.init
+    (Array.length config)
+    (fun k ->
+      let module I = (val config.(k) : Item) in
+      let v, b = try Option.get (I.T.read (List.assoc I.name list)), true
+        with _ -> I.default, false in
+      fun () -> I.tmp := v; b)
+  in
+  {get = fun (type u) item ->
+    let module I = (val item : Item with type t = u) in
+    if array.(I.index) () then
+      !I.tmp
+    else
+      instance.get item}
+    
+let make config list = append config list
+  {get = (fun (type u) i ->
+    let module I = (val i : Item with type t = u) in
+    I.default)
+  }
+let from_comma config s = parse_comma s |> make config
       
-let reinit conf = 
-  let iter x = 
-    let module I = (val x : Item) in
-    I.ref := I.default
-  in List.iter iter !conf
