@@ -1,5 +1,4 @@
 (** Automata for blocks *)
-
 open Batteries
 open Block
 open Automaton
@@ -10,6 +9,7 @@ let interrupt (lines, name, opts) parse =
   let lines = List.rev lines in
   [match name with
     | "example" -> Example lines
+    | "src" -> Src (opts, lines)
     | "quote" -> Quote (parse (List.enum lines))
     | _ ->
       Custom (name, opts, parse (List.enum lines))]

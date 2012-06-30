@@ -47,8 +47,12 @@ and t =
   (** Math, enclosed by $$ ... $$ *)
   | Quote of t list
   (** Quoted text *)
+  | Name of string
+  (** A name tag that maps to next block *)
   | Example of string list
-  (** [Examples] used to typeset random code snippet *)
+  (** [Examples] used to typeset random code snippets *)
+  | Src of string * string list
+  (** [Src] is used to typeset code snippets *)
   | Custom of string * string * t list
   (** Custom block of the form
   #+begin_name opts

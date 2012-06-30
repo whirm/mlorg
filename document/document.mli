@@ -99,3 +99,5 @@ val prop_val : string -> heading -> string option
 
 val dump : heading list -> unit
 (** Dump a list of heading as a tree *)
+
+val find_block_by_name : t -> string -> Block.t option

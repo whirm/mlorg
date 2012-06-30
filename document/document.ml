@@ -84,7 +84,7 @@ let fold = List.fold_left
 class ['a] folder = object(self)
   inherit ['a] Block.folder
   method document (v: 'a) d = 
-    fold self#heading (fold self#block v d.beginning) d.headings
+    fold self#heading (self#blocks v d.beginning) d.headings
   method heading v h = 
     fold self#inline 
       (fold self#heading 
@@ -245,3 +245,13 @@ let dump =
           | None -> "");
       aux (i + 4) heading.children)
   in aux 0
+
+let find_block_by_name doc name = 
+  let folder = object(self)
+    inherit [Block.t option] folder as super
+    method blocks v = function
+      | Block.Name name' :: other :: q when name = name' -> Some other
+      | t :: q -> self#blocks (super#block v t) q
+      | [] -> v
+  end
+  in folder#document None doc
