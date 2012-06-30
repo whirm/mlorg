@@ -1,4 +1,44 @@
-<**/*ml>: package(batteries)
-<**/*mli>: package(batteries)
-<**/*native>: package(batteries)
-<**/*byte>: package(batteries)
+# OASIS_START
+# DO NOT EDIT (digest: 39cb8fa0e3f1b9554b8b8a47783e9f44)
+# Library mlorg-common
+"common": include
+<common/*.ml{,i}>: pkg_dynlink
+<common/*.ml{,i}>: pkg_batteries
+# Library mlorg-syntax-inline
+"syntax/inline": include
+<syntax/inline/*.ml{,i}>: use_mlorg-common
+<syntax/inline/*.ml{,i}>: pkg_dynlink
+<syntax/inline/*.ml{,i}>: pkg_batteries
+# Library mlorg-syntax-blocks
+"syntax/blocks": include
+<syntax/blocks/*.ml{,i}>: use_mlorg-syntax-inline
+<syntax/blocks/*.ml{,i}>: use_mlorg-common
+<syntax/blocks/*.ml{,i}>: pkg_dynlink
+<syntax/blocks/*.ml{,i}>: pkg_batteries
+# Library mlorg-document
+"document": include
+<document/*.ml{,i}>: use_mlorg-syntax-blocks
+<document/*.ml{,i}>: use_mlorg-syntax-inline
+<document/*.ml{,i}>: use_mlorg-common
+<document/*.ml{,i}>: pkg_dynlink
+<document/*.ml{,i}>: pkg_batteries
+# Library mlorg-exports
+"exports": include
+<exports/*.ml{,i}>: use_mlorg-document
+<exports/*.ml{,i}>: use_mlorg-syntax-blocks
+<exports/*.ml{,i}>: use_mlorg-syntax-inline
+<exports/*.ml{,i}>: use_mlorg-common
+<exports/*.ml{,i}>: pkg_dynlink
+<exports/*.ml{,i}>: pkg_batteries
+# Executable mlorg
+"main.byte": pkg_dynlink
+"main.byte": pkg_batteries
+# Library mlorg
+<*.ml{,i}>: use_mlorg-exports
+<*.ml{,i}>: use_mlorg-document
+<*.ml{,i}>: use_mlorg-syntax-blocks
+<*.ml{,i}>: use_mlorg-syntax-inline
+<*.ml{,i}>: use_mlorg-common
+<*.ml{,i}>: pkg_dynlink
+<*.ml{,i}>: pkg_batteries
+# OASIS_STOP

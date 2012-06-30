@@ -97,6 +97,9 @@ val father : heading -> heading option
 val prop_val : string -> heading -> string option
 (** Returns the value of a property *)
 
+val prop_val_ : string -> heading -> string
+(** Returns the value of a property -- may fail*)
+
 val dump : heading list -> unit
 (** Dump a list of heading as a tree *)
 

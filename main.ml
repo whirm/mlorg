@@ -4,6 +4,7 @@ open Batteries
 open Prelude
 open Html
 open Latex
+open Quote
 open Filter
 
 (* pure part *)

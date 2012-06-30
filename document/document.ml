@@ -72,12 +72,12 @@ class ['a] mapper = object(self)
   inherit ['a] Block.mapper
   method document (v: 'a) d = 
     { d with headings = map self#heading v d.headings;
-      beginning = map self#block v d.beginning
+      beginning = self#blocks v d.beginning
     }
   method heading v h = 
-    { h with name = map self#inline v h.name;
+    { h with name = self#inlines v h.name;
       children = map self#heading v h.children;
-      content = map self#block v h.content
+      content = self#blocks v h.content
     } 
 end
 let fold = List.fold_left
@@ -86,9 +86,9 @@ class ['a] folder = object(self)
   method document (v: 'a) d = 
     fold self#heading (self#blocks v d.beginning) d.headings
   method heading v h = 
-    fold self#inline 
+    self#inlines
       (fold self#heading 
-         (fold self#block v h.content) 
+         (self#blocks v h.content) 
          h.children) 
       h.name
 end
@@ -232,6 +232,9 @@ let father x = x.father
 let prop_val name h =
   try Some (List.assoc name h.meta.properties)
   with Not_found -> None
+let prop_val_ name h =
+  List.assoc name h.meta.properties
+  
 
 let dump = 
   let rec aux i = 

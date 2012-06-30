@@ -1,6 +1,5 @@
 #use "topfind";;
-#require "batteries";;
-#load "_build/main.cma";;
+#require "mlorg";;
 open Batteries;;
 open Prelude;;
 open Timestamp;;
