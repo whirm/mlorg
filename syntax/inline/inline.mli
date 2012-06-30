@@ -167,13 +167,13 @@ val parse : string -> t list
 class ['a] mapper :
 object
   method inline : 'a -> t -> t
-  method inline_list : 'a -> t list -> t list
+  method inlines : 'a -> t list -> t list
 end
 
 class ['a] folder :
 object
   method inline : 'a -> t -> 'a
-  method inline_list : 'a -> t list -> 'a
+  method inlines : 'a -> t list -> 'a
 end
 
 

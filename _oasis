@@ -1,0 +1,52 @@
+OASISFormat: 0.2
+Name:        mlorg
+Version:     0
+Synopsis:    mlorg is a parser for org-mode files written in OCaml.
+Authors:     Simon Castellan <simon.castellan@iuwt.fr>
+License:     GPL
+Plugins:     META (0.2)
+BuildDepends: batteries,dynlink
+
+
+Library "mlorg-common"
+  Path:            common
+  BuildTools:      ocamlbuild
+  Modules:         Prelude,Log,Config,Timestamp,Numbering,ExtList,Delimiters
+  InternalModules: 
+
+Library "mlorg-syntax-inline"
+  Path:            syntax/inline
+  BuildTools:      ocamlbuild
+  Modules:         Entity,Inline
+  BuildDepends:    mlorg-common
+  InternalModules: 
+
+Library "mlorg-syntax-blocks"
+  Path:            syntax/blocks
+  BuildDepends:    mlorg-syntax-inline
+  BuildTools:      ocamlbuild
+  Modules:         Block, Automaton, Context, Aut_blocks, Aut_directive, Aut_drawers, Aut_heading, Aut_list, Aut_math, Aut_name, Automaton, Aut_paragraph, Parser
+  InternalModules: Automaton, Context, Aut_blocks, Aut_directive, Aut_drawers, Aut_heading, Aut_list, Aut_math, Aut_name, Automaton, Aut_paragraph
+
+Library "mlorg-document"
+  Path:            document
+  BuildDepends:    mlorg-syntax-blocks
+  BuildTools:      ocamlbuild
+  Modules:         Document, Filter, Modules
+
+Library "mlorg-exports"
+  Path:            exports
+  BuildDepends:    mlorg-document
+  BuildTools:      ocamlbuild
+  Modules:         Xml, Html, Latex, Quote
+
+Library "mlorg"
+  Path:            .
+  BuildDepends:    mlorg-exports
+  BuildTools:      ocamlbuild
+  Modules:
+
+Executable "mlorg"
+  Path:       .
+  BuildTools: ocamlbuild
+  MainIs:     main.ml

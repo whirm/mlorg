@@ -323,14 +323,14 @@ let parse = run_parsers
 class ['a] mapper = object(self)
   method inline (v:'a) = function
     | Emphasis (a, b) ->
-      Emphasis (a, self#inline_list v b)
+      Emphasis (a, self#inlines v b)
     | Footnote_Reference ref ->
       Footnote_Reference { ref with definition = 
-          Option.map (self#inline_list v) ref.definition }
+          Option.map (self#inlines v) ref.definition }
     | Link l ->
-      Link { l with label = self#inline_list v l.label }
-    | Subscript t -> Subscript (self#inline_list v t)
-    | Superscript t -> Superscript (self#inline_list v t)
+      Link { l with label = self#inlines v l.label }
+    | Subscript t -> Subscript (self#inlines v t)
+    | Superscript t -> Superscript (self#inlines v t)
     | (Macro _
     | Radio_Target _
     | Verbatim _
@@ -343,19 +343,19 @@ class ['a] mapper = object(self)
     | Break_Line 
     | Export_Snippet _ 
     | Entity _) as x -> x
-  method inline_list v = List.map (self#inline v)
+  method inlines v = List.map (self#inline v)
 end
 
 class ['a] folder = object(self)
   method inline (v:'a) = function
     | Emphasis (a, b) ->
-      self#inline_list v b
+      self#inlines v b
     | Footnote_Reference ref ->
-      Option.map_default (self#inline_list v) v ref.definition
+      Option.map_default (self#inlines v) v ref.definition
     | Link l ->
-      self#inline_list v l.label
-    | Subscript t -> self#inline_list v t
-    | Superscript t -> self#inline_list v t
+      self#inlines v l.label
+    | Subscript t -> self#inlines v t
+    | Superscript t -> self#inlines v t
     | Macro _
     | Radio_Target _
     | Verbatim _
@@ -368,7 +368,7 @@ class ['a] folder = object(self)
     | Break_Line 
     | Export_Snippet _ 
     | Entity _ -> v
-  method inline_list v = List.fold_left self#inline v
+  method inlines v = List.fold_left self#inline v
 end
 
 let string_of_url = function

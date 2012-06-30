@@ -49,10 +49,10 @@ and t =
   (** Quoted text *)
   | Name of string
   (** A name tag that maps to next block *)
-  | Example of string list
-  (** [Examples] used to typeset random code snippets *)
-  | Src of string * string list
-  (** [Src] is used to typeset code snippets *)
+  | Example of int * string list
+  (** [Examples] used to typeset random code snippets. The integer is the line number in the source file. *)
+  | Src of int * string * string list
+  (** [Src] is used to typeset code snippets. The integer is the line number in the source file. *)
   | Custom of string * string * t list
   (** Custom block of the form
   #+begin_name opts

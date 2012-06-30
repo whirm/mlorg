@@ -38,21 +38,21 @@ module E = struct
         | Plain s -> [Xml.data (Xml.escape_entities s)]
         | Emphasis (kind, data) ->
           let l = [`Bold, "b"; `Italic, "i"; `Underline, "u"] in
-          [Xml.block (List.assoc kind l) (self#inlines data)]
+          [Xml.block (List.assoc kind l) (self#inlines_ data)]
         | Entity e -> 
           [Xml.data e.html]
         | Latex_Fragment (Inline.Math s) -> [Xml.data (Xml.escape_entities ("\\("^s^"\\)"))]
         | Link {url; label} ->
             [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
-                (self#inlines label)]
+                (self#inlines_ label)]
         | Verbatim s -> 
           [Xml.block "code" [Xml.data (Xml.escape_entities s)]]
         | x -> super#inline [] x
-      method inlines l = 
+      method inlines_ l = 
         concatmap (self#inline []) l
       method list_item _ x = 
         let contents = match x.contents with
-          | [Paragraph i] -> self#inlines i
+          | [Paragraph i] -> self#inlines_ i
           | _ -> self#blocks [] x.contents
         in
         match x.number with
@@ -61,10 +61,10 @@ module E = struct
           [Xml.block ~attr: ["style", "list-style-type: none"] "li"
             (Xml.data number :: contents)]
       method block _ = function
-        | Paragraph l -> [Xml.block "p" (self#inlines l)]
+        | Paragraph l -> [Xml.block "p" (self#inlines_ l)]
         | List (l, _) ->
           [Xml.block "ul" (concatmap (self#list_item []) l)]
-        | Example l ->
+        | Example (_, l) ->
             [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
         | Quote l ->
             [Xml.block "blockquote" (self#blocks [] l)]
@@ -73,7 +73,7 @@ module E = struct
         concatmap (self#block []) l
       method heading _ d = 
         (Xml.block (Printf.sprintf "h%d" d.level)
-            (self#inlines d.name)) ::
+            (self#inlines_ d.name)) ::
           (self#blocks [] d.content
            @ concatmap (self#heading []) d.children)
       method document _ d =

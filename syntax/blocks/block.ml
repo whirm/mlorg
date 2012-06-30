@@ -18,8 +18,8 @@ and t =
   | Math of string
   | Quote of t list
   | Name of string
-  | Example of string list
-  | Src of string * string list
+  | Example of int * string list
+  | Src of int * string * string list
   | Custom of string * string * t list
   | Drawer of string list
   | Property_Drawer of (string * string) list
@@ -30,8 +30,8 @@ class ['a] mapper = object(self)
   method blocks = map self#block 
   method block (v:'a) = function
     | List (l, b) -> List (map self#list_item v l, b)
-    | Heading h -> Heading { h with title = map self#inline v h.title }
-    | Paragraph i -> Paragraph (map self#inline v i)
+    | Heading h -> Heading { h with title = self#inlines v h.title }
+    | Paragraph i -> Paragraph (self#inlines v i)
     | Custom (a, b, t) -> Custom (a, b, self#blocks v t)
     | Quote t -> Quote (self#blocks v t)
     | (Drawer _ | Property_Drawer _ | Name _ | Src _
@@ -44,9 +44,9 @@ class ['a] folder = object(self)
   inherit ['a] Inline.folder
   method blocks = List.fold_left self#block
   method block (v:'a) = function
-    | Heading h -> self#inline_list v h.title
+    | Heading h -> self#inlines v h.title
     | List (l, b) -> List.fold_left self#list_item v l
-    | Paragraph i -> List.fold_left self#inline v i 
+    | Paragraph i -> self#inlines v i 
     | Custom (_, _, t)
     | Quote t -> self#blocks v t
     | (Drawer _ | Property_Drawer _ | Name _ | Src _ |

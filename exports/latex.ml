@@ -59,7 +59,7 @@ $extraheader
         | Emphasis (kind, data) ->
           let l = [`Bold, "textbf"; `Italic, "emph"; `Underline, "underline"] in
           Printf.fprintf out "\\%s{" (List.assoc kind l);
-          self#inline_list () data;
+          self#inlines () data;
           Printf.fprintf out "}"
         | Break_Line -> Printf.fprintf out "\\\\\n"
         | Entity e -> 
@@ -82,7 +82,7 @@ $extraheader
         self#blocks () i.contents
 
       method block () = function
-        | Paragraph l -> self#inline_list () l; Printf.fprintf out "\n\n"
+        | Paragraph l -> self#inlines () l; Printf.fprintf out "\n\n"
         | List (i, _) ->
           Printf.fprintf out "\\begin{itemize}\n";
           List.fold_left self#list_item () i;
@@ -99,7 +99,7 @@ $extraheader
       method heading () d = 
         let command = List.nth (Config.get sections) (d.level - 1) in
         Printf.fprintf out "\\%s{" command;
-        self#inline_list () d.name;
+        self#inlines () d.name;
         Printf.fprintf out "}\n";
         self#blocks () d.content;
         List.iter (self#heading ()) d.children
