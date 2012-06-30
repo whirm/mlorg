@@ -14,7 +14,7 @@ module Exporters : sig
 
     val default_filename : string -> string
     (** From the source, builds the default filename *)
-    val export : Document.t -> 'a BatIO.output -> unit
+    val export : Document.t -> unit BatIO.output -> unit
     (** The exporter function *)
   end
   (** A module that defines an exporters *)
@@ -24,7 +24,7 @@ module Exporters : sig
   (** Returns the metadata of an exporter *)
   val find : string -> t
   (** Returns the exporter of the given name *)
-  val run : string -> Document.t -> 'a BatIO.output -> unit
+  val run : string -> Document.t -> unit BatIO.output -> unit
   (** Run a given exporter *)
 
   val add : t -> unit

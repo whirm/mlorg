@@ -15,7 +15,7 @@ module Exporters = struct
     (** The exporter's metadata *)
       
     val default_filename : string -> string
-    val export : Document.t -> 'a BatIO.output -> unit
+    val export : Document.t -> unit BatIO.output -> unit
     (** The exporter function *)
 
   end
