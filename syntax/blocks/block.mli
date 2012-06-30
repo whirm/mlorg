@@ -78,3 +78,10 @@ class ['a] folder : object
   method blocks : 'a -> t list -> 'a
   method list_item : 'a -> list_item -> 'a
 end
+
+class virtual ['a] bottomUp : object
+  inherit ['a] Inline.bottomUp
+  method block : t -> 'a
+  method blocks : t list -> 'a
+  method list_item : list_item -> 'a
+end

@@ -176,6 +176,20 @@ object
   method inlines : 'a -> t list -> 'a
 end
 
+class virtual ['a] bottomUp :
+object
+  method virtual bot : 'a
+  (** The default value for leaf *)
+  method virtual combine : 'a list -> 'a
+  (** Combining a list of result *)
+  method inline : t -> 'a
+  (** Traverse a single element *)
+  method inlines : t list -> 'a
+(** Traverse a list of elements and combine their results *)
+end
+(** Implements a bottom up traversal of the tree
+    where contents is created from the leaf and propagated upward.
+    This is very useful for exporters *)
 
 (** {1 Useful tools about inline} *)
 val ascii : t -> string

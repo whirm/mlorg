@@ -77,6 +77,11 @@ class ['a] folder : object
   method document : 'a -> t -> 'a
   method heading : 'a -> heading -> 'a
 end
+class virtual ['a] bottomUp : object
+  inherit ['a] Block.bottomUp
+  method document : t -> 'a
+  method heading : heading -> 'a
+end
 
 (** {1 Parsing documents} *)    
 val from_chan : string -> BatIO.input -> t

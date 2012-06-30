@@ -371,6 +371,33 @@ class ['a] folder = object(self)
   method inlines v = List.fold_left self#inline v
 end
 
+
+class virtual ['a] bottomUp = object(self)
+  method virtual bot : 'a
+  method virtual combine : 'a list -> 'a
+  method inline = function
+    | Emphasis (a, b) ->
+        self#inlines b
+    | Footnote_Reference ref ->
+        Option.map_default self#inlines self#bot ref.definition
+    | Link l ->
+      self#inlines l.label
+    | Subscript t -> self#inlines t
+    | Superscript t -> self#inlines t
+    | Macro _
+    | Radio_Target _
+    | Verbatim _
+    | Cookie _
+    | Timestamp _
+    | Plain _
+    | Inline_Call _
+    | Inline_Source_Block _
+    | Latex_Fragment _
+    | Break_Line 
+    | Export_Snippet _ 
+    | Entity _ -> self#bot
+  method inlines = self#combine -| List.map self#inline
+end
 let string_of_url = function
   | File s | Search s -> s
   | Complex {link; protocol} -> protocol ^ ":" ^ link

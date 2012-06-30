@@ -1,3 +1,4 @@
+open Batteries
 type heading = {
   title: Inline.t list;
   tags: string list;
@@ -52,5 +53,19 @@ class ['a] folder = object(self)
     | (Drawer _ | Property_Drawer _ | Name _ | Src _ |
         Example _ | Math _ | Directive _) -> v
   method list_item v { contents } = self#blocks v contents
+end
+  
+class virtual ['a] bottomUp = object(self)
+  inherit ['a] Inline.bottomUp
+  method blocks = self#combine -| List.map self#block
+  method block = function
+    | Heading h -> self#inlines h.title
+    | List (l, b) -> self#combine (List.map self#list_item l)
+    | Paragraph i -> self#inlines i 
+    | Custom (_, _, t)
+    | Quote t -> self#blocks t
+    | (Drawer _ | Property_Drawer _ | Name _ | Src _ |
+        Example _ | Math _ | Directive _) -> self#bot
+  method list_item { contents } = self#blocks contents
 end
   

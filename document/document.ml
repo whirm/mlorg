@@ -92,6 +92,16 @@ class ['a] folder = object(self)
          h.children) 
       h.name
 end
+
+class virtual ['a] bottomUp = object(self)
+  inherit ['a] Block.bottomUp
+  method document d = 
+    self#combine (self#blocks d.beginning :: List.map self#heading d.headings)
+  method heading h = 
+    self#combine (self#inlines h.name ::
+                  self#blocks h.content :: 
+                  List.map self#heading h.children)
+end
   
 
 (** {1 Importing a tree} *)
