@@ -35,10 +35,11 @@ $extraheader
     let sections = add config "sections" (list string)
       "The name of the sections"
       ["section"; "subsection"; "subsubsection"; "paragraph"; "subparagraph"]
+    let config = Config.validate config
   end
   open Meta
   let assoc l s = try List.assoc s l with _ -> ""
-  let export doc out = 
+  let export { get } doc out = 
     let o = object(self)
       inherit [unit] Document.folder as super
 
@@ -47,7 +48,7 @@ $extraheader
       method header () = 
         let vars = ["classname", self#escape_inside (get classname);
                     "packages", "";
-                    "extraheader", Config.get extraheader;
+                    "extraheader", get extraheader;
                     "title", self#escape_inside doc.title;
                     "author", self#escape_inside doc.author;
                    ] in
@@ -97,7 +98,7 @@ $extraheader
           Printf.fprintf out "\\end{%s}\n" (self#escape_inside name)
         | x -> super#block () x
       method heading () d = 
-        let command = List.nth (Config.get sections) (d.level - 1) in
+        let command = List.nth (get sections) (d.level - 1) in
         Printf.fprintf out "\\%s{" command;
         self#inlines () d.name;
         Printf.fprintf out "}\n";
