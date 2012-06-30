@@ -38,8 +38,10 @@ module E = struct
           let fd, filename = File.open_temporary_out ~suffix:".ml" () in
           Printf.fprintf fd 
 "open Batteries;;
+open Printf;;
 module D = Document
 module F = Filter
+let write s o = IO.nwrite o s
 open Block
 open Inline
 let _ = Quote.register (
