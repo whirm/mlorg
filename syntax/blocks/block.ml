@@ -11,6 +11,18 @@ and list_item = {
   number: string option; (** The optional number of the item *)
   checkbox: bool option; (** Does it have a checkbox ([[ ]]) and is it checked ? *)
 }
+
+(** {2 Tables} *)
+and table = {
+  groups : (int * int) list option;
+  (** List of columns to group. A list of couple (start, stop) *)
+  align_line : int array option;
+  (** The size of each columns wanted by the user*)
+  rows: Inline.t list array array;
+  (** THe rows *)
+  format : string option
+  (** The table's format *)
+}
 and t = 
   | Paragraph of Inline.t list
   | Heading of heading
@@ -24,7 +36,7 @@ and t =
   | Custom of string * string * t list
   | Drawer of string list
   | Property_Drawer of (string * string) list
-
+  | Table of table
 let map f v l = List.map (f v) l
 class ['a] mapper = object(self)
   inherit ['a] Inline.mapper
@@ -35,6 +47,8 @@ class ['a] mapper = object(self)
     | Paragraph i -> Paragraph (self#inlines v i)
     | Custom (a, b, t) -> Custom (a, b, self#blocks v t)
     | Quote t -> Quote (self#blocks v t)
+    | Table t -> Table {t with rows = 
+        Array.map (Array.map (self#inlines v)) t.rows}
     | (Drawer _ | Property_Drawer _ | Name _ | Src _
           | Example _ | Math _ | Directive _ as x) -> x
   method list_item v ({ contents } as x) =
@@ -50,6 +64,8 @@ class ['a] folder = object(self)
     | Paragraph i -> self#inlines v i 
     | Custom (_, _, t)
     | Quote t -> self#blocks v t
+    | Table t -> 
+        Array.fold_left (Array.fold_left self#inlines) v t.rows
     | (Drawer _ | Property_Drawer _ | Name _ | Src _ |
         Example _ | Math _ | Directive _) -> v
   method list_item v { contents } = self#blocks v contents
@@ -64,6 +80,9 @@ class virtual ['a] bottomUp = object(self)
     | Paragraph i -> self#inlines i 
     | Custom (_, _, t)
     | Quote t -> self#blocks t
+    | Table t ->
+        let f = self#combine -| Array.to_list in
+        f (Array.map (f -| Array.map self#inlines) t.rows)
     | (Drawer _ | Property_Drawer _ | Name _ | Src _ |
         Example _ | Math _ | Directive _) -> self#bot
   method list_item { contents } = self#blocks contents

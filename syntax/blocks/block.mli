@@ -62,7 +62,18 @@ and t =
   (** A drawer *)
   | Property_Drawer of (string * string) list
   (** A property drawer *)
-
+  | Table of table
+(** Table *)
+and table = {
+  groups : (int * int) list option;
+  (** List of columns to group. A list of couple (start, stop) *)
+  align_line : int array option;
+  (** The size of each columns wanted by the user*)
+  rows: Inline.t list array array;
+  (** The rows *)
+  format : string option
+  (** The table's format *)
+}
 
 (** {1 Mapper and folders} *)
 class ['a] mapper : object
