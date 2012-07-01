@@ -26,7 +26,7 @@ module E = struct
     method combine = List.concat
     method wrap d contents = 
       let head = Xml.block "head"
-        [Xml.block "title" [Xml.data (Xml.escape_entities d.title)];
+        [Xml.block "title" [Xml.data d.title];
          Xml.block "meta" ~attr: ["http-equiv", "Content-Type"; "content", "text/html";
                                   "charset", get encoding] [];
          Xml.block "script" ~attr:["type","text/javascript"; 
@@ -38,18 +38,18 @@ module E = struct
         ~attr:["xmlns", "http://www.w3.org/1999/xhtml"]
         [head; Xml.block "body" contents]
     method inline = function
-      | Plain s -> [Xml.data (Xml.escape_entities s)]
+      | Plain s -> [Xml.data s]
       | Emphasis (kind, data) ->
           let l = [`Bold, "b"; `Italic, "i"; `Underline, "u"] in
           [Xml.block (List.assoc kind l) (self#inlines data)]
       | Entity e -> 
           [Xml.data e.html]
-      | Latex_Fragment (Inline.Math s) -> [Xml.data (Xml.escape_entities ("\\("^s^"\\)"))]
+      | Latex_Fragment (Inline.Math s) -> [Xml.data ("\\("^s^"\\)")]
       | Link {url; label} ->
           [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
               (self#inlines label)]
       | Verbatim s -> 
-          [Xml.block "code" [Xml.data (Xml.escape_entities s)]]
+          [Xml.block "code" [Xml.data s]]
       | x -> super#inline x
     method list_item x = 
       let contents = match x.contents with
@@ -87,9 +87,9 @@ module E = struct
   let with_custom_exporter o { get } doc out = 
     if get full then
       (IO.nwrite out doctype;
-       Xml.output out (o#wrap doc (o#document doc)))
+       Xml.output_xhtml out [o#wrap doc (o#document doc)])
     else
-      List.iter (Xml.output out) (o#document doc)
+      Xml.output_xhtml out (o#document doc)
   let export c = with_custom_exporter (new htmlExporter c) c
   let default_filename = change_ext "html"
 end
