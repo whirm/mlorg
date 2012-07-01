@@ -3,9 +3,11 @@ open Batteries
 
 
 type t = 
+  | Empty
   | Data of string
   | Block of string * (string * string) list * t list
 
+let empty = Empty
 let block ?(attr = []) name children = 
   Block (name, attr, children)
 let data s = Data s
@@ -57,6 +59,7 @@ let output_lines fd indent_level lines =
 
 let output ?(offset = 0) fd inlines prep_inlines exceptions space_significants trees = 
   let rec write ?(ctx_inline = false) indent_level = function
+    | Empty -> ()
     | Data s -> output_lines fd indent_level s
     | Block (name, attribs, children) ->
 	let inline = List.mem name inlines in

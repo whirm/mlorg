@@ -12,6 +12,9 @@ val block : ?attr : (string * string) list -> string -> t list -> t
 (** Construct a block with given attribute name and children. The indent
     parameter specify if it is allowed to indent the contents of this block (default true) *)
 
+val empty : t
+(** The empty element *)
+
 val output :
   ?offset : int ->
   unit IO.output ->
