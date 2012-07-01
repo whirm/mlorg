@@ -33,6 +33,14 @@ and list_item = {
 }
 (** A list item *)
 
+(** {2 Tables} *)
+(** A row in a table *)
+and table = {
+  rows : Inline.t list array array; (** The rows of the table *)
+  align_line : int array option; (** An optional size for each column *)
+  groups : (int * int) list option; (** An optional grouping for columns. A list of [(index_open, index_close)] *)
+  format : string option; (** The format of the table *)
+}
 (** {2 Blocks} *)
 and t = 
   | Paragraph of Inline.t list
@@ -53,6 +61,8 @@ and t =
   (** [Examples] used to typeset random code snippets. The integer is the line number in the source file. *)
   | Src of int * string * string list
   (** [Src] is used to typeset code snippets. The integer is the line number in the source file. *)
+  | Table of table
+  (** Tables *)
   | Custom of string * string * t list
   (** Custom block of the form
   #+begin_name opts
