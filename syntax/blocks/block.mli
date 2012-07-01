@@ -58,7 +58,7 @@ and t =
   #+begin_name opts
       DATA
   #+end *)
-  | Drawer of string list
+  | Drawer of t list
   (** A drawer *)
   | Property_Drawer of (string * string) list
   (** A property drawer *)

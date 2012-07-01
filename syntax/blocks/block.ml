@@ -34,7 +34,7 @@ and t =
   | Example of int * string list
   | Src of int * string * string list
   | Custom of string * string * t list
-  | Drawer of string list
+  | Drawer of t list
   | Property_Drawer of (string * string) list
   | Table of table
 let map f v l = List.map (f v) l
