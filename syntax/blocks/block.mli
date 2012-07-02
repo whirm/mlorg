@@ -62,6 +62,8 @@ and t =
   (** A drawer *)
   | Property_Drawer of (string * string) list
   (** A property drawer *)
+  | Footnote_Definition of string * Inline.t list
+  (** The definition of a footnote : name and contents *)
   | Table of table
 (** Table *)
 and table = {

@@ -36,6 +36,7 @@ and t =
   | Custom of string * string * t list
   | Drawer of t list
   | Property_Drawer of (string * string) list
+  | Footnote_Definition of string * Inline.t list
   | Table of table
 let map f v l = List.map (f v) l
 class ['a] mapper = object(self)
@@ -45,6 +46,7 @@ class ['a] mapper = object(self)
     | List (l, b) -> List (map self#list_item v l, b)
     | Heading h -> Heading { h with title = self#inlines v h.title }
     | Paragraph i -> Paragraph (self#inlines v i)
+    | Footnote_Definition (s, i) -> Footnote_Definition (s, self#inlines v i)
     | Custom (a, b, t) -> Custom (a, b, self#blocks v t)
     | Quote t -> Quote (self#blocks v t)
     | Table t -> Table {t with rows = 
@@ -61,7 +63,7 @@ class ['a] folder = object(self)
   method block (v:'a) = function
     | Heading h -> self#inlines v h.title
     | List (l, b) -> List.fold_left self#list_item v l
-    | Paragraph i -> self#inlines v i 
+    | Paragraph i | Footnote_Definition (_, i) -> self#inlines v i 
     | Custom (_, _, t)
     | Quote t -> self#blocks v t
     | Table t -> 
@@ -77,7 +79,7 @@ class virtual ['a] bottomUp = object(self)
   method block = function
     | Heading h -> self#inlines h.title
     | List (l, b) -> self#combine (List.map self#list_item l)
-    | Paragraph i -> self#inlines i 
+    | Paragraph i | Footnote_Definition (_, i) -> self#inlines i 
     | Custom (_, _, t)
     | Quote t -> self#blocks t
     | Table t ->
