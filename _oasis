@@ -25,8 +25,8 @@ Library "mlorg-syntax-blocks"
   Path:            syntax/blocks
   BuildDepends:    mlorg-syntax-inline
   BuildTools:      ocamlbuild
-  Modules:         Block, Automaton, Context, Aut_blocks, Aut_directive, Aut_drawers, Aut_heading, Aut_list, Aut_math, Aut_name, Automaton, Aut_paragraph, Parser
-  InternalModules: Automaton, Context, Aut_blocks, Aut_directive, Aut_drawers, Aut_heading, Aut_list, Aut_math, Aut_name, Automaton, Aut_paragraph
+  Modules:         Block, Automaton, Context, Aut_blocks, Aut_directive, Aut_drawers, Aut_heading, Aut_list, Aut_math, Aut_name, Automaton, Aut_paragraph, Aut_verbatim, Parser
+  InternalModules: Automaton, Context, Aut_blocks, Aut_directive, Aut_drawers, Aut_heading, Aut_list, Aut_math, Aut_name, Automaton, Aut_paragraph, Aut_verbatim
 
 Library "mlorg-document"
   Path:            document
