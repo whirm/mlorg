@@ -5,6 +5,7 @@ type state = int * string list
 let interrupt (n, lines) _ = [Block.Example (n, List.rev lines)]
         
 let cut s = 
+  if s = ":" then Some ""
   if String.length s > 2 && s.[0] = ':' && s.[1] = ' ' then
     Some (String.sub s 2 (String.length s - 2))
   else
