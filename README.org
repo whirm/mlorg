@@ -166,7 +166,15 @@ The syntax is a block named =quote=:
 #+end_example
 
 *** Example
-Same thing as for quotes but with =example=.[fn::I obviously don't typeset the example since I don't know how to make it work]
+Same thing as for quotes but with =example=.
+: #+begin_example
+: Code
+: #+end_example
+Or with alternate syntax:
+
+: : Line 1
+: : Line 2
+
 *** A custom block
 A custom block, with options. Syntax:
 #+begin_example
@@ -214,3 +222,12 @@ Likewise you can define grouping annotations with:
 several of these lines but only the last one will be used. Moreover, if the
 first column of your table is only composed by =/= and empty fields, it gets
 removed (It seems to be the behavior of =org=).
+*** Footnote definition
+You can define a footnote in a non-inline by doing so:
+
+#+begin_example
+[name] Contents
+blabla
+#+end_example
+
+Note: Footnotes definition only contains inline text.x
