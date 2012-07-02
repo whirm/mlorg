@@ -113,9 +113,9 @@ let collect =
   let collector = object(self)
     inherit [meta] Block.folder as super
     method block meta = function
-      | Block. Property_Drawer p -> 
+      | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
-      | _ -> meta (* no recursion *)
+      | block -> super#block meta block (* no recursion *)
     method inline meta = 
       let open Inline in function
         | Timestamp (Date t) -> { meta with timestamps = t :: meta.timestamps }
