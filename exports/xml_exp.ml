@@ -70,16 +70,17 @@ module E = struct
      | Cookie (Percent k) -> [Xml.block "cookie" ~attr:["percent", string_of_int k] []]
      | Cookie (Absolute (k, k')) -> 
          [Xml.block "cookie" ~attr:["done", string_of_int k; "total", string_of_int k'] []]
-     | Timestamp (Scheduled t) -> [Xml.block "scheduled" (self#timestamp t)]
-     | Timestamp (Deadline t) -> [Xml.block "deadline" (self#timestamp t)]
-     | Timestamp (Date t) -> [Xml.block "date" (self#timestamp t)]
-     | Timestamp (Range t) -> [Xml.block "range" (self#range t)]
+     | Timestamp (Scheduled t) -> [Xml.block "scheduled" [self#timestamp t]]
+     | Timestamp (Deadline t) -> [Xml.block "deadline" [self#timestamp t]]
+     | Timestamp (Date t) -> [Xml.block "date" [self#timestamp t]]
+     | Timestamp (Range t) -> [Xml.block "range" [self#range t]]
      | Radio_Target s -> [Xml.block "radio-target" [Xml.data s]]
      | Verbatim s -> 
          [Xml.block "verbatim-inline" [Xml.data s]]
     method range {start; stop} =
-      [Xml.block "start" (self#timestamp start);
-       Xml.block "stop" (self#timestamp stop)]
+      Xml.block "time-range"
+        [Xml.block "start" [self#timestamp start];
+         Xml.block "stop" [self#timestamp stop]]
     method date {year; month; day} = 
       Xml.block "dateitem" ~attr:["year", string_of_int year;
                                   "month", string_of_int month;
@@ -88,9 +89,9 @@ module E = struct
       Xml.block "time" ~attr:["hour", string_of_int hour;
                               "min", string_of_int min] []
     method timestamp {date; time; repetition} = 
-      [self#date date; Option.map_default self#time Xml.empty time;
+      self#date date; Option.map_default self#time Xml.empty time;
        Option.map_default (Xml.block "repetition" -| (fun x -> [x]) -| self#date)
-         Xml.empty repetition]
+         Xml.empty repetition
     method list_item x = 
       [Xml.block "item"
         ~attr: (opt_attr "number" x.number)
@@ -141,13 +142,25 @@ module E = struct
           in    
           [Xml.block "table" ~attr: (opt_attr "format" t.format)
               (index :: groups :: contents)]
-          
+    method footnote (name, contents) = 
+      Xml.block "footnote" ~attr: ["name", name] (self#inlines contents)
+    method property (key, value) = 
+      Xml.block "properties" ~attr:["name", key; "value", value] []
     method heading d = 
-      [Xml.block "heading"
-        ~attr: ["level", string_of_int d.level]
-        (Xml.block "name" (self#inlines d.name) ::
-           (self#blocks d.content
-            @ concatmap self#heading d.children))]
+      let mk_list name f l = if l = [] then Xml.empty
+        else Xml.block name (List.map f l)
+      in
+      let children = 
+        Xml.block "name" (self#inlines d.name) ::
+          mk_list "scheduled" self#timestamp d.meta.scheduled ::
+          mk_list "deadlines" self#timestamp d.meta.deadlines ::
+          mk_list "timestamps" self#timestamp d.meta.timestamps ::
+          mk_list "range" self#range d.meta.ranges ::
+          mk_list "footnotes" self#footnote d.meta.footnotes ::
+          mk_list "properties" self#property d.meta.properties ::
+          (self#blocks d.content
+           @ concatmap self#heading d.children)
+      in [Xml.block "heading" children]
     method document d =
       [Xml.block "document" 
           (self#blocks d.beginning @
