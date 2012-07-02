@@ -89,9 +89,10 @@ module E = struct
       Xml.block "time" ~attr:["hour", string_of_int hour;
                               "min", string_of_int min] []
     method timestamp {date; time; repetition} = 
-      self#date date; Option.map_default self#time Xml.empty time;
-       Option.map_default (Xml.block "repetition" -| (fun x -> [x]) -| self#date)
-         Xml.empty repetition
+      Xml.block "timestamp"
+        [self#date date; Option.map_default self#time Xml.empty time;
+         Option.map_default (Xml.block "repetition" -| (fun x -> [x]) -| self#date)
+           Xml.empty repetition]
     method list_item x = 
       [Xml.block "item"
         ~attr: (opt_attr "number" x.number)
@@ -150,19 +151,21 @@ module E = struct
       let mk_list name f l = if l = [] then Xml.empty
         else Xml.block name (List.map f l)
       in
-      let children = 
-        Xml.block "name" (self#inlines d.name) ::
-          mk_list "scheduled" self#timestamp d.meta.scheduled ::
-          mk_list "deadlines" self#timestamp d.meta.deadlines ::
-          mk_list "timestamps" self#timestamp d.meta.timestamps ::
-          mk_list "range" self#range d.meta.ranges ::
-          mk_list "footnotes" self#footnote d.meta.footnotes ::
-          mk_list "properties" self#property d.meta.properties ::
+      let children = Xml.block "meta"
+        [Xml.block "name" (self#inlines d.name);
+          mk_list "scheduled" self#timestamp d.meta.scheduled;
+          mk_list "deadlines" self#timestamp d.meta.deadlines;
+          mk_list "timestamps" self#timestamp d.meta.timestamps;
+          mk_list "range" self#range d.meta.ranges;
+          mk_list "footnotes" self#footnote d.meta.footnotes;
+          mk_list "properties" self#property d.meta.properties] ::
           (self#blocks d.content
            @ concatmap self#heading d.children)
       in [Xml.block "heading" children]
     method document d =
       [Xml.block "document" 
+          ~attr: ["title", d.title; "author", d.author;
+                  "filename", d.filename]
           (self#blocks d.beginning @
              concatmap self#heading d.headings)]
   end
