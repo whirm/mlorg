@@ -231,3 +231,16 @@ blabla
 #+end_example
 
 Note: Footnotes definition only contains inline text.x
+*** Keywords
+Some keywords can be attached to a block (such as the name) by writing before the block, directive annotations:
+
+: #+name: Name of the block
+: #+...
+: The block
+
+The list of affiliated keywords (taken from =org-element.el=): =ATTR_ASCII=
+=ATTR_DOCBOOK= =ATTR_HTML= =ATTR_LATEX= =ATTR_ODT= =CAPTION= =DATA= =HEADER=
+=HEADERS= =LABEL= =NAME= =PLOT= =RESNAME= =RESULT= =RESULTS= =SOURCE=
+=SRCNAME= and =TBLNAME=.
+
+
