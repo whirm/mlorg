@@ -15,7 +15,7 @@ lines is non-empty: *)
 let interrupt lines _ = match List.rev lines with
   (* This case is to avoid cluttering the output tree with empty blocks *)
   | [] -> []
-  | head :: tail ->
+  | (head :: tail) as lines ->
       let parse lines = Inline.parse (String.concat "\n" lines) in
       (* We check for a footnote definition in the first line *)
       try Scanf.sscanf head "[%[^]]] %[^\n]" (fun name rest ->
