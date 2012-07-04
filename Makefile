@@ -9,5 +9,9 @@ top: all
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
 
-README.html: main.native README.org
+web: README.html
+	mkdir -p $(WEBDDESTIDR)
+	cp README.html $(WEBDESTDIR)/index.html
+
+README.html: all README.org
 	./main.native --filename README.org --backend html
