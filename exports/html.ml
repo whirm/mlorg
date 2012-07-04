@@ -76,8 +76,8 @@ module E = struct
         (self#blocks d.content
          @ concatmap (self#heading) d.children)
     method document d =
-      [Xml.block "h1" ~attr:["id", "content"]
-          (Xml.block "div" ~attr:["class", "title"] 
+      [Xml.block "div" ~attr:["id", "content"]
+          (Xml.block "h1" ~attr:["class", "title"] 
           [Xml.data d.title] ::
           (self#blocks d.beginning @
              concatmap (self#heading) d.headings))]
