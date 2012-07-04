@@ -47,8 +47,8 @@ and t =
   (** Math, enclosed by $$ ... $$ *)
   | Quote of t list
   (** Quoted text *)
-  | Name of string
-  (** A name tag that maps to next block *)
+  | With_Keywords of (string * string) list * t
+  (** Keywords for a block *)
   | Example of int * string list
   (** [Examples] used to typeset random code snippets. The integer is the line number in the source file. *)
   | Src of int * string * string list

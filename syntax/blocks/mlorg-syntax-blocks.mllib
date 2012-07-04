@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d0d49925b9b1d3c0ffb84136e39bdb8e)
+# DO NOT EDIT (digest: 3010f2cebd93aeb3e71579e3171b1d5d)
 Block
 Automaton
 Context
@@ -9,7 +9,6 @@ Aut_drawers
 Aut_heading
 Aut_list
 Aut_math
-Aut_name
 Automaton
 Aut_paragraph
 Aut_verbatim
@@ -22,7 +21,6 @@ Aut_drawers
 Aut_heading
 Aut_list
 Aut_math
-Aut_name
 Automaton
 Aut_paragraph
 Aut_verbatim

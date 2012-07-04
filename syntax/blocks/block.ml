@@ -30,7 +30,7 @@ and t =
   | Directive of string * string
   | Math of string
   | Quote of t list
-  | Name of string
+  | With_Keywords of (string * string) list * t
   | Example of int * string list
   | Src of int * string * string list
   | Custom of string * string * t list
@@ -49,9 +49,10 @@ class ['a] mapper = object(self)
     | Footnote_Definition (s, i) -> Footnote_Definition (s, self#inlines v i)
     | Custom (a, b, t) -> Custom (a, b, self#blocks v t)
     | Quote t -> Quote (self#blocks v t)
+    | With_Keywords (vals, l) -> With_Keywords (vals, self#block v l)
     | Table t -> Table {t with rows = 
         Array.map (Array.map (self#inlines v)) t.rows}
-    | (Drawer _ | Property_Drawer _ | Name _ | Src _
+    | (Drawer _ | Property_Drawer _ | Src _
           | Example _ | Math _ | Directive _ as x) -> x
   method list_item v ({ contents } as x) =
     { x with contents = self#blocks v contents }
@@ -64,11 +65,12 @@ class ['a] folder = object(self)
     | Heading h -> self#inlines v h.title
     | List (l, b) -> List.fold_left self#list_item v l
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines v i 
+    | With_Keywords (_, t) -> self#block v t
     | Custom (_, _, t)
     | Quote t -> self#blocks v t
     | Table t -> 
         Array.fold_left (Array.fold_left self#inlines) v t.rows
-    | (Drawer _ | Property_Drawer _ | Name _ | Src _ |
+    | (Drawer _ | Property_Drawer _ | Src _ |
         Example _ | Math _ | Directive _) -> v
   method list_item v { contents } = self#blocks v contents
 end
@@ -80,12 +82,13 @@ class virtual ['a] bottomUp = object(self)
     | Heading h -> self#inlines h.title
     | List (l, b) -> self#combine (List.map self#list_item l)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines i 
+    | With_Keywords (_, t) -> self#block t
     | Custom (_, _, t)
     | Quote t -> self#blocks t
     | Table t ->
         let f = self#combine -| Array.to_list in
         f (Array.map (f -| Array.map self#inlines) t.rows)
-    | (Drawer _ | Property_Drawer _ | Name _ | Src _ |
+    | (Drawer _ | Property_Drawer _ | Src _ |
         Example _ | Math _ | Directive _) -> self#bot
   method list_item { contents } = self#blocks contents
 end

@@ -107,7 +107,7 @@ module E = struct
       | Math s -> [Xml.block "math-block" [Xml.data s]]
       | Quote l ->
           [Xml.block "quote" (self#blocks l)]
-      | Name s -> [Xml.block "named-block" [Xml.data s]]
+      | With_Keywords (l, b) -> [Xml.block "with-keywords" ~attr: l (self#block b)]
       | Example (_, l) ->
           [Xml.block "example" [Xml.data (String.concat "\n" l)]]
       | Src (number, opts, lines) ->
