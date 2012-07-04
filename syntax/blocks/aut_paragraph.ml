@@ -18,7 +18,7 @@ let interrupt lines _ = match List.rev lines with
   | (head :: tail) as lines ->
       let parse lines = Inline.parse (String.concat "\n" lines) in
       (* We check for a footnote definition in the first line *)
-      try Scanf.sscanf head "[%[^]]] %[^\n]" (fun name rest ->
+      try Scanf.sscanf head "[%[^][]] %[^\n]" (fun name rest ->
         (* If it matches, we return a footnote definition *)
         [Block.Footnote_Definition (name, parse (rest :: tail))])
       (* If it does not we return a boring paragraph *)
