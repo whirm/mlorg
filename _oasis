@@ -49,4 +49,5 @@ Library "mlorg"
 Executable "mlorg"
   Path:       .
   BuildTools: ocamlbuild
+  CompiledObject: native
   MainIs:     main.ml
