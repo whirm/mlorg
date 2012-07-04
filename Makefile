@@ -14,4 +14,4 @@ web: README.html
 	cp README.html $(WEBDESTDIR)/index.html
 
 README.html: all README.org
-	./_build/main.native --filename README.org --backend html
+	./_build/mlorg --filename README.org --backend html
