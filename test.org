@@ -1,7 +1,2 @@
 
-
-* foo
-#+name: export
-#+begin_src ocaml
-fun _ _ -> print_endline "ALLO"
-#+end_src
+: & 
