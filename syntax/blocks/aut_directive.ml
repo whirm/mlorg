@@ -7,9 +7,15 @@ let affiliated_keywords =
   ["ATTR_ASCII"; "ATTR_DOCBOOK"; "ATTR_HTML"; "ATTR_LATEX"; "ATTR_ODT"; "CAPTION";
    "DATA"; "HEADER"; "HEADERS"; "LABEL"; "NAME"; "PLOT"; "RESNAME"; "RESULT"; "RESULTS";
    "SOURCE"; "SRCNAME"; "TBLNAME"]
+let keywords_translation = 
+  [("DATA", "NAME"); ("LABEL", "NAME"); ("RESNAME", "NAME");
+    ("SOURCE", "NAME"); ("SRCNAME", "NAME"); ("TBLNAME", "NAME");
+    ("RESULT", "RESULTS"); ("HEADERS", "HEADER")]
+
+let translate x = try List.assoc x keywords_translation with Not_found -> x
 let interrupt (a, b) _ =
   if List.mem (String.uppercase a) affiliated_keywords then
-    [With_Keywords ([String.uppercase a, b], Paragraph [])] (* little hack *)
+    [With_Keywords ([translate (String.uppercase a), b], Paragraph [])] (* little hack *)
   else
     [Directive (a, b)]
   
