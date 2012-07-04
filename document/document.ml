@@ -113,9 +113,9 @@ let collect =
   let collector = object(self)
     inherit [meta] Block.folder as super
     method block meta = function
-      | Block. Property_Drawer p -> 
+      | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
-      | _ -> meta (* no recursion *)
+      | block -> super#block meta block (* no recursion *)
     method inline meta = 
       let open Inline in function
         | Timestamp (Date t) -> { meta with timestamps = t :: meta.timestamps }
@@ -129,6 +129,19 @@ let collect =
   in
   collector#blocks empty_meta
 
+let gather_keywords doc = 
+  let gatherer = object(self) 
+    inherit [unit] mapper as super
+    method blocks () = 
+    let open Block in
+        function
+          | With_Keywords (l, Paragraph []) :: With_Keywords (l', b) :: q ->
+              self#blocks () (With_Keywords (l @ l', b) :: q)
+          | With_Keywords (l, Paragraph []) :: other :: q ->
+              With_Keywords (l, other) :: self#blocks () q
+          | l -> super#blocks () l
+  end in
+  gatherer#document () doc
 (* The following function takes a list of blocks, and returns
 - the blocks until next heading
 - the heading
@@ -214,16 +227,17 @@ let from_blocks filename blocks =
     aux false { name = []; level = 0; content = []; father = None;
                 children = []; tags = []; marker = None;
                 meta = empty_meta } blocks
-    in
-  handle_directives
-    { beginning = main.content; directives;
-      exts = []; ext_opts = [];
-      headings = main.children;
-      beg_meta = main.meta;
-      title = (try List.assoc "TITLE" directives with _ -> "");
-      author = (try List.assoc "AUTHOR" directives with _ -> "");
-      filename;
-    }
+  in
+  gather_keywords 
+    (handle_directives
+       { beginning = main.content; directives;
+         exts = []; ext_opts = [];
+         headings = main.children;
+         beg_meta = main.meta;
+         title = (try List.assoc "TITLE" directives with _ -> "");
+         author = (try List.assoc "AUTHOR" directives with _ -> "");
+         filename;
+       })
 (** {1 Parsing from files} *)
 let from_chan filename channel = 
     BatIO.lines_of channel |> 
@@ -259,12 +273,17 @@ let dump =
       aux (i + 4) heading.children)
   in aux 0
 
-let find_block_by_name doc name = 
+let find_block_with_property f doc =
   let folder = object(self)
     inherit [Block.t option] folder as super
     method blocks v = function
-      | Block.Name name' :: other :: q when name = name' -> Some other
+      | Block.With_Keywords (l, t) :: _ when f l -> Some t
       | t :: q -> self#blocks (super#block v t) q
       | [] -> v
   end
   in folder#document None doc
+
+
+let find_block_by_name doc name = 
+  find_block_with_property 
+    (fun l -> try List.assoc "NAME" l = name with _ -> false) doc

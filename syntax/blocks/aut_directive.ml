@@ -2,8 +2,24 @@
 open Block
 open Automaton
 type state = string * string
-let interrupt (a, b) _ = [Directive (a, b)]
-        
+(* org mode keywords *)
+let affiliated_keywords = 
+  ["ATTR_ASCII"; "ATTR_DOCBOOK"; "ATTR_HTML"; "ATTR_LATEX"; "ATTR_ODT"; "CAPTION";
+   "DATA"; "HEADER"; "HEADERS"; "LABEL"; "NAME"; "PLOT"; "RESNAME"; "RESULT"; "RESULTS";
+   "SOURCE"; "SRCNAME"; "TBLNAME"]
+let keywords_translation = 
+  [("DATA", "NAME"); ("LABEL", "NAME"); ("RESNAME", "NAME");
+    ("SOURCE", "NAME"); ("SRCNAME", "NAME"); ("TBLNAME", "NAME");
+    ("RESULT", "RESULTS"); ("HEADERS", "HEADER")]
+
+let translate x = try List.assoc x keywords_translation with Not_found -> x
+let interrupt (a, b) _ =
+  if List.mem (String.uppercase a) affiliated_keywords then
+    [With_Keywords ([translate (String.uppercase a), b], Paragraph [])] (* little hack *)
+  else
+    [Directive (a, b)]
+  
+      
 (* To parse a string, we just check if it's empty. If so we are done. If not, we
    are partially done (can be interrupted). *)
 let parse_line st { line } = 

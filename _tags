@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 39cb8fa0e3f1b9554b8b8a47783e9f44)
+# DO NOT EDIT (digest: 6664930808509fda9ef013f7b0dc1ecd)
 # Library mlorg-common
 "common": include
 <common/*.ml{,i}>: pkg_dynlink
@@ -31,8 +31,8 @@
 <exports/*.ml{,i}>: pkg_dynlink
 <exports/*.ml{,i}>: pkg_batteries
 # Executable mlorg
-"main.byte": pkg_dynlink
-"main.byte": pkg_batteries
+"main.native": pkg_dynlink
+"main.native": pkg_batteries
 # Library mlorg
 <*.ml{,i}>: use_mlorg-exports
 <*.ml{,i}>: use_mlorg-document

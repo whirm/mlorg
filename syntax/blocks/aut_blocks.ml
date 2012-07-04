@@ -15,15 +15,23 @@ let interrupt (number, lines, name, opts) parse =
       Custom (name, opts, parse (List.enum lines))]
         
 let parse_line (number, lines, name, opts) { line; parse } = 
-  try Scanf.sscanf line "#+end_%s" (fun name' ->
-    if name' <> name then Next (number, line :: lines, name, opts)
-    else Done (interrupt (number, lines, name, opts) parse, true))
-  with _ -> Next (number, line :: lines, name, opts)
+  let re = Str.regexp "#+\\(end|END\\)_\\[^ \\]" in
+  if Str.string_match re line 0 then
+    if Str.matched_group 2 line <> name then 
+      Next (number, line :: lines, name, opts)
+    else 
+      Done (interrupt (number, lines, name, opts) parse, true)
+  else 
+    Next (number, line :: lines, name, opts)
 
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line; number } = 
-  try Scanf.sscanf line "#+begin_%s %[^\n]"
-        (fun a b -> Some (number, [], a, b))
-  with _ -> None
+  let re = Str.regexp "#+\\(begin|BEGIN\\)_\\[^ \\]+ \\(.+\\)" in
+  if Str.string_match re line 0 then
+    let name = Str.matched_group 2 line 
+    and options = Str.matched_group 3 line in
+    Some (number, [], name, options)
+  else
+    None
 
 let priority = 10

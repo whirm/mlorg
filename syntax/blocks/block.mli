@@ -34,13 +34,17 @@ and list_item = {
 (** A list item *)
 
 (** {2 Tables} *)
-(** A row in a table *)
 and table = {
-  rows : Inline.t list array array; (** The rows of the table *)
-  align_line : int array option; (** An optional size for each column *)
-  groups : (int * int) list option; (** An optional grouping for columns. A list of [(index_open, index_close)] *)
-  format : string option; (** The format of the table *)
+  groups : (int * int) list option;
+  (** List of columns to group. A list of couple (start, stop) *)
+  align_line : int array option;
+  (** The size of each columns wanted by the user*)
+  rows: Inline.t list array array;
+  (** The rows *)
+  format : string option
+  (** The table's format *)
 }
+(** Table *)
 (** {2 Blocks} *)
 and t = 
   | Paragraph of Inline.t list
@@ -55,24 +59,24 @@ and t =
   (** Math, enclosed by $$ ... $$ *)
   | Quote of t list
   (** Quoted text *)
-  | Name of string
-  (** A name tag that maps to next block *)
+  | With_Keywords of (string * string) list * t
+  (** Keywords for a block *)
   | Example of int * string list
   (** [Examples] used to typeset random code snippets. The integer is the line number in the source file. *)
   | Src of int * string * string list
   (** [Src] is used to typeset code snippets. The integer is the line number in the source file. *)
-  | Table of table
-  (** Tables *)
   | Custom of string * string * t list
   (** Custom block of the form
   #+begin_name opts
       DATA
   #+end *)
-  | Drawer of string list
+  | Drawer of t list
   (** A drawer *)
   | Property_Drawer of (string * string) list
   (** A property drawer *)
-
+  | Footnote_Definition of string * Inline.t list
+  (** The definition of a footnote : name and contents *)
+  | Table of table
 
 (** {1 Mapper and folders} *)
 class ['a] mapper : object

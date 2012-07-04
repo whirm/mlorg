@@ -2,6 +2,9 @@
 (*
 This is the first and the simplest automaton. A paragraph is simply a bunch of
 lines that end with an empty line.
+
+Well, Actually it's not so simple. To ease things up, 
+On interruption we check that the block is (or not a footnote definition)  
 *)
 open Automaton
 type state = string list
@@ -9,15 +12,17 @@ type state = string list
 
 (* When interrupting this parser, we just parse the inline contents, if the list of
 lines is non-empty: *)
-let interrupt lines _ = 
-  if lines = [] then []
-  else
-    let lines = String.concat "\n" (List.rev lines) in
-    let content = Inline.parse lines in
-    if content <> [] then
-      [Block.Paragraph content]
-    else
-      []
+let interrupt lines _ = match List.rev lines with
+  (* This case is to avoid cluttering the output tree with empty blocks *)
+  | [] -> []
+  | (head :: tail) as lines ->
+      let parse lines = Inline.parse (String.concat "\n" lines) in
+      (* We check for a footnote definition in the first line *)
+      try Scanf.sscanf head "[%[^][]] %[^\n]" (fun name rest ->
+        (* If it matches, we return a footnote definition *)
+        [Block.Footnote_Definition (name, parse (rest :: tail))])
+      (* If it does not we return a boring paragraph *)
+      with _ -> [Block.Paragraph (parse lines)]
         
 (* To parse a string, we just check if it's empty. If so we are done. If not, we
    are partially done (can be interrupted). *)
@@ -28,4 +33,5 @@ let parse_line lines { line } =
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line } = Some [line]
 
+(* We are the lowest priority automata. Everyone can interrupt us :-( *)
 let priority = 0

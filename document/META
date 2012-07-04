@@ -1,0 +1,10 @@
+# OASIS_START
+# DO NOT EDIT (digest: a41a551a627b13bdaf560451866db865)
+version = "0"
+description = "mlorg is a parser for org-mode files written in OCaml."
+requires = "batteries dynlink mlorg-syntax-blocks"
+archive(byte) = "mlorg-document.cma"
+archive(native) = "mlorg-document.cmxa"
+exists_if = "mlorg-document.cma"
+# OASIS_STOP
+

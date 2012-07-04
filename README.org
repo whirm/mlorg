@@ -16,11 +16,27 @@ by doing:
 git clone https://github.com/ocaml-batteries-team/batteries-included.git
 cd batteries-included
 make
-sudo make install
+make install
 #+end_example
 
-Once you are ready, you just have to type =make= in =mlorg='s source
-directory. You can then play with the =mlorg= binary or the toplevel by issuing =make top=.
+To compile mlorg, in the source directory type:
+#+begin_example
+ocaml setup.ml -configure
+ocaml setup.ml -build
+sudo ocaml setup.ml -install
+#+end_example
+The installation is obviously optional, but it if you want to use the =quote=
+backend or the toplevel you need to have it installed. (You can type =sudo ocaml
+setup.ml -uninstall= to uninstall)
+* How to play with it
+** Toplevel
+To have a toplevel in which =mlorg= is loaded, just type =make top=.
+
+To load a document, you can issue =Document.parse_file filename= and play with
+the resulting object.
+** To export
+To use the binary =mlorg= it is quite easy. The traditional usage is =mlorg
+--filename filename --backend your-backend [--output output]=
 * Syntax recognized by =mlorg=
 The syntax of org-mode is not well-defined. =mlorg= does its best to parse the
 main constructs. Here is detailed list of the construction available in =mlorg=.
@@ -150,7 +166,15 @@ The syntax is a block named =quote=:
 #+end_example
 
 *** Example
-Same thing as for quotes but with =example=.[fn::I obviously don't typeset the example since I don't know how to make it work]
+Same thing as for quotes but with =example=.
+: #+begin_example
+: Code
+: #+end_example
+Or with alternate syntax:
+
+: : Line 1
+: : Line 2
+
 *** A custom block
 A custom block, with options. Syntax:
 #+begin_example
@@ -172,3 +196,51 @@ Special drawers with name =PROPERTIES= which hold a key-value configuration.
 :key: value
 :END:
 #+end_example
+*** Table
+Tables are described according to org-syntax:
+
+#+begin_example
+| field1 | ... | fieldn |
+| field1 | ... | fieldn |
+#+end_example
+At the end, one can specify the table's format by
+
+#+begin_example
+#+TBLFM: ...
+#+end_example
+
+=mlorg= handles the grouping annotations and size annotations of tables as well.
+If a line is only composed with empty fields and =<number>= then this line is
+not stored as a proper row but information about size of each field. You can
+have several line of this kind but they are all discarded but the last one.
+
+Likewise you can define grouping annotations with:
+#+begin_example
+| / | < | | | | > | < | | > |
+#+end_example
+(See the manual for more information about this meaning) Again you can have
+several of these lines but only the last one will be used. Moreover, if the
+first column of your table is only composed by =/= and empty fields, it gets
+removed (It seems to be the behavior of =org=).
+*** Footnote definition
+You can define a footnote in a non-inline by doing so:
+
+#+begin_example
+[name] Contents
+blabla
+#+end_example
+
+Note: Footnotes definition only contains inline text.x
+*** Keywords
+Some keywords can be attached to a block (such as the name) by writing before the block, directive annotations:
+
+: #+name: Name of the block
+: #+...
+: The block
+
+The list of affiliated keywords (taken from =org-element.el=): =ATTR_ASCII=
+=ATTR_DOCBOOK= =ATTR_HTML= =ATTR_LATEX= =ATTR_ODT= =CAPTION= =DATA= =HEADER=
+=HEADERS= =LABEL= =NAME= =PLOT= =RESNAME= =RESULT= =RESULTS= =SOURCE=
+=SRCNAME= and =TBLNAME=.
+
+

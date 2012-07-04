@@ -39,7 +39,8 @@ let parse_first_line s =
      whether the list is ordered and [k] is the number of the first item, if any *)
   let next = 
     if String.length s = 0 then None
-    else if s.[0] = '+' || s.[0] = '-' then Some (1, false)
+    else if String.length s > 2 && (s.[0] = '+' || s.[0] = '-') && s.[1] = ' 'then 
+           Some (1, false)
     else try 
            Scanf.sscanf s "%d.%n" (fun _ k -> Some (k, true))
       with _ -> None

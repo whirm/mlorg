@@ -11,7 +11,9 @@ module E = struct
   module Meta = struct
     let name = "quote"
     let config = Config.create ()
-    let ocamlc = Config.add config "ocamlc" string "OCamlc command to use" "ocamlfind ocamlc -package batteries,mlorg -c"
+    let ocamlc = Config.add config "ocamlc" string "OCamlc command to use" 
+      (Printf.sprintf "ocamlfind %s -package batteries,mlorg"
+         (if Dynlink.is_native then "ocamlopt -shared" else "ocamlc -c"))
     let code = Config.add config "name" string "Name of the codeblock to use to export" "export"
     let external_file = Config.add config "external-file" string "Optional name of the file to load" ""
     let config = Config.validate config
@@ -36,11 +38,13 @@ let _ = Quote.register (
   let run ocamlc input lines number document out = 
     let fd, filename = File.open_temporary_out ~suffix:".ml" () in
     let () = write_ml_source fd lines input number in
-    let command = Printf.sprintf "%s %s" ocamlc (Filename.quote filename) in 
+    let obj = change_ext (if Dynlink.is_native then "cmx" else "cmo") filename in
+    let command = Printf.sprintf "%s %s -o %s" ocamlc (Filename.quote filename)
+      (Filename.quote obj) 
+    in 
     let () = Log.info "Compiling %s [%s]" filename command;
       if Sys.command command <> 0 then
         (Log.fatal "Compiling failed."; failwith "Compilation failed") in
-    let obj = change_ext (if Dynlink.is_native then "cmx" else "cmo") filename in
     let () = 
       (try Dynlink.loadfile obj
        with Dynlink.Error e ->

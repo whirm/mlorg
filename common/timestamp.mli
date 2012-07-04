@@ -22,6 +22,7 @@ type t = {
   repetition: date option;
 (** The date to wait for the event to start again, eg. [+1w] corresponds to
     seven days *)
+  active : bool;
 }
 (** A timestamp. time and repetition are optional. *)
 
@@ -51,7 +52,7 @@ val null : t
 val to_tm : t -> Unix.tm
 (** Converts a timestamp into an {!Unix.tm} *)
 
-val from_tm : Unix.tm -> t
+val from_tm : ?active : bool -> Unix.tm -> t
 (** Converts a {!Unix.tm} to a timestamp, by normalizing it before.
     This is always set a time and no repetition *)
 

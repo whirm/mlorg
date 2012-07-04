@@ -5,6 +5,7 @@ open Prelude
 open Html
 open Latex
 open Quote
+open Xml_exp
 open Filter
 
 (* pure part *)
