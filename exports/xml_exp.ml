@@ -88,8 +88,8 @@ module E = struct
     method time {hour; min} = 
       Xml.block "time" ~attr:["hour", string_of_int hour;
                               "min", string_of_int min] []
-    method timestamp {date; time; repetition} = 
-      Xml.block "timestamp"
+    method timestamp {active; date; time; repetition} = 
+      Xml.block "timestamp" ~attr:["active", if active then "true" else "false"]
         [self#date date; Option.map_default self#time Xml.empty time;
          Option.map_default (Xml.block "repetition" -| (fun x -> [x]) -| self#date)
            Xml.empty repetition]
