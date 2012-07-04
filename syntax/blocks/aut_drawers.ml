@@ -7,7 +7,7 @@ type state = string list * string
 
 let is_start { line } = 
   try
-    Scanf.sscanf line " :%[^:]:" (fun name -> Some ([], name))
+    Scanf.sscanf line " :%[^:]:!" (fun name -> Some ([], name))
   with _ -> None
 
 
