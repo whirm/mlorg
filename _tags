@@ -1,47 +1,30 @@
 # OASIS_START
-# DO NOT EDIT (digest: e52d83e9a3bf6a6a9d0f36efdb89b0da)
-# Library mlorg-common
-"common": include
-<common/*.ml{,i}>: pkg_dynlink
-<common/*.ml{,i}>: pkg_batteries
-# Library mlorg-syntax-inline
-"syntax/inline": include
-<syntax/inline/*.ml{,i}>: use_mlorg-common
-<syntax/inline/*.ml{,i}>: pkg_dynlink
-<syntax/inline/*.ml{,i}>: pkg_batteries
-# Library mlorg-syntax-blocks
-"syntax/blocks": include
-<syntax/blocks/*.ml{,i}>: use_mlorg-syntax-inline
-<syntax/blocks/*.ml{,i}>: use_mlorg-common
-<syntax/blocks/*.ml{,i}>: pkg_dynlink
-<syntax/blocks/*.ml{,i}>: pkg_batteries
-# Library mlorg-document
-"document": include
-<document/*.ml{,i}>: use_mlorg-syntax-blocks
-<document/*.ml{,i}>: use_mlorg-syntax-inline
-<document/*.ml{,i}>: use_mlorg-common
-<document/*.ml{,i}>: pkg_dynlink
-<document/*.ml{,i}>: pkg_batteries
-# Library mlorg-exports
-"exports": include
-<exports/*.ml{,i}>: use_mlorg-document
-<exports/*.ml{,i}>: use_mlorg-syntax-blocks
-<exports/*.ml{,i}>: use_mlorg-syntax-inline
-<exports/*.ml{,i}>: use_mlorg-common
-<exports/*.ml{,i}>: pkg_dynlink
-<exports/*.ml{,i}>: pkg_batteries
-# Executable mlorg
-"main.byte": pkg_dynlink
-"main.byte": pkg_batteries
+# DO NOT EDIT (digest: 75656e709f601e5c774da6f60f6a0b25)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
 # Library mlorg
-<*.ml{,i}>: use_mlorg-exports
-<*.ml{,i}>: use_mlorg-document
-<*.ml{,i}>: use_mlorg-syntax-blocks
-<*.ml{,i}>: use_mlorg-syntax-inline
-<*.ml{,i}>: use_mlorg-common
-# Executable mlorg.opt
-"main.native": pkg_dynlink
-"main.native": pkg_batteries
-<*.ml{,i}>: pkg_dynlink
+"mlorg.cmxs": use_mlorg
 <*.ml{,i}>: pkg_batteries
+<*.ml{,i}>: pkg_dynlink
+<common/*.ml{,i}>: pkg_batteries
+<common/*.ml{,i}>: pkg_dynlink
+<document/*.ml{,i}>: pkg_batteries
+<document/*.ml{,i}>: pkg_dynlink
+<exports/*.ml{,i}>: pkg_batteries
+<exports/*.ml{,i}>: pkg_dynlink
+<syntax/blocks/*.ml{,i}>: pkg_batteries
+<syntax/blocks/*.ml{,i}>: pkg_dynlink
+<syntax/inline/*.ml{,i}>: pkg_batteries
+<syntax/inline/*.ml{,i}>: pkg_dynlink
 # OASIS_STOP

@@ -1,12 +1,8 @@
 (* mlorg's main *)
 
 open Batteries
-open Prelude
-open Html
-open Latex
-open Quote
-open Xml_exp
-open Filter
+open Mlorg
+
 
 (* pure part *)
 let generate filename backend output opts = 

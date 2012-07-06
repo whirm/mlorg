@@ -24,15 +24,18 @@ val is_escaping : BatSubstring.t -> int -> bool
     (k+1)] holds *)
 
 val unescape : ?l : char list -> BatSubstring.t -> string
-(** Removes all the escapes appearing in a string. If l is specified, then only escape the chars in l *)
+(** [unescale ~l substring] unescapes characters in [l] appearing in [substring].
+    If [l] is not specified then every escaped character is unescaped *)
+
 
 val escape : string list -> string -> string
-(** Escape the given character in a string *)
+(** [escape chars string] escapes every occurence of any character in [chars], in [string] *)
 
 val substitute : (string -> string) -> string -> string
-(** Substitute a string with variables in it (uses [Buffer.add_substitute]) *)
+(** [substitute f s] substitues every variable present in [s] by applying [f] on the name of the variable. It uses the same format as [Buffer.add_substitute] *)
 
 (** {2 Other} *)
+
 val change_ext : string -> string ->string
 (** [change_ext new_ext file] replaces the old extension of [file] by [new_ext].
     Does nothing if [file = ""]. *)
