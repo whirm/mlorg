@@ -3,7 +3,8 @@
 (** This file deals with timestamps in org-mode. Timestamps are ubiquitous in
     org-mode files. *)
 
-(** {1 Definitions} *)
+(** {3 Definitions} *)
+
 type date = {
   year: int;
   month: int;
@@ -16,6 +17,7 @@ type time = {
   min: int;
 }
 (** A time. No seconds in org-mode's timestamps *)
+
 type t = {
   date: date;
   time: time option;
@@ -23,6 +25,7 @@ type t = {
 (** The date to wait for the event to start again, eg. [+1w] corresponds to
     seven days *)
   active : bool;
+(** Is the timestamp active ? [<timestamp>] is active and shows up in the agenda where [[timestamp]] isn't. *)
 }
 (** A timestamp. time and repetition are optional. *)
 
@@ -30,9 +33,9 @@ type range = {
   start: t;
   stop: t;
 }
-(** A timestamp range *)
+(** A timestamp range: a beginning and an end *)
 
-(** A few accessors: *)
+(** {3 A few accessors} *)
 
 val year : t -> int
 val month : t -> int
@@ -44,10 +47,10 @@ val min : t -> int
 val hour_opt : t -> int option
 val min_opt : t -> int option
 
-(** The null timestamp *)
 val null : t
+(** The null timestamp *)
 
-(** {1 Converting to and from {!Unix.tm}} *)
+(** {3 Converting to and from {!Unix.tm}} *)
 
 val to_tm : t -> Unix.tm
 (** Converts a timestamp into an {!Unix.tm} *)
@@ -63,7 +66,8 @@ val normalize : t -> t
 val weekday : t -> int
 (** Returns the weekday of a timestamp *)
 
-(** {1 Reading and writing timestamps} *)
+(** {3 Reading and writing timestamps} *)
+
 val parse : string -> (t * string) option
 (** Parse a timestamp *)
 

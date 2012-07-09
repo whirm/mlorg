@@ -6,8 +6,8 @@
 
 (** Note that the delimiter parsing is more subtle than what you can get with
     for instance [Str.split]. In particular it will match other delimiters and
-    handle escpaes. For instance with the proper table, [enclosing_delimiter "{foo{bar}}" '{']
-    would return ["foo{bar}"].
+    handle escpaes. For instance with the proper table, [enclosing_delimiter
+    "{foo{bar}}" '{'] would return ["foo{bar}"].
 *)
 
 module type Table = sig

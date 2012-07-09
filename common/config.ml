@@ -114,6 +114,7 @@ end
 type 'a item = (module Item with type t = 'a)
 type preconfig = (module Item) list ref
 type t = (module Item) array
+type interface = t
 
 type instance = 
     {get : 'a. 'a item -> 'a}
