@@ -7,6 +7,6 @@ module Backends = struct
   module Html = Html
   module Quote = Quote
   module Latex = Latex
-  module Xml = Xml
+  module Xml = Xml_exp
 end
 module Xml = Xml
