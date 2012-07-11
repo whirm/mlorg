@@ -3,11 +3,10 @@
 open Batteries
 open Mlorg
 
-
 (* pure part *)
 let generate filename backend output opts = 
-  let export = Modules.Exporters.find backend in
   try
+    let export = Modules.Exporters.find backend in
     let module E = (val export : Modules.Exporters.Signature) in
     let output = if output = "" then 
         E.default_filename filename
@@ -28,7 +27,7 @@ let generate filename backend output opts =
     if output = "-" then IO.close_out fdout
 
   with Sys_error msg -> Printf.eprintf "%s\n" msg
-    | Not_found -> Printf.eprintf "Backend `%s' does not exist." backend
+    | Not_found -> Printf.eprintf "Backend `%s' does not exist.\n" backend
 let output = ref "" and filename = ref "-"
 let backend = ref "html"
 let opts = ref ""
