@@ -1,6 +1,7 @@
 module Document = Document
 module Block = Block
 module Inline = Inline
+module Config = Config
 module Modules = Modules
 module Backends = struct
   module Html = Html

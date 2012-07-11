@@ -6,6 +6,8 @@ all:
 top: all
 	rlwrap ocaml -I _build/common -I _build/syntax/inline -I _build/document -I _build/exports -I _build/syntax/blocks -I _build/document/ $(INC) -init ocaml.init
 
+install:
+	ocaml setup.ml -reinstall
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
 

@@ -8,16 +8,19 @@ Plugins:     META (0.2)
 BuildDepends: batteries,dynlink
 
 
-Library "mlorg"
-  Path:            .
+Library mlorg
+  Path:             .
   InternalModules:  common/Prelude, common/Log, common/Config, common/Timestamp, common/Numbering,common/ExtList,common/Delimiters, syntax/inline/Entity, syntax/inline/Inline, syntax/blocks/Block, syntax/blocks/Automaton, syntax/blocks/Context, syntax/blocks/Aut_blocks, syntax/blocks/Aut_table, syntax/blocks/Aut_directive, syntax/blocks/Aut_drawers, syntax/blocks/Aut_heading, syntax/blocks/Aut_list, syntax/blocks/Aut_math, syntax/blocks/Aut_paragraph, syntax/blocks/Aut_verbatim, syntax/blocks/Parser, document/Document, document/Filter, document/Modules, exports/Xml, exports/Html, exports/Latex, exports/Quote, exports/Xml_exp
   Modules:          Mlorg
   BuildTools:       ocamlbuild
 
+Executable mlorg
+  Path: .
+  MainIs: main.ml
+  BuildTools: ocamlbuild
 
 Document mlorg
   Title:                API reference for mlorg
-  Type:                 ocamlbuild (0.2)
   InstallDir:           $htmldir/mlorg
   BuildTools:           ocamlbuild
   BuildTools+:          ocamldoc
