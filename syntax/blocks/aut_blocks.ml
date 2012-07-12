@@ -15,7 +15,7 @@ let interrupt (number, lines, name, opts) parse =
       Custom (name, opts, parse (List.enum lines))]
         
 let parse_line (number, lines, name, opts) { line; parse } = 
-  let re = Str.regexp "#+\\(end|END\\)_\\[^ \\]" in
+  let re = Str.regexp "#\\+\\(end\\|END\\)_\\([^ ]+\\)" in
   if Str.string_match re line 0 then
     if Str.matched_group 2 line <> name then 
       Next (number, line :: lines, name, opts)
@@ -26,10 +26,10 @@ let parse_line (number, lines, name, opts) { line; parse } =
 
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line; number } = 
-  let re = Str.regexp "#+\\(begin|BEGIN\\)_\\[^ \\]+ \\(.+\\)" in
+  let re = Str.regexp "#\\+\\(begin\\|BEGIN\\)_\\([^ ]+\\)\\( +\\(.+\\)\\)?" in
   if Str.string_match re line 0 then
     let name = Str.matched_group 2 line 
-    and options = Str.matched_group 3 line in
+    and options = try Str.matched_group 4 line with Not_found -> "" in
     Some (number, [], name, options)
   else
     None
