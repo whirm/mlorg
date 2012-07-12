@@ -86,42 +86,40 @@ let parse_timestamp_part timestamp s =
 module D = Delimiters.Make (struct
   let table = ['[', (']', false); '<', ('>', false)]
 end)
-let parse s = 
-  if s <> "" && (s.[0] = '[' || s.[0] = '<') then
-    match D.enclosing_delimiter (BatSubstring.all s) s.[0] with
-      | None -> None
-      | Some (parts, rest) ->
-          match Prelude.words parts with
-            | [] -> None
-            | date_s :: rem_parts -> match parse_date date_s with
-                | None -> None
+let parse_substring s = 
+  let open BatSubstring in
+  if length s > 0 && (get s 0 = '[' || get s 0 = '<') then
+      (match D.enclosing_delimiter s (get s 0) with
+        | None -> None
+        | Some (parts, rest) ->
+            match Prelude.words parts with
+              | [] -> None
+              | date_s :: rem_parts -> match parse_date date_s with
+                  | None -> None
                 | Some date ->
-                    let active = (s.[0] = '<') in
+                    let active = (get s 0 = '<') in
                     let timestamp = List.fold_left parse_timestamp_part
                       { null with date; active }
                       rem_parts
-                    in Some (timestamp, BatSubstring.to_string rest)
+                    in Some (timestamp, rest))
   else None
+let parse s = Option.map (fun (a, b) -> a, BatSubstring.to_string b) (parse_substring (BatSubstring.all s))
 
-let parse_range s = 
-  match parse s with
+let parse_range_substring s = 
+  let open BatSubstring in
+  match parse_substring s with
     | None -> None
     | Some (start, rest) ->
-      if String.length rest < 2 || rest.[0] <> '-' || rest.[1] <> '-' then 
+      if length rest < 2 || get rest 0 <> '-' || get rest 1 <> '-' then 
         None
       else
-        match parse (String.sub rest 2 (String.length rest - 2)) with
+        match parse_substring (triml 2 rest) with
           | Some (stop, rest) ->
             Some ({start; stop}, rest)
           | None -> None
             
-let parse_substring sub = 
-  Option.map (fun (x, s) -> x, BatSubstring.of_string s) 
-    (parse (BatSubstring.to_string sub))
-    
-let parse_range_substring sub = 
-  Option.map (fun (x, s) -> x, BatSubstring.of_string s) 
-    (parse_range (BatSubstring.to_string sub))
+let parse_range s = Option.map (fun (a, b) -> a, BatSubstring.to_string b) 
+  (parse_range_substring (BatSubstring.all s))
 
 let date_to_string d = 
   Printf.sprintf "%d-%2d-%02d" d.year d.month d.day
