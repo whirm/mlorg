@@ -19,7 +19,7 @@ let count_stars s =
 
 
 let get_marker context s = 
-  let word, rest = BatSubstring.splitl ((<>) ' ') s in
+  let word, rest = BatSubstring.splitl ((<>) ' ') (BatSubstring.trim s) in
   let word = BatSubstring.to_string word in
   if List.mem word context.Context.markers then
     Some word, rest
@@ -28,7 +28,7 @@ let get_marker context s =
 
 let get_priority s = 
   let module String = BatSubstring in
-  let word, rest = BatSubstring.splitl ((<>) ' ') s in
+  let word, rest = BatSubstring.splitl ((<>) ' ') (BatSubstring.trim s) in
   if String.size word = 4 
   && word.[0] = '[' && word.[1] = '#' && word.[3] = ']' then
     Some word.[2], rest
@@ -37,7 +37,8 @@ let get_priority s =
 
 let get_title s = 
   let module String = BatSubstring in
-  let parse_inl = Inline.parse -| BatSubstring.to_string in
+  let parse_inl = Inline.parse -| BatSubstring.to_string 
+    -| BatSubstring.trim in
   let title, tags = BatSubstring.splitr (fun c -> c = ':' 
   || Char.is_letter c || Char.is_digit c) s in
   if not (BatSubstring.is_empty tags) && 
