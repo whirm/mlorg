@@ -326,8 +326,11 @@ let timestamp_parser _ rest =
     | "SCHEDULED:", rest -> handle (fun x -> Scheduled x) rest
     | "CLOSED:", rest -> handle (fun x -> Closed x) rest
     | "DEADLINE:", rest -> handle (fun x -> Deadline x) rest
-    | "CLOCK:", rest -> try_range (fun x -> Clock (Stopped x)) 
-      (fun x -> Clock (Started x)) (Substring.triml 1 rest)
+    | "CLOCK:", rest -> 
+        let a, rest = try_range (fun x -> Clock (Stopped x))
+          (fun x -> Clock (Started x)) (Substring.triml 1 rest) in
+        a, snd (until (fun c -> c = '\n') rest)
+
     | _ -> try_range (fun x -> Range x) (fun x -> Date x) rest
   in
   Some ([Timestamp timestamp], rest)
