@@ -127,6 +127,8 @@ let collect =
         | Timestamp (Scheduled t) -> { meta with scheduled = t :: meta.scheduled }
         | Timestamp (Deadline t) -> { meta with deadlines = t :: meta.deadlines }
         | Timestamp (Range t) -> { meta with ranges = t :: meta.ranges }
+        | Timestamp (Clock (Stopped t)) -> { meta with ranges = t :: meta.clocks }
+        | Timestamp (Clock (Started t)) -> { meta with current_clock = Some t }
         | Footnote_Reference ({name = Some name; definition = Some def}) ->
           { meta with footnotes = (name, def) :: meta.footnotes }
         | x -> super#inline meta x
@@ -292,3 +294,13 @@ let find_block_with_property f doc =
 let find_block_by_name doc name = 
   find_block_with_property 
     (fun l -> try List.assoc "NAME" l = name with _ -> false) doc
+
+let current_clocked_item doc =
+  let o = object(self)
+    inherit [heading option] folder as super
+    method heading v h = match h.meta.current_clock with
+      | Some c -> Some h
+      | None -> super#heading v h
+  end
+  in o#document None doc
+

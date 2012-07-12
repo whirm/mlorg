@@ -113,3 +113,6 @@ val dump : heading list -> unit
 (** Dump a list of heading as a tree *)
 
 val find_block_by_name : t -> string -> Block.t option
+
+
+val current_clocked_item : t -> heading option
