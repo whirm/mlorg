@@ -107,14 +107,14 @@ let parse_range s =
   match parse s with
     | None -> None
     | Some (start, rest) ->
-        if String.length rest = 0 || rest.[0] <> '-' || rest.[1] <> '-' then 
-          None
-        else
-          match parse (String.sub rest 2 (String.length s - 2)) with
-            | Some (stop, rest) ->
-                Some ({start; stop}, rest)
-            | None -> None
-
+      if String.length rest < 2 || rest.[0] <> '-' || rest.[1] <> '-' then 
+        None
+      else
+        match parse (String.sub rest 2 (String.length rest - 2)) with
+          | Some (stop, rest) ->
+            Some ({start; stop}, rest)
+          | None -> None
+            
 let parse_substring sub = 
   Option.map (fun (x, s) -> x, BatSubstring.of_string s) 
     (parse (BatSubstring.to_string sub))

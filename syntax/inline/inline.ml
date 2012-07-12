@@ -38,10 +38,15 @@ and link = {
 and stats_cookie = 
   | Percent of int
   | Absolute of int * int (** current, max *)
+and clock_item = 
+  | Started of Timestamp.t
+  | Stopped of Timestamp.range
 and timestamp = 
   | Scheduled of Timestamp.t
   | Deadline of Timestamp.t
   | Date of Timestamp.t
+  | Closed of Timestamp.t
+  | Clock of clock_item
   | Range of Timestamp.range
 and latex_fragment = 
   | Math of string
@@ -92,7 +97,7 @@ let rec run_parsers parsers string =
       | ',' | '.' | ' ' | '\t' | '\n' -> true
       | _ -> false
     in
-    skip_until is_breaking ~k: (skip_until (not -| is_breaking) s) s
+    skip_until (not -| is_breaking) ~k: (skip_until is_breaking s) s
   in
   let rec aux start acc substring = 
     let (_, current, _) = Substring.base substring in
@@ -304,24 +309,29 @@ let statistics_cookie_parser _ rest =
 
 (** {2 Timestamp parser} *)
 let timestamp_parser _ rest = 
-  match Timestamp.parse_range_substring rest with
-    | Some (a, rest) -> Some ([Timestamp (Range a)], rest)
-    | None -> match Timestamp.parse_substring rest with
-        | Some (a, rest) -> Some ([Timestamp (Date a)], rest)
-        | None ->
-          let timestamp, rest = 
-            try
-              let rest = see "SCHEDULED: " rest in
-              match Timestamp.parse_substring rest with
-                | Some (a, rest) -> Scheduled a, rest
-                | None -> raise (Failure "")
-            with _ -> 
-              let rest = see "DEADLINE: " rest in
-              match Timestamp.parse_substring rest with
-                | Some (a, rest) -> Deadline a, rest
-                | None -> raise (Failure "")
-          in
-          Some ([Timestamp timestamp], rest)
+  let handle f rest =
+    let rest = Substring.triml 1 rest in
+    (match Timestamp.parse_substring rest with
+      | Some (a, rest) -> f a, rest
+      | None -> raise (Failure ""))
+  in
+  let try_range f g rest = match Timestamp.parse_range_substring rest with
+    | Some (a, rest) -> f a, rest
+    | None ->
+      match Timestamp.parse_substring rest with
+        | Some (a, rest) -> g a, rest
+        | None -> raise (Failure "")
+  in
+  let timestamp, rest = match until_space (fun _ -> false) rest with
+    | "SCHEDULED:", rest -> handle (fun x -> Scheduled x) rest
+    | "CLOSED:", rest -> handle (fun x -> Closed x) rest
+    | "DEADLINE:", rest -> handle (fun x -> Deadline x) rest
+    | "CLOCK:", rest -> try_range (fun x -> Clock (Stopped x)) 
+      (fun x -> Clock (Started x)) (Substring.triml 1 rest)
+    | _ -> try_range (fun x -> Range x) (fun x -> Date x) rest
+  in
+  Some ([Timestamp timestamp], rest)
+
 
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;

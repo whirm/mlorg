@@ -55,12 +55,14 @@ and entity = Entity.t
 
 (** {2 Export snippett} *)
 (** An export snippet is given by a couple [(language, text)].*)
+
 and export_snippet = string * string
 
 (** {2 Footnote reference} *)
 (** A footnote reference contains:
     - a name (optional)
     - a definition (optional) *)
+
 and footnote_reference = {
   name : string option;
   definition : t list option;
@@ -74,19 +76,24 @@ and footnote_reference = {
     - End header arguments.
     Cf org's doc for more information
 *)
+
 and inline_call = {
   program : string;
   arguments : (string * string) list;
   inside_headers : string option;
   end_headers : string option;
 }
+
 (** {2 Inline source block} *)
+
 and inline_source_block = {
   language: string;
   options: string option;
   code: string;
 }
+
 (** {2 Latex fragments} *)
+
 and latex_fragment = 
   | Math of string
   | Command of string * string
@@ -108,7 +115,9 @@ and link = {
   url: url;
   label: t list;
 }
+
 (** {2 Cookies} *)
+
 and stats_cookie = 
   | Percent of int
   | Absolute of int * int (** current, max *)
@@ -117,10 +126,19 @@ and stats_cookie =
 
 
 (** {2 Timestamps} *)
+
+and clock_item = 
+  | Started of Timestamp.t
+  | Stopped of Timestamp.range
+(** A clock item-- either stopped or 
+    started *)
+
 and timestamp = 
   | Scheduled of Timestamp.t
   | Deadline of Timestamp.t
   | Date of Timestamp.t
+  | Closed of Timestamp.t
+  | Clock of clock_item
   | Range of Timestamp.range
 
 (** {2 The type of inline contents} *)
