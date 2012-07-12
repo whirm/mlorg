@@ -108,10 +108,11 @@ module E = struct
       | Quote l ->
           [Xml.block "quote" (self#blocks l)]
       | With_Keywords (l, b) -> [Xml.block "with-keywords" ~attr: l (self#block b)]
-      | Example (_, l) ->
-          [Xml.block "example" [Xml.data (String.concat "\n" l)]]
+      | Example (line, l) ->
+          [Xml.block "example" ~attr: ["linenumber", string_of_int line]
+              [Xml.data (String.concat "\n" l)]]
       | Src (number, opts, lines) ->
-          [Xml.block "source" ~attr:["options", opts]
+          [Xml.block "source" ~attr:["options", opts; "linenumber", string_of_int number]
               [Xml.data (String.concat "\n" lines)]]
       | Custom (name, opt, contents) ->
           [Xml.block "custom" ~attr:["name", name; "options", opt]
