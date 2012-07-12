@@ -71,10 +71,10 @@ class ['a] folder = object(self)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines v i 
     | With_Keywords (_, t) -> self#block v t
     | Custom (_, _, t)
-    | Quote t -> self#blocks v t
+    | Drawer (_, t) | Quote t -> self#blocks v t
     | Table t -> 
         Array.fold_left (Array.fold_left self#inlines) v t.rows
-    | (Drawer _ | Property_Drawer _ | Src _ |
+    | (Property_Drawer _ | Src _ |
         Example _ | Math _ | Directive _) -> v
   method list_item v { contents } = self#blocks v contents
 end
@@ -91,11 +91,11 @@ class virtual ['a] bottomUp = object(self)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines i 
     | With_Keywords (_, t) -> self#block t
     | Custom (_, _, t)
-    | Quote t -> self#blocks t
+    | (Drawer (_, t) | Quote t) -> self#blocks t
     | Table t ->
         let f = self#combine -| Array.to_list in
         f (Array.map (f -| Array.map self#inlines) t.rows)
-    | (Drawer _ | Property_Drawer _ | Src _ |
+    | (Property_Drawer _ | Src _ |
         Example _ | Math _ | Directive _) -> self#bot
   method list_item { contents } = self#blocks contents
 end
