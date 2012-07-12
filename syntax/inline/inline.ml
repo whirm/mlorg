@@ -108,7 +108,8 @@ let rec run_parsers parsers string =
                       match t myself substring with
                         | None -> try_parsers q
                         | Some (r, cont) ->
-                            aux current (r @ push acc start current) cont
+                          let _, new_off, _ = Substring.base cont in
+                            aux new_off (r @ push acc start current) cont
           with _ -> try_parsers q
       in try_parsers parsers
   in aux 0 [] substring
