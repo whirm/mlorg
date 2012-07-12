@@ -127,7 +127,7 @@ let collect =
         | Timestamp (Scheduled t) -> { meta with scheduled = t :: meta.scheduled }
         | Timestamp (Deadline t) -> { meta with deadlines = t :: meta.deadlines }
         | Timestamp (Range t) -> { meta with ranges = t :: meta.ranges }
-        | Timestamp (Clock (Stopped t)) -> { meta with ranges = t :: meta.clocks }
+        | Timestamp (Clock (Stopped t)) -> { meta with clocks = t :: meta.clocks }
         | Timestamp (Clock (Started t)) -> { meta with current_clock = Some t }
         | Footnote_Reference ({name = Some name; definition = Some def}) ->
           { meta with footnotes = (name, def) :: meta.footnotes }
@@ -304,3 +304,8 @@ let current_clocked_item doc =
   end
   in o#document None doc
 
+let clocking_time h = 
+  List.fold_left (fun total n -> Printf.printf "%d\n" n; total + n)
+    (Option.map_default Timestamp.from_now 0  h.meta.current_clock)
+    (List.map Timestamp.duration h.meta.clocks)
+let current_clocking_time doc = Option.map clocking_time (current_clocked_item doc)

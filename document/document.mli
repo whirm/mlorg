@@ -116,3 +116,10 @@ val find_block_by_name : t -> string -> Block.t option
 
 
 val current_clocked_item : t -> heading option
+(** Returns the current clocked item of a document, if it exists *)
+
+val clocking_time : heading -> int
+(** Returns the total time (in seconds) the heading has been clocked *)
+
+val current_clocking_time : t -> int option
+(** Returns the clocking time of the currently clocked in entry *)
