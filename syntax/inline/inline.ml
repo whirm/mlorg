@@ -76,31 +76,45 @@ type parser = (string -> t list) -> Substring.t -> (t list * Substring.t) option
 let rec run_parsers parsers string =
   let substring = Substring.all string in
   let myself = run_parsers parsers in
-  let push acc chars = 
-    if chars = [] then acc
+  let push acc start stop = 
+    if stop = start then
+      acc
     else
-      let s = unescape (Substring.all (String.of_list (List.rev chars))) in
+      let s = unescape (Substring.substring string start (stop - start)) in
       Plain s :: acc
   in
-  let rec aux chars acc substring = 
+  let rec skip_until ?(k = 0) p s =
+    if k = Substring.length s || p (Substring.get s k) then k
+    else skip_until ~k:(k+1) p s
+  in
+  let skip_word s = 
+    let is_breaking = function
+      | ',' | '.' | ' ' | '\t' | '\n' -> true
+      | _ -> false
+    in
+    skip_until is_breaking ~k: (skip_until (not -| is_breaking) s) s
+  in
+  let rec aux start acc substring = 
+    let (_, current, _) = Substring.base substring in
     if Substring.is_empty substring then 
-      List.rev (push acc chars)
+      List.rev (push acc start current)
     else
       let rec try_parsers = function
         | [] -> 
-          aux (Substring.get substring 0 :: chars)
-            acc
-            (Substring.triml 1 substring)
-        | t :: q -> try match t myself substring with
-            | None -> try_parsers q
-            | Some (r, cont) ->
-              aux [] (r @ push acc chars) cont
+            let lg = skip_word substring in
+            aux start acc
+              (Substring.triml lg substring)
+        | t :: q -> try 
+                      match t myself substring with
+                        | None -> try_parsers q
+                        | Some (r, cont) ->
+                            aux current (r @ push acc start current) cont
           with _ -> try_parsers q
       in try_parsers parsers
-  in aux [] [] substring
+  in aux 0 [] substring
 
 (* The table of delimiters used to parse inline contents *)
-let delim_table = [('[', (']', false)); ('<', ('>', false));
+ let delim_table = [('[', (']', false)); ('<', ('>', false));
                    ('{', ('}', false)); ('(', (')', false));
                    ('*', ('*', true)); ('_', ('_', true));
                    ('~', ('~', true)); ('$', ('$', false)); 
