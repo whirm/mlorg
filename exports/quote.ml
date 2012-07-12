@@ -44,12 +44,12 @@ let _ = Quote.register (
     in 
     let () = Log.info "Compiling %s [%s]" filename command;
       if Sys.command command <> 0 then
-        (Log.fatal "Compiling failed."; failwith "Compilation failed") in
+        Log.fatal "Compiling failed." 
+    in
     let () = 
-      (try Dynlink.loadfile obj
-       with Dynlink.Error e ->
-         (Log.fatal "Error while loading %s: %s" obj (Dynlink.error_message e);
-          failwith "Cannot load module"))
+      try Dynlink.loadfile obj
+      with Dynlink.Error e ->
+        Log.fatal "Error while loading %s: %s" obj (Dynlink.error_message e)
     in
     !r document stdout
 
