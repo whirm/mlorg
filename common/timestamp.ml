@@ -146,3 +146,18 @@ let to_string ?(wday = [|"sun."; "mon."; "tue."; "wed"; "thu."; "wed."; "sat."|]
 let range_to_string {start; stop} = 
   Printf.sprintf "%s--%s" (to_string start) (to_string stop)
 
+let seconds_of_t t = 
+  to_tm t |> Unix.mktime |> fst
+
+let duration {start; stop} = 
+  truncate (seconds_of_t stop -. seconds_of_t start)
+
+
+let from_now t = 
+  duration { start = t; stop = from_tm (Unix.localtime (Unix.time ())) }
+
+let string_of_seconds n = 
+  let mins, secs = n / 60, n mod 60 in
+  let hours, mins = mins / 60, mins mod 60 in
+  Printf.sprintf "%02d:%02d" hours mins
+

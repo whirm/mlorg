@@ -87,3 +87,18 @@ val to_string : ?wday: string array -> t -> string
 
 val range_to_string : range -> string
 (** Converts a range to a string *)
+
+(** {3 Durations} *)
+
+val seconds_of_t : t -> float
+(* Returns the number of seconds denoted by a timestamp (since EPOCH) *)
+
+
+val duration : range -> int
+(** Returns the duration of a timestamp range, in seconds *)
+
+val from_now : t -> int
+(** [from_now t] return sthe number of seconds between now and [t] *)
+
+val string_of_seconds : int -> string
+(** Prettyprints a number of seconds *)
