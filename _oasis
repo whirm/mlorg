@@ -15,15 +15,15 @@ Library mlorg
   BuildTools:       ocamlbuild
 
 Executable mlorg
-  Path: .
-  MainIs: main.ml
+  Path:       .
+  MainIs:     main.ml
   BuildTools: ocamlbuild
 
-Executable mlorg
-  Path: .
-  MainIs: main.ml
+Executable "mlorg.opt"
+  Path:           .
+  MainIs:         main.ml
   CompiledObject: native
-  BuildTools: ocamlbuild
+  BuildTools:     ocamlbuild
 
 Document mlorg
   Title:                API reference for mlorg
