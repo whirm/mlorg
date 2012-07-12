@@ -7,7 +7,7 @@ type state = string list * string
 
 let is_start { line } = 
   try
-    Scanf.sscanf line " :%[^:]:!" (fun name -> Some ([], name))
+    Scanf.sscanf (String.trim line) ":%[^:]:%!" (fun name -> Some ([], name))
   with _ -> None
 
 
@@ -30,7 +30,7 @@ let interrupt (lines, name) parse =
   if name = "properties" || name = "PROPERTIES" then
     [Property_Drawer (parse_properties lines)]
   else
-    [Drawer (parse (List.enum lines))]
+    [Drawer (name, parse (List.enum lines))]
 
 let parse_line (lines, name) { line; parse } = 
   try Scanf.sscanf (String.trim line) " :%[^:]:" (fun name' ->

@@ -33,7 +33,7 @@ and t =
   | Example of int * string list
   | Src of int * string * string list
   | Custom of string * string * t list
-  | Drawer of t list
+  | Drawer of string * t list
   | Property_Drawer of (string * string) list
   | Footnote_Definition of string * Inline.t list
   | Table of table

@@ -117,7 +117,7 @@ module E = struct
       | Custom (name, opt, contents) ->
           [Xml.block "custom" ~attr:["name", name; "options", opt]
               (self#blocks contents)]
-      | Drawer c ->
+      | Drawer (name, c) ->
           [Xml.block "drawer" ~attr:["name", name]
               (self#blocks c)]
       | Property_Drawer _ -> []
