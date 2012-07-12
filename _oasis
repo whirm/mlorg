@@ -19,6 +19,12 @@ Executable mlorg
   MainIs: main.ml
   BuildTools: ocamlbuild
 
+Executable mlorg
+  Path: .
+  MainIs: main.ml
+  CompiledObject: native
+  BuildTools: ocamlbuild
+
 Document mlorg
   Title:                API reference for mlorg
   InstallDir:           $htmldir/mlorg
