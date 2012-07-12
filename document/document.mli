@@ -17,8 +17,12 @@ type meta = {
   (** The deadlines appearing in the heading *)
   footnotes  : (string * Inline.t list) list;
   (** The footnotes defined in that heading *)
-  properties : (string * string) list
+  properties : (string * string) list;
   (** The properties of that heading *)
+  clocks: Timestamp.range list;
+  (** The clocked amount of time *)
+  current_clock : Timestamp.t option;
+  (** The optional time when it was clocked *)
 }
 (** The metadata of a heading in a document. *)
 

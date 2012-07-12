@@ -18,6 +18,10 @@ type meta = {
   (** The footnotes defined in that heading *)
   properties : (string * string) list;
   (** The properties of the heading *)
+  clocks: Timestamp.range list;
+  (** The clocked amount of time *)
+  current_clock : Timestamp.t option;
+  (** The optional time when it was clocked *)
 }
 (** The metadata of a heading in a document. *)
 
@@ -106,7 +110,8 @@ end
 
 (** {1 Importing a tree} *)
 let empty_meta = {
-  timestamps = []; ranges = []; scheduled = []; deadlines = []; footnotes = []; properties = []
+  timestamps = []; ranges = []; scheduled = []; deadlines = []; footnotes = []; properties = [];
+  clocks = []; current_clock = None;
 }
 
 let collect = 

@@ -74,6 +74,9 @@ module E = struct
      | Timestamp (Deadline t) -> [Xml.block "deadline" [self#timestamp t]]
      | Timestamp (Date t) -> [Xml.block "date" [self#timestamp t]]
      | Timestamp (Range t) -> [Xml.block "range" [self#range t]]
+     | Timestamp (Closed t) -> [Xml.block "closed" [self#timestamp t]]
+     | Timestamp (Clock (Stopped t)) -> [Xml.block "clock" ~attr:["stopped", "true"] [self#range t]]
+     | Timestamp (Clock (Started t)) -> [Xml.block "clock" ~attr:["stopped", "false"] [self#timestamp t]]
      | Radio_Target s -> [Xml.block "radio-target" [Xml.data s]]
      | Verbatim s -> 
          [Xml.block "verbatim-inline" [Xml.data s]]
@@ -163,6 +166,10 @@ module E = struct
           mk_list "timestamps" self#timestamp d.meta.timestamps;
           mk_list "range" self#range d.meta.ranges;
           mk_list "footnotes" self#footnote d.meta.footnotes;
+          mk_list "clocks" self#range d.meta.clocks;
+          (match d.meta.current_clock with
+            | Some t -> Xml.block "current-clock" [self#timestamp t]
+            | None -> Xml.empty);
           mk_list "properties" self#property d.meta.properties] ::
           (self#blocks d.content
            @ concatmap self#heading d.children)
