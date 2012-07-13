@@ -155,6 +155,7 @@ and t =
   | Link of link
   | Macro of string * string list
   | Radio_Target of string
+  | Target of string
   | Subscript of t list
   | Superscript of t list
   | Verbatim of string

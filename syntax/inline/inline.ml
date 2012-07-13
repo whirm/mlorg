@@ -63,6 +63,7 @@ and t =
   | Link of link
   | Macro of string * string list
   | Radio_Target of string
+  | Target of string
   | Subscript of t list
   | Superscript of t list
   | Verbatim of string
@@ -279,6 +280,11 @@ let radio_target_parser _ rest =
   let contents, rest = inside_force ochev rest in
   let rest = see ">>" rest in
   Some ([Radio_Target contents], rest)
+let target_parser _ rest = 
+  let rest = see "<" rest in
+  let contents, rest = inside_force ochev rest in
+  let rest = see ">" rest in
+  Some ([Target contents], rest)
 
 (** {2 Verbatim parser} *)
 let verbatim_parser _ rest =
@@ -336,7 +342,7 @@ let timestamp_parser _ rest =
 let parse = run_parsers
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
-   inline_source_block_parser; latex_fragment_parser;
+   target_parser; inline_source_block_parser; latex_fragment_parser;
    break_line_parser; link_parser; link_inline_parser;
    macro_parser; radio_target_parser; verbatim_parser; subscript_parser;
    superscript_parser; statistics_cookie_parser; 
@@ -365,6 +371,7 @@ class ['a] mapper = object(self)
     | Inline_Call _
     | Inline_Source_Block _
     | Latex_Fragment _
+    | Target _
     | Break_Line 
     | Export_Snippet _ 
     | Entity _) as x -> x
@@ -389,6 +396,7 @@ class ['a] folder = object(self)
     | Plain _
     | Inline_Call _
     | Inline_Source_Block _
+    | Target _
     | Latex_Fragment _
     | Break_Line 
     | Export_Snippet _ 
@@ -419,6 +427,7 @@ class virtual ['a] bottomUp = object(self)
     | Inline_Source_Block _
     | Latex_Fragment _
     | Break_Line 
+    | Target _
     | Export_Snippet _ 
     | Entity _ -> self#bot
   method inlines = self#combine -| List.map self#inline
@@ -438,6 +447,7 @@ let rec ascii = function
   | Verbatim s -> s
   | Cookie _ -> ""
   | Timestamp _ -> ""
+  | Target s -> ""
   | Latex_Fragment (Math s)
   | Plain s -> s
   | Latex_Fragment (Command (s, s')) ->

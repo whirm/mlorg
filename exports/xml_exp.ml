@@ -67,6 +67,7 @@ module E = struct
           [Xml.block "link" ~attr: ["href", Inline.string_of_url url]
               (self#inlines label)]
      | Break_Line -> [Xml.block "break-line" []]
+     | Target s -> [Xml.block "target" [Xml.data s]]
      | Cookie (Percent k) -> [Xml.block "cookie" ~attr:["percent", string_of_int k] []]
      | Cookie (Absolute (k, k')) -> 
          [Xml.block "cookie" ~attr:["done", string_of_int k; "total", string_of_int k'] []]
