@@ -14,21 +14,23 @@ module E = struct
     let ocamlc = Config.add config "ocamlc" string "OCamlc command to use" 
       (Printf.sprintf "ocamlfind %s -package batteries,mlorg"
          (if Dynlink.is_native then "ocamlopt -shared" else "ocamlc -c"))
-    let code = Config.add config "name" string "Name of the codeblock to use to export" "export"
+    let block = Config.add config "block" string "Name of the codeblock to use to export" "export"
     let external_file = Config.add config "external-file" string "Optional name of the file to load" ""
+    let code = Config.add config "code" string "Optional code (as a string) to load" ""
     let config = Config.validate config
   end
     
   let write_ml_source fd lines file number = 
     Printf.fprintf fd
-"open Batteries
+"open Mlorg
+open Batteries
 open Printf
 open Block
 open Inline
 module D = Document
 module F = Filter
-let write s o = IO.nwrite o s
-let _ = Quote.register (
+let write = Printf.fprintf
+let _ = Backends.Quote.register (
 # %d %S 1
 %s
 )"
@@ -57,14 +59,15 @@ let _ = Quote.register (
     if get Meta.external_file <> "" then
       run (get Meta.ocamlc) (get Meta.external_file)
         (File.lines_of (get Meta.external_file) |> List.of_enum) 1 doc out
+    else if get Meta.code <> "" then
+      run (get Meta.ocamlc) "<user-entry>"
+        [get Meta.code] 1 doc out
     else
-      match Document.find_block_by_name doc (get Meta.code) with
-        | None -> Log.fatal "Block %s not found." (get Meta.code);
-            failwith "Block not found"
+      match Document.find_block_by_name doc (get Meta.block) with
+        | None -> Log.fatal "Block %s not found." (get Meta.block)
         | Some (Block.Src (number, _, lines)) ->
             run (get Meta.ocamlc) doc.filename lines number doc out
-        | _ -> Log.fatal "Block %s has wrong type" (get Meta.code);
-            failwith "Block has wrong type"
+        | _ -> Log.fatal "Block %s has wrong type" (get Meta.block)
           
   let default_filename _ = "-"
 end
