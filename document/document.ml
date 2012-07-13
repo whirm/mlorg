@@ -146,7 +146,8 @@ let gather_keywords doc =
               self#blocks () (With_Keywords (l @ l', b) :: q)
           | With_Keywords (l, Paragraph []) :: other :: q ->
               With_Keywords (l, other) :: self#blocks () q
-          | l -> super#blocks () l
+          | t :: q -> super#block () t :: self#blocks () q
+          | [] -> []
   end in
   gatherer#document () doc
 (* The following function takes a list of blocks, and returns
