@@ -1,7 +1,9 @@
 open Batteries
 open Document
+open Timestamp
 type t = Document.heading -> bool
 type string_matcher = string -> bool
+
 (** The type of a string matcher: a function matching strings *)
 
 let s s = (=) s
@@ -28,9 +30,17 @@ let rec under f =
     f h || (match h.father with
       | Some daddy -> under f daddy
       | None -> false)
-
+let marker f = fun h -> Option.map_default f false h.marker
 let name f =
   fun h -> f (Inline.asciis h.name)
+
+let scheduled t = 
+  fun h -> List.exists (fun t' -> t.date = t'.date) h.meta.scheduled
+let deadline t = 
+  fun h -> List.exists (fun t' -> t.date = t'.date) h.meta.deadlines
+let happens t = 
+  fun h -> List.exists (fun t' -> t.date = t'.date) h.meta.timestamps
+    || List.exists (fun r -> r.start.date < t.date && t.date < r.stop.date) h.meta.ranges
 
 let run_headings = List.filter
 let rec run_headings_sub f = function
@@ -42,3 +52,5 @@ let rec run_headings_sub f = function
     else l
 
 let run f d = run_headings_sub f d.headings
+let count f = run f |- List.length
+let count_headings f = run_headings f |- List.length
