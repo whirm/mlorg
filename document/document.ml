@@ -305,7 +305,7 @@ let current_clocked_item doc =
   in o#document None doc
 
 let clocking_time h = 
-  List.fold_left (fun total n -> Printf.printf "%d\n" n; total + n)
+  List.fold_left ( + )
     (Option.map_default Timestamp.from_now 0  h.meta.current_clock)
     (List.map Timestamp.duration h.meta.clocks)
 let current_clocking_time doc = Option.map clocking_time (current_clocked_item doc)
