@@ -162,6 +162,7 @@ module E = struct
       let mk_list name f l = if l = [] then Xml.empty
         else Xml.block name (List.map f l)
       in
+      let attr = ["level", string_of_int d.level] @ opt_attr "marker" d.marker in
       let children = Xml.block "meta"
         [Xml.block "name" (self#inlines d.name);
           mk_list "scheduled" self#timestamp d.meta.scheduled;
@@ -176,7 +177,7 @@ module E = struct
           mk_list "properties" self#property d.meta.properties] ::
           (self#blocks d.content
            @ concatmap self#heading d.children)
-      in [Xml.block "heading" children]
+      in [Xml.block "heading" ~attr children]
     method document d =
       [Xml.block "document" 
           ~attr: ["title", d.title; "author", d.author;
