@@ -161,3 +161,9 @@ let string_of_seconds n =
   let hours, mins = mins / 60, mins mod 60 in
   Printf.sprintf "%02d:%02d" hours mins
 
+
+let add_days t d = 
+  normalize { t with date = { t.date with day = t.date.day + d } }
+
+let today () = 
+  Unix.time () |> Unix.localtime |> from_tm

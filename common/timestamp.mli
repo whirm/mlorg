@@ -102,3 +102,9 @@ val from_now : t -> int
 
 val string_of_seconds : int -> string
 (** Prettyprints a number of seconds *)
+
+val add_days : t -> int -> t
+(** Adds some days to a date *)
+
+val today : unit -> t
+(** Returns the timestamp corresponding to today *)
