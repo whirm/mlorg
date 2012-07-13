@@ -11,6 +11,7 @@ let interrupt (lines, b) _ =
   [Math (String.concat "\n" (List.rev lines))]
         
 let handle_line (lines, _) line =
+  let line = String.trim line in
   if String.ends_with line "$$" then
     String.sub line 0 (String.length line - 2) :: lines, true
   else

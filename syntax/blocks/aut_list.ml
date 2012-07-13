@@ -96,8 +96,9 @@ let parse_line st { Automaton.line; Automaton.parse } =
   if line = "" then 
     if st.last_line_empty then Automaton.Done (interrupt st parse, false)
     else Automaton.Partial { st with last_line_empty = true }
-      
-  else match parse_first_line line with
+  else 
+    let st = { st with last_line_empty = false } in
+    match parse_first_line line with
     | None ->
       if String.starts_with line "  " then
         Automaton.Partial
