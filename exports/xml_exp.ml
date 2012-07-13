@@ -187,7 +187,7 @@ module E = struct
   let export _ doc out = 
     Xml.output out
       ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
-       "footnote-reference"; "inline-source"; "inline-call"]
+       "math-inline"; "footnote-reference"; "inline-source"; "inline-call"]
       ["paragraph"; "name"; "named-block"]
       []
       ["verbatim-inline"; "example"; "source"]
