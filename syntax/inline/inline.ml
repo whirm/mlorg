@@ -93,11 +93,8 @@ let rec run_parsers parsers string =
     else skip_until ~k:(k+1) p s
   in
   let skip_word s = 
-    let is_breaking = function
-      | ',' | '.' | ' ' | '\t' | '\n' -> true
-      | _ -> false
-    in
-    skip_until (not -| is_breaking) ~k: (skip_until is_breaking s) s
+    skip_until (fun c -> not (Char.is_whitespace c && Char.is_newline c)) s
+      ~k: (skip_until ~k:1 (fun c -> not (Char.is_latin1 c || Char.is_digit c)) s) 
   in
   let rec aux start acc substring = 
     let (_, current, _) = Substring.base substring in
@@ -329,7 +326,7 @@ let timestamp_parser _ rest =
     | "CLOCK:", rest -> 
         let a, rest = try_range (fun x -> Clock (Stopped x))
           (fun x -> Clock (Started x)) (Substring.triml 1 rest) in
-        a, snd (until (fun c -> c = '\n') rest)
+        a, Substring.trim (Substring.dropl ((<>) '\n') rest)
 
     | _ -> try_range (fun x -> Range x) (fun x -> Date x) rest
   in
