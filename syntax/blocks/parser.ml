@@ -67,9 +67,8 @@ In particular, note that parse_line returns a [return] of a modified type.
 
 let rec parse number list context lines = 
   let list = Automaton.sort list in
-  let myself ?linenumber x = 
-    let number = Option.default number linenumber in
-    parse number list context x
+  let myself () x = 
+    parse (ref !number) list context x
   in
   let rec aux blocks (previous, state) = 
     (* We distinguish cases depending on :
@@ -81,15 +80,15 @@ let rec parse number list context lines =
       | None, None -> List.rev blocks
   (* Second case : no input, but a running automaton. Interrupt it 
      and append the result to the accumulator *)
-      | None, Some st -> List.rev (interrupt st myself @ blocks)
+      | None, Some st -> List.rev (interrupt st (myself ()) @ blocks)
   (* A line, but no running automata. Use the {!faa} 
-     function to elect a new automaton, *if* the line is non-empty.
+     function to elect a new automaton, *if* the line is non-empty, or a comment
      Otherwise skip the line *)
       | Some line, None -> 
-        if line = "" then (incr number; aux blocks (previous, None))
+        if line = "" || String.starts_with line "# " then (incr number; aux blocks (previous, None))
         else
           (let input = { line; number = !number; context; 
-                         parse = myself } in
+                         parse = myself () } in
            let previous, state = faa input list in
            incr number;
            aux blocks (previous, Some state))
@@ -97,7 +96,7 @@ let rec parse number list context lines =
       (* A line, and a running automaton. Give it the line to eat, and act upon its return. *)
       | Some line, Some state ->
         let input = { line; number = !number; context; 
-                      parse = myself } in
+                      parse = myself () } in
         incr number;
         match parse_line state input with
           (* He's done. Whether he digested the line, make the proper modification on lines/number. *)
@@ -112,7 +111,7 @@ let rec parse number list context lines =
           | Automaton.Partial st' -> 
             try
               let previous', state' = faa input previous in
-              aux (interrupt state myself @ blocks) 
+              aux (interrupt state (myself ()) @ blocks) 
                 (previous', Some state')
             with _ ->
               aux blocks (previous, Some st')
@@ -121,7 +120,7 @@ let rec parse number list context lines =
     aux [] (list, None)
 
 
-let parse = parse (ref 0) [(module Aut_paragraph : Automaton.Automaton);
+let parse = parse (ref 1) [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_heading : Automaton.Automaton);
  (module Aut_list : Automaton.Automaton);
  (module Aut_directive : Automaton.Automaton);
