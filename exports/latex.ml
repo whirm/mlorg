@@ -89,6 +89,10 @@ $extraheader
           List.fold_left self#list_item () i;
           Printf.fprintf out "\\end{itemize}\n";
 
+        | Latex_Environment (name, opts, lines) ->
+            Printf.fprintf out "\\begin{%s}%s\n" name opts;
+            List.iter (Printf.fprintf out "%s\n") lines;
+            Printf.fprintf out "\\end{%s}\n" name
         | Math b ->
             Printf.fprintf out "$$%s$$\n" b
         | Custom (name, opts, l) ->
@@ -96,6 +100,13 @@ $extraheader
             (self#escape_inside opts);
           self#blocks () l;
           Printf.fprintf out "\\end{%s}\n" (self#escape_inside name)
+        | With_Keywords (l, Custom ("figure", opts, lines)) ->
+            Printf.fprintf out "\\begin{figure}%s\n\\centering" opts;
+          self#blocks () lines;
+            (try Printf.fprintf out "\\caption{%s}\n" (List.assoc "CAPTION" l)
+            with _ -> ());
+          Printf.fprintf out "\\end{figure}\n"
+            
         | x -> super#block () x
       method heading () d = 
         let command = List.nth (get sections) (d.level - 1) in
