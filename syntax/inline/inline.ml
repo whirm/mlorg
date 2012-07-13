@@ -326,11 +326,11 @@ let timestamp_parser _ rest =
     | "CLOCK:", rest -> 
         let a, rest = try_range (fun x -> Clock (Stopped x))
           (fun x -> Clock (Started x)) (Substring.triml 1 rest) in
-        a, Substring.trim (Substring.dropl ((<>) '\n') rest)
+        a, Substring.dropl ((<>) '\n') rest
 
     | _ -> try_range (fun x -> Range x) (fun x -> Date x) rest
   in
-  Some ([Timestamp timestamp], rest)
+  Some ([Timestamp timestamp], Substring.trim rest)
 
 
 let parse = run_parsers
