@@ -120,6 +120,9 @@ module E = struct
       | Custom (name, opt, contents) ->
           [Xml.block "custom" ~attr:["name", name; "options", opt]
               (self#blocks contents)]
+      | Latex_Environment (name, opts, contents) ->
+          [Xml.block "latex-environment" ~attr: ["name", name; "opts", opts]
+              [Xml.data (String.concat "\n" contents)]]
       | Drawer (name, c) ->
           [Xml.block "drawer" ~attr:["name", name]
               (self#blocks c)]

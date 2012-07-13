@@ -70,6 +70,12 @@ and t =
   #+begin_name opts
       DATA
   #+end *)
+  | Latex_Environment of string * string * string list
+      (** Latex environment. Of the form
+          \begin{foo}
+          bar
+          \end{foo}
+      *)
   | Drawer of string * t list
   (** A drawer *)
   | Property_Drawer of (string * string) list
