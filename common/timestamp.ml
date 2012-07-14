@@ -167,3 +167,19 @@ let add_days t d =
 
 let today () = 
   Unix.time () |> Unix.localtime |> from_tm
+
+let sub d d' = 
+  { year = d'.year - d.year;
+    month = d'.month - d.month;
+    day = d'.day - d.day }
+
+let covers arg source = match source.repetition with
+  | None -> source.date = arg.date
+  | Some repetition ->
+      if arg < source then false
+      else 
+        let sub = sub arg.date source.date in
+        (repetition.year = 0 ||sub.year mod repetition.year = 0)
+        && (repetition.month = 0 || sub.month mod repetition.month = 0)
+        && (repetition.day = 0 || sub.day mod repetition.day = 0)
+

@@ -108,3 +108,13 @@ val add_days : t -> int -> t
 
 val today : unit -> t
 (** Returns the timestamp corresponding to today *)
+
+val covers : t -> t -> bool
+(** [covers arg source] tells whether [arg] is covered by [source], meaning that
+
+    - If [source] has no repetition marker then [is_covered_by source arg] is
+    equivalent to [source.date = arg.date], ie. [source] and [date] happens on
+    the same day
+    - If [source has a repetition marker, then [is_covered_by source arg] is true
+    whenever [arg] happens on a day where [source] repeats (including [source.date = arg.date])
+*)

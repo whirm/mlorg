@@ -35,11 +35,11 @@ let name f =
   fun h -> f (Inline.asciis h.name)
 
 let scheduled t = 
-  fun h -> List.exists (fun t' -> t.date = t'.date) h.meta.scheduled
+  fun h -> List.exists (Timestamp.covers t) h.meta.scheduled
 let deadline t = 
-  fun h -> List.exists (fun t' -> t.date = t'.date) h.meta.deadlines
+  fun h -> List.exists (Timestamp.covers t) h.meta.deadlines
 let happens t = 
-  fun h -> List.exists (fun t' -> t.date = t'.date) h.meta.timestamps
+  fun h -> List.exists (Timestamp.covers t) h.meta.timestamps
     || List.exists (fun r -> r.start.date < t.date && t.date < r.stop.date) h.meta.ranges
 
 let run_headings = List.filter
