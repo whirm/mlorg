@@ -30,7 +30,7 @@ let is_start { line; number } =
   if Str.string_match re line 0 then
     let name = Str.matched_group 2 line 
     and options = try Str.matched_group 4 line with Not_found -> "" in
-    Some (number, [], name, options)
+    Some (number, [], name, String.trim options)
   else
     None
 
