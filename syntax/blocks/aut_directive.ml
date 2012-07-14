@@ -23,7 +23,7 @@ let interrupt (a, b) _ =
 (* To parse a string, we just check if it's empty. If so we are done. If not, we
    are partially done (can be interrupted). *)
 let parse_line st { line } = 
-  Done (interrupt st (), true)
+  Done (interrupt st (), false)
 
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line } = 
