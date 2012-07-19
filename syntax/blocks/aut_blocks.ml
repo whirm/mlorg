@@ -24,6 +24,9 @@ let parse_line (number, lines, name, opts) { line; parse } =
   else 
     Next (number, line :: lines, name, opts)
 
+let interrupt (number, _, name, _) _ =
+  Log.warning "Unterminated block %s started at line %d" name number
+
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line; number } = 
   let re = Str.regexp "#\\+\\(begin\\|BEGIN\\)_\\([^ ]+\\)\\( +\\(.+\\)\\)?" in
