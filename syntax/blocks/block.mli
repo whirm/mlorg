@@ -82,6 +82,8 @@ and t =
   (** A property drawer *)
   | Footnote_Definition of string * Inline.t list
   (** The definition of a footnote : name and contents *)
+  | Horizontal_Rule
+  (** Horizontal rule *)
   | Table of table
 
 (** {1 Mapper and folders} *)

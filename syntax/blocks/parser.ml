@@ -129,6 +129,7 @@ let parse = parse (ref 1) [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_blocks : Automaton.Automaton);
  (module Aut_table : Automaton.Automaton);
  (module Aut_latex_env : Automaton.Automaton);
- (module Aut_verbatim : Automaton.Automaton)
+ (module Aut_verbatim : Automaton.Automaton);
+ (module Aut_hr : Automaton.Automaton)
 ] Context.default
 

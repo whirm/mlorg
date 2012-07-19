@@ -151,9 +151,10 @@ module E = struct
           in    
           [Xml.block "table" ~attr: (opt_attr "format" t.format)
               (index :: groups :: contents)]
-      | Footnote_Definition (name, contents) ->
-          [Xml.block "footnote-definition" ~attr:["name", name]
-            (self#inlines contents)]
+     | Horizontal_Rule -> [Xml.block "horizontal-rule" []]
+     | Footnote_Definition (name, contents) ->
+       [Xml.block "footnote-definition" ~attr:["name", name]
+           (self#inlines contents)]
 
     method footnote (name, contents) = 
       Xml.block "footnote" ~attr: ["name", name] (self#inlines contents)
