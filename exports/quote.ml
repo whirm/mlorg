@@ -54,7 +54,7 @@ let _ = Backends.Quote.register (
         Log.fatal "Error while loading %s: %s" obj (Dynlink.error_message e)
     in
     Sys.remove filename; Sys.remove obj;
-    Sys.remove (change_ext "cmi" obj);-    Sys.remove filename; Sys.remove obj;
+    Sys.remove (change_ext "cmi" obj);
     !r document stdout
 
   let export { get } doc out = 
