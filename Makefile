@@ -15,5 +15,10 @@ web: README.html
 	mkdir -p $(WEBDESTDIR)
 	cp README.html $(WEBDESTDIR)/index.html
 
+testorg:
+	cat $(FILE) | mlorg --backend org > 1.org
+	cat 1.org | mlorg --backend org > 2.org
+	diff 1.org 2.org
+
 README.html: all README.org
 	./_build/mlorg --filename README.org --backend html

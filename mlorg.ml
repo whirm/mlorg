@@ -10,5 +10,6 @@ module Backends = struct
   module Quote = Quote
   module Latex = Latex
   module Xml = Xml_exp
+  module Org = Org
 end
 module Xml = Xml

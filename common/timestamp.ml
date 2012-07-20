@@ -91,12 +91,12 @@ let parse_substring s =
   if length s > 0 && (get s 0 = '[' || get s 0 = '<') then
       (match D.enclosing_delimiter s (get s 0) with
         | None -> None
-        | Some (parts, rest) ->
+        | Some (parts, rest) -> 
             match Prelude.words parts with
               | [] -> None
               | date_s :: rem_parts -> match parse_date date_s with
                   | None -> None
-                | Some date ->
+                  | Some date ->
                     let active = (get s 0 = '<') in
                     let timestamp = List.fold_left parse_timestamp_part
                       { null with date; active }
@@ -122,7 +122,7 @@ let parse_range s = Option.map (fun (a, b) -> a, BatSubstring.to_string b)
   (parse_range_substring (BatSubstring.all s))
 
 let date_to_string d = 
-  Printf.sprintf "%d-%2d-%02d" d.year d.month d.day
+  Printf.sprintf "%d-%02d-%02d" d.year d.month d.day
     
 let time_to_string t = 
   Printf.sprintf "%02d:%02d" t.hour t.min
@@ -137,9 +137,9 @@ let to_string ?(wday = [|"sun."; "mon."; "tue."; "wed"; "thu."; "wed."; "sat."|]
   Printf.sprintf "%c%s%c" 
     (if t.active then '<' else '[')
     ([Some (date_to_string t.date);
+      Some wday.(weekday t);
       Option.map time_to_string t.time; 
       Option.map repetition_to_string t.repetition;
-      Some wday.(weekday t)
      ] |> List.filter_map identity |> String.concat " ")
     (if t.active then '>' else ']')
     

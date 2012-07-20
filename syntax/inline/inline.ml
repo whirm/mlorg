@@ -260,7 +260,7 @@ let link_inline_parser _ rest =
   let rest = see "://" rest in
   let link, rest = until_space (fun x -> false) rest in
   Some ([Link {label = [Plain (protocol ^ "://" ^ link)];
-               url = Complex { protocol; link }}],
+               url = Complex { protocol; link = "//"^link }}],
         rest)
   
 (** {2 Macro parser} *)
@@ -316,10 +316,10 @@ let statistics_cookie_parser _ rest =
 (** {2 Timestamp parser} *)
 let timestamp_parser _ rest = 
   let handle f rest =
-    let rest = Substring.triml 1 rest in
-    (match Timestamp.parse_substring rest with
+    Printf.eprintf "Rest: '%s'\n" (Substring.to_string rest);
+    match Timestamp.parse_substring rest with
       | Some (a, rest) -> f a, rest
-      | None -> raise (Failure ""))
+      | None -> raise (Failure "")
   in
   let try_range f g rest = match Timestamp.parse_range_substring rest with
     | Some (a, rest) -> f a, rest
