@@ -90,12 +90,15 @@ let rec run_parsers parsers string =
       Plain s :: acc
   in
   let rec skip_until ?(k = 0) p s =
-    if k = Substring.length s || p (Substring.get s k) then k
+    if k >= Substring.length s || p (Substring.get s k) then k
     else skip_until ~k:(k+1) p s
   in
-  let skip_word s = 
-    skip_until (fun c -> not (Char.is_whitespace c && Char.is_newline c)) s
-      ~k: (skip_until ~k:1 (fun c -> not (Char.is_latin1 c || Char.is_digit c)) s) 
+  let rec skip_word s = 
+    if Substring.length s > 0 && Substring.get s 0 = '\\' then 
+      2+skip_word (Substring.triml 2 s)
+    else
+      skip_until (fun c -> not (Char.is_whitespace c && Char.is_newline c)) s
+        ~k: (skip_until ~k:1 (fun c -> not (Char.is_latin1 c || Char.is_digit c)) s) 
   in
   let rec aux start acc substring = 
     let (_, current, _) = Substring.base substring in

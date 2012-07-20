@@ -12,7 +12,11 @@ let rec is_escaped s k =
   && not (is_escaped s (k-1))
 let is_escaping s k = is_escaped s (k+1)
 let unescape ?(l = []) s = 
-  filteri (fun k -> not (is_escaping s k) ||  not (List.mem (BatSubstring.get s (k+1)) l))
+  let test k = 
+    l <> [] && k < BatSubstring.length s - 1 && 
+      not (List.mem (BatSubstring.get s (k+1)) l)
+  in
+  filteri (fun k -> not (is_escaping s k) || test k)
     (BatSubstring.to_string s)
 
 
