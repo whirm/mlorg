@@ -1,3 +1,4 @@
+open Prelude
 open Batteries
 module type SerializableType = sig
   type t
@@ -186,6 +187,13 @@ let prettyprint out config =
   Hashtbl.iter
     (fun _ i ->
       let module I = (val i : Item) in
-      Printf.fprintf out "%s (default: %s) -- %s\n" I.name
-        (I.T.show I.default) I.description)
+      let s = I.T.show I.default in
+      let l = lines s in
+      if List.length l <= 1 then
+        Printf.fprintf out "%s [type:%s] (default: %s) -- %s\n" I.name
+          I.T.description s I.description
+      else
+        Printf.fprintf out "%s [type:%s] -- %s. Default value:\n%s\n"
+          I.name I.T.description I.description
+          (String.concat "\n" (List.map ((^) "  ") l)))
     config

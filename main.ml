@@ -37,13 +37,13 @@ let add_opt s = try
   opts := (a, b) :: !opts
   with Not_found -> Log.warning "%s: invalid option (should be: var=value)" s
 
-let _ = Plugin.eprint_config_descr ()
 let _ = if not !Sys.interactive then (
   let open Arg in
       parse ["--filename", Set_string filename, "Filename to convert (default: stdin)";
              "--output", Set_string output, "Output file";
              "--set", String add_opt, "Set an option (of the form foo=bar)";
-             "--backend", Set_string backend, "Output backend"]
+             "--possible-options", Unit (fun () -> Plugin.eprint_config_descr (); exit 0), "Describe possible options of backends";
+              "--backend", Set_string backend, "Output backend"]
       (fun _ -> ()) "mlorg";
       generate !filename !backend !output (Plugin.global_config !opts)
 )
