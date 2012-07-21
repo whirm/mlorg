@@ -26,7 +26,6 @@ $extraheader
 \\author{$author}
 \\begin{document}
 \\maketitle
-\\tableofcontents
 "
     let footer = add config "footer" string "The LaTeX footer"
 "\\end{document}"
@@ -39,7 +38,13 @@ $extraheader
   end
   open Meta
   let assoc l s = try List.assoc s l with _ -> ""
+  let link s =
+    let map_char = function 
+      | ('a'..'z' | 'A'..'Z' | '0' .. '9') as c -> String.of_char c
+      | ' ' | '_' -> "_" | c -> Printf.sprintf "-%x-" (int_of_char c)
+    in String.to_list s |> List.map map_char  |> String.concat ""
   let export { get } doc out = 
+    let toc = Toc.gather doc in
     let o = object(self)
       inherit [unit] Document.folder as super
 
@@ -76,6 +81,20 @@ $extraheader
           Printf.fprintf out "\\%s{%s}" name (self#escape_inside option)
         | Verbatim s -> 
           Printf.fprintf out "\\texttt{%s}" (escape ["}"] s)
+        | Target s ->
+          Printf.fprintf out "\\label{%s}" (link s)
+        | Link {url; label} ->
+            (match url, label with
+              | Search title, _ ->
+                  if Toc.mem title toc then
+                    Printf.fprintf out "\\ref{sec:%s}" (link title)
+                  else
+                    Printf.fprintf out "\\ref{%s}" title
+              | _, label ->
+                  Printf.fprintf out "\\hyperref[%s]{"
+                    (Inline.string_of_url url);
+                  self#inlines () label;
+                  Printf.fprintf out "}")
         | x -> super#inline () x
       method list_item () i = (match i.number with
         | Some c -> Printf.fprintf out "  \\item[%s] " c
@@ -95,6 +114,8 @@ $extraheader
             Printf.fprintf out "\\end{%s}\n" name
         | Math b ->
             Printf.fprintf out "$$%s$$\n" b
+        | Custom ("tableofcontents", _, _) ->
+            Printf.fprintf out "\\tableofcontents\n"
         | Custom (name, opts, l) ->
           Printf.fprintf out "\\begin{%s}{%s}\n" (self#escape_inside name)
             (self#escape_inside opts);
@@ -112,7 +133,7 @@ $extraheader
         let command = List.nth (get sections) (d.level - 1) in
         Printf.fprintf out "\\%s{" command;
         self#inlines () d.name;
-        Printf.fprintf out "}\n";
+        Printf.fprintf out "}\\label{sec:%s}\n" (link (Inline.asciis d.name));
         self#blocks () d.content;
         List.iter (self#heading ()) d.children
       method document () d = 
