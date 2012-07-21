@@ -47,3 +47,5 @@ end
 
 val global_config : (string * string) list -> Config.instance
   
+val eprint_config_descr : unit -> unit
+(** Prints on stderr the description of all the configuration items *)

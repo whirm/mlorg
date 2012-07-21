@@ -54,13 +54,15 @@ module Exporters = struct
 
   let find n = data (find n (get ()))
   let add = push
-  let config = Config.concat (List.map (fun e -> name e, config e) (get ()))
+  let config () = Config.concat (List.map (fun e -> name e, config e) (get ()))
 end
 
+let get_global_interface () =
+  Config.concat
+    ["exporters", Exporters.config ()]
 
 let global_config parameters = 
-  let config = Config.concat
-    ["exporters", Exporters.config]
-  in
-  Config.make (Config.validate config) parameters
+  Config.make (get_global_interface ()) parameters
   
+let eprint_config_descr = 
+  get_global_interface |- Config.prettyprint stderr

@@ -107,63 +107,72 @@ module type Item = sig
   module T : SerializableType with type t = t
   val name : string
   val description : string
+  val index : int
   val default : t
   val tmp : t ref
-  val index: int
 end
 type 'a item = (module Item with type t = 'a)
-type t = (module Item) list ref
-type interface = (module Item) array
+type t = (int, (module Item)) Hashtbl.t
 
 type instance = 
     {get : 'a. 'a item -> 'a}
 
-let create () = ref []
+let create () = Hashtbl.create 8
+let counter = ref 0
 let add (type u) config name (typ : u serializable) description default = 
   let module I = struct
     type t = u
     module T = (val typ : SerializableType with type t = u)
     let name = name and description = description
+    let index = !counter
     and default = default and tmp = ref default
-    let index = List.length !config
   end in
-  config := (module I : Item) :: !config;
+  incr counter;
+  Hashtbl.add config I.index (module I : Item);
   (module I : Item with type t = u)
     
 let concat configs = 
-  let counter = ref (-1) in
-  ref (
-    List.map (fun (name, config) ->
-      List.map (fun i ->
-        let module I = (val i : Item) in
-        incr counter;
-        let module I'= struct
-          include I
-          let index = !counter
-          let name = name ^ "." ^ I.name
-        end
-        in (module I' : Item))
-        !config)
-      configs |> List.concat
-  )
-let validate t = Array.of_list (List.rev !t)
+  let lg = List.fold_left ( + ) 0 (List.map (snd |- Hashtbl.length) configs) in
+  let result = Hashtbl.create lg in
+  List.iter (fun (plugin, config) ->
+    Hashtbl.iter (fun _ i ->
+      let module I = (val i : Item) in
+      let new_name = plugin ^ "." ^ I.name in
+      let module I'= struct
+        include I
+        let name = new_name
+      end
+      in
+      Hashtbl.add result I.index (module I' : Item))
+      config) configs;
+  result
+
 (* this takes a config and a list of string * string 
    an existing instance, and create a composed instance *)
+
 let append config list instance = 
-  let array = Array.init
-    (Array.length config)
-    (fun k ->
-      let module I = (val config.(k) : Item) in
-      let v, b = try Option.get (I.T.read (List.assoc I.name list)), true
-        with _ -> I.default, false in
-      fun () -> I.tmp := v; b)
+  let hashtbl = Hashtbl.create (Hashtbl.length config) in
+  let () = Hashtbl.iter (fun _ i ->
+    let module I = (val i : Item) in
+    let v, b = 
+      try 
+        Option.get (I.T.read (List.assoc I.name list)), true
+      with 
+        | Not_found -> I.default, false 
+        | _ -> Log.warning "Value %s is invalid for configuration item %s"
+            (List.assoc I.name list) I.name;
+            I.default, false
+    in
+    Hashtbl.add hashtbl I.index (fun () -> I.tmp := v; b))
+    config
   in
   {get = fun (type u) item ->
     let module I = (val item : Item with type t = u) in
-    if array.(I.index) () then
+    if Hashtbl.find hashtbl I.index () then
       !I.tmp
     else
-      instance.get item}
+      instance.get item
+  }
     
 let make config list = append config list
   {get = (fun (type u) i ->
@@ -172,3 +181,11 @@ let make config list = append config list
   }
 let from_comma config s = parse_comma s |> make config
       
+
+let prettyprint out config = 
+  Hashtbl.iter
+    (fun _ i ->
+      let module I = (val i : Item) in
+      Printf.fprintf out "%s (default: %s) -- %s\n" I.name
+        (I.T.show I.default) I.description)
+    config

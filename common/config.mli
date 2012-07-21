@@ -75,18 +75,12 @@ type 'a item
 type t
 (** A configuration, describing a list of entry *)
 
-type interface
-(** A set of configuration entry. It is definitive, you cannot add anything to it *)
-
 val create : unit -> t
 (** Creates an empty configuration *)
 
 val add : t -> string -> 'a serializable -> string -> 'a -> 'a item
 (** [add config name serial description default] adds a new item composed with
     the arguments in the configuration [config]. It returns the created item *)
-
-val validate : t -> interface
-(** [validateconfiguration] validates [configuration] and turns it into a proper interface *)
 
 val concat : (string * t) list -> t
 (** Concat many configs in one. Takes a name-indexed list of configurations and
@@ -96,11 +90,11 @@ val concat : (string * t) list -> t
 type instance = {get : 'a. 'a item -> 'a}
 (** An instance of a configuration -- defining a value of a finite number of item *)
 
-val make : interface -> (string * string) list -> instance
-(** Make an instance out of an interface and a few defined values *)
+val make : t -> (string * string) list -> instance
+(** Make an instance out of an t and a few defined values *)
 
-val append : interface -> (string * string) list -> (instance -> instance)
-(** [append interface values instance] will create a new instance which will be defined on values
+val append : t -> (string * string) list -> (instance -> instance)
+(** [append t values instance] will create a new instance which will be defined on values
     of [instance] and on values appearing in [values] *)
 
 (** {2 Parsing strings} *)
@@ -108,6 +102,8 @@ val append : interface -> (string * string) list -> (instance -> instance)
 val parse_comma : string -> (string * string) list
 (** Parse a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
 
-val from_comma : interface -> string -> instance
+val from_comma : t -> string -> instance
 (** Make an instance out of a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
 
+val prettyprint : 'a BatIO.output -> t -> unit
+(** Prettyprint a configuration *)

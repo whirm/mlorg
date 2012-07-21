@@ -37,6 +37,7 @@ let add_opt s = try
   opts := (a, b) :: !opts
   with Not_found -> Log.warning "%s: invalid option (should be: var=value)" s
 
+let _ = Plugin.eprint_config_descr ()
 let _ = if not !Sys.interactive then (
   let open Arg in
       parse ["--filename", Set_string filename, "Filename to convert (default: stdin)";
