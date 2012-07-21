@@ -4,17 +4,15 @@ open Batteries
 open Inline
 open Block
 open Document
-open Modules
+open Plugin
 open Config
-
 module E = struct
-  module Meta = struct
-    let name = "latex"
-    let config = Config.create ()
-    let classname = 
-      add config "classname" string "The LaTeX class name to use" "article"
-    let header = add config "header" string
-      "The LaTeX header. You can use the following variables in it:
+  let name = "latex"
+  let config = Config.create ()
+  let classname = 
+    add config "classname" string "The LaTeX class name to use" "article"
+  let header = add config "header" string
+    "The LaTeX header. You can use the following variables in it:
 - classname: the class name chosen for this document
 - packages: the list of packages to be loaded (formatted)
 - extraheader: user's extra header
@@ -27,16 +25,14 @@ $extraheader
 \\begin{document}
 \\maketitle
 "
-    let footer = add config "footer" string "The LaTeX footer"
-"\\end{document}"
-    let extraheader = add config "extraheader" string "Extra LaTeX header" ""
+  let footer = add config "footer" string "The LaTeX footer"
+    "\\end{document}"
+  let extraheader = add config "extraheader" string "Extra LaTeX header" ""
+    
+  let sections = add config "sections" (list string)
+    "The name of the sections"
+    ["section"; "subsection"; "subsubsection"; "paragraph"; "subparagraph"]
 
-    let sections = add config "sections" (list string)
-      "The name of the sections"
-      ["section"; "subsection"; "subsubsection"; "paragraph"; "subparagraph"]
-    let config = Config.validate config
-  end
-  open Meta
   let assoc l s = try List.assoc s l with _ -> ""
   let link s =
     let map_char = function 
@@ -143,7 +139,9 @@ $extraheader
     end
     in o#document () doc
 
-  let default_filename = change_ext "tex"
+  module D = struct let export = export and default_filename = change_ext "ext" end
+  type interface = exporter
+  let data = (module D : Exporter)
 end
 
-let _ = Modules.Exporters.add (module E : Exporters.Signature)        
+let _ = Exporters.add (module E : Plugin with type interface = exporter)        

@@ -72,30 +72,32 @@ val list : 'a serializable -> 'a list serializable
 type 'a item
 (** An item, that is a configuration entry *)
 
-type preconfiguration
-(** A preconfiguration -- something you can add items to. *)
+type t
+(** A configuration, describing a list of entry *)
 
 type interface
 (** A set of configuration entry. It is definitive, you cannot add anything to it *)
 
-type t = interface
-(** Short-hand for interfaces *)
+val create : unit -> t
+(** Creates an empty configuration *)
 
-val create : unit -> preconfiguration
-(** Creates an empty preconfiguration *)
-
-val add : preconfiguration -> string -> 'a serializable -> string -> 'a -> 'a item
+val add : t -> string -> 'a serializable -> string -> 'a -> 'a item
 (** [add config name serial description default] adds a new item composed with
     the arguments in the configuration [config]. It returns the created item *)
 
-val validate : preconfiguration -> interface
-(** [validate preconfiguration] validates [preconfiguration] and turns it into a proper interface *)
+val validate : t -> interface
+(** [validateconfiguration] validates [configuration] and turns it into a proper interface *)
 
+val concat : (string * t) list -> t
+(** Concat many configs in one. Takes a name-indexed list of configurations and
+    returns a configuration where item names have been prefixed by the name of
+    the parent configuration with a dot between them.
+*)
 type instance = {get : 'a. 'a item -> 'a}
 (** An instance of a configuration -- defining a value of a finite number of item *)
 
-val make : t -> (string * string) list -> instance
-(** Make an instance out of a configuration and a few defined values *)
+val make : interface -> (string * string) list -> instance
+(** Make an instance out of an interface and a few defined values *)
 
 val append : interface -> (string * string) list -> (instance -> instance)
 (** [append interface values instance] will create a new instance which will be defined on values

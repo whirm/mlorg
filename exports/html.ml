@@ -4,20 +4,16 @@ open Batteries
 open Inline
 open Block
 open Document
-open Modules
+open Plugin
 open Config
 open Xml
 module E = struct
-  module Meta = struct
-    let name = "html"
-    let config = Config.create ()
-    let encoding = Config.add config "encoding" string "The document's encoding" "utf-8"
-    let full = Config.add config "wrap" boolean "Shall the output be a full html document ?" true
-    let style = Config.add config "style" string "The stylesheet to use" "style.css"
-    let config = Config.validate config
-  end
-  open Meta
-
+  let name = "html"
+  let config = Config.create ()
+  let encoding = Config.add config "encoding" string "The document's encoding" "utf-8"
+  let full = Config.add config "wrap" boolean "Shall the output be a full html document ?" true
+  let style = Config.add config "style" string "The stylesheet to use" "style.css"
+  type interface = exporter
   let concatmap f l = List.concat (List.map f l)
   let assoc l s = try List.assoc s l with _ -> ""
   class htmlExporter { get } = object(self)
@@ -92,7 +88,10 @@ module E = struct
        Xml.output_xhtml out [o#wrap doc (o#document doc)])
     else
       Xml.output_xhtml out (o#document doc)
-  let export c = with_custom_exporter (new htmlExporter c) c
-  let default_filename = change_ext "html"
+  module E = struct
+    let export c = with_custom_exporter (new htmlExporter c) c
+    let default_filename = change_ext "html"
+  end
+  let data = (module E : Exporter)
 end
-let _ = Modules.Exporters.add (module E : Exporters.Signature)        
+let _ = Plugin.Exporters.add (module E : Plugin with type interface = exporter)

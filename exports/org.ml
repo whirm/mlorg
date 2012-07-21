@@ -6,14 +6,11 @@ open Batteries
 open Inline
 open Block
 open Document
-open Modules
+open Plugin
 open Config
 module E = struct
-  module Meta = struct
-    let name = "org"
-    let config = Config.create ()
-    let config = Config.validate config
-  end
+  let name = "org"
+  let config = Config.create ()
     
   class orgExporter out = 
     let indent_level = ref 0 in
@@ -187,9 +184,13 @@ module E = struct
                   "filename", d.filename]
           (self#blocks d.beginning @
              concatmap self#heading d.headings)]*)
+    end
+  module Exp = struct
+    let export _ doc out = 
+      (new orgExporter out)#document doc
+    let default_filename = change_ext "org"
   end
-  let export _ doc out = 
-    (new orgExporter out)#document doc
-  let default_filename = change_ext "org"
+  type interface = exporter
+  let data = (module Exp : Exporter)
 end
-let _ = Modules.Exporters.add (module E : Exporters.Signature)        
+let _ = Exporters.add (module E : Plugin with type interface = exporter)        

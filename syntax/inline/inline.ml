@@ -316,7 +316,6 @@ let statistics_cookie_parser _ rest =
 (** {2 Timestamp parser} *)
 let timestamp_parser _ rest = 
   let handle f rest =
-    Printf.eprintf "Rest: '%s'\n" (Substring.to_string rest);
     match Timestamp.parse_substring rest with
       | Some (a, rest) -> f a, rest
       | None -> raise (Failure "")

@@ -5,16 +5,12 @@ open Batteries
 open Inline
 open Block
 open Document
-open Modules
+open Plugin
 open Config
 open Xml
 module E = struct
-  module Meta = struct
-    let name = "xml"
-    let config = Config.create ()
-    let config = Config.validate config
-  end
-  open Meta
+  let name = "xml"
+  let config = Config.create ()
 
   let concatmap f l = List.concat (List.map f l)
   let assoc l s = try List.assoc s l with _ -> ""
@@ -187,14 +183,18 @@ module E = struct
           (self#blocks d.beginning @
              concatmap self#heading d.headings)]
   end
-  let export _ doc out = 
-    Xml.output out
-      ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
-       "math-inline"; "footnote-reference"; "inline-source"; "inline-call"]
-      ["paragraph"; "name"; "named-block"]
-      []
-      ["verbatim-inline"; "example"; "source"]
-      ((new xmlExporter)#document doc)
-  let default_filename = change_ext "xml"
+  module D = struct
+    let export _ doc out = 
+      Xml.output out
+        ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
+         "math-inline"; "footnote-reference"; "inline-source"; "inline-call"]
+        ["paragraph"; "name"; "named-block"]
+        []
+        ["verbatim-inline"; "example"; "source"]
+        ((new xmlExporter)#document doc)
+    let default_filename = change_ext "xml"
+  end
+  type interface = exporter
+  let data = (module D : Exporter)
 end
-let _ = Modules.Exporters.add (module E : Exporters.Signature)        
+let _ = Exporters.add (module E : Plugin with type interface = exporter)

@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: b4e04e5ef35a8cc9d7ef1f69b4fdd3b3)
+# DO NOT EDIT (digest: 98205f51704f2594454844248db93aa3)
 Mlorg
 common/Prelude
 common/Log
@@ -25,7 +25,6 @@ syntax/blocks/Aut_verbatim
 syntax/blocks/Parser
 document/Document
 document/Filter
-document/Modules
 exports/Xml
 exports/Html
 exports/Latex

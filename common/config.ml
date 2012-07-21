@@ -112,9 +112,8 @@ module type Item = sig
   val index: int
 end
 type 'a item = (module Item with type t = 'a)
-type preconfiguration = (module Item) list ref
-type t = (module Item) array
-type interface = t
+type t = (module Item) list ref
+type interface = (module Item) array
 
 type instance = 
     {get : 'a. 'a item -> 'a}
@@ -131,7 +130,22 @@ let add (type u) config name (typ : u serializable) description default =
   config := (module I : Item) :: !config;
   (module I : Item with type t = u)
     
-
+let concat configs = 
+  let counter = ref (-1) in
+  ref (
+    List.map (fun (name, config) ->
+      List.map (fun i ->
+        let module I = (val i : Item) in
+        incr counter;
+        let module I'= struct
+          include I
+          let index = !counter
+          let name = name ^ "." ^ I.name
+        end
+        in (module I' : Item))
+        !config)
+      configs |> List.concat
+  )
 let validate t = Array.of_list (List.rev !t)
 (* this takes a config and a list of string * string 
    an existing instance, and create a composed instance *)
