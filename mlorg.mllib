@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 486dda1f6d6277b0be3c1a336e78d4df)
+# DO NOT EDIT (digest: 83d0b5699da5a476f3c5b88daa1a560e)
 Mlorg
 common/Prelude
 common/Log
@@ -28,7 +28,7 @@ syntax/blocks/Parser
 document/Document
 document/Filter
 document/Plugin
-exports/Toc
+plugins/Toc
 exports/Org
 exports/Xml
 exports/Html
