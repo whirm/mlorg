@@ -47,15 +47,21 @@ module E = struct
       | Link {url; label} ->
           let href = Inline.string_of_url url in
           if List.exists (String.ends_with href) (get image_extensions) then
-            [Xml.block "img" ~attr: ["src", href;
-                                     "title", Inline.asciis label] []]
+            let opts, href = 
+              print_endline href;
+              try let (Complex {protocol; link}) = url in
+                  Scanf.sscanf protocol "depth-%d" 
+                    (fun n -> ["style", Printf.sprintf "vertical-align: -%dpx" n], link)
+              with _ -> [], href
+            in
+            [Xml.block "img" ~attr: (opts @
+                                       ["src", href;
+                                        "title", Inline.asciis label]) []]
           else
             [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
                 (self#inlines label)]
       | Verbatim s -> 
           [Xml.block "code" [Xml.data s]]
-      | Latex_Fragment (Inline.Math s) ->
-          [Xml.block "img" ~attr:["src", Math2png.math2png conf ("$"^s^"$")] []]
       | x -> super#inline x
     method list_item x = 
       let contents = match x.contents with
@@ -75,17 +81,6 @@ module E = struct
           [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
       | Quote l ->
           [Xml.block "blockquote" (self#blocks l)]
-      | Math b ->
-          [Xml.block "img" ~attr:["style", "align=center";
-                                  "src", Math2png.math2png conf ("$$"^b^"$$");
-                                  "title", b] []]
-      | Latex_Environment (name, opts, lines) ->
-          let source = Printf.sprintf "\\begin{%s}%s\n%s\n\\end{%s}"
-            name opts (String.concat "\n" lines) name
-          in
-          [Xml.block "img" ~attr:["style", "align=center";
-                                  "src", Math2png.math2png conf source;
-                                  "title", source] []]
       | x -> super#block x
     method heading d = 
       (Xml.block (Printf.sprintf "h%d" d.level)
