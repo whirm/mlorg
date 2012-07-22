@@ -45,6 +45,17 @@ module Exporters : sig
   val run : exporter -> Config.instance -> Document.t -> unit BatIO.output -> unit
 end
 
+(** {3 General purpose plugin} *)
+module General : sig
+  val add : unit plugin -> unit
+end
+
+(** {3 Global item configuration} *)
+module Global : sig
+  val verbose : int Config.item
+end
+
+(** {2 Configuration management} *)
 val global_config : (string * string) list -> Config.instance
   
 val eprint_config_descr : unit -> unit

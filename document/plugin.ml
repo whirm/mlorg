@@ -57,9 +57,27 @@ module Exporters = struct
   let config () = Config.concat (List.map (fun e -> name e, config e) (get ()))
 end
 
+module General = struct
+  include ExtList.Make (struct
+    type t = unit plugin
+    let base = []
+  end)
+  let add = push
+  let config () = Config.concat (List.map (fun e -> name e, config e) (get ()))
+end
+
+module Global = struct
+  open Config
+  let config = Config.create ()
+  let verbose = Config.add config "verbose" int "Verbosity level" 0
+end
 let get_global_interface () =
   Config.concat
-    ["exporters", Exporters.config ()]
+    [
+      "exporters", Exporters.config ();
+      "general", General.config ();
+      "mlorg", Global.config
+    ]
 
 let global_config parameters = 
   Config.make (get_global_interface ()) parameters
