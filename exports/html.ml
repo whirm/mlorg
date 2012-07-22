@@ -13,10 +13,13 @@ module E = struct
   let encoding = Config.add config "encoding" string "The document's encoding" "utf-8"
   let full = Config.add config "wrap" boolean "Shall the output be a full html document ?" true
   let style = Config.add config "style" string "The stylesheet to use" "style.css"
+  let use_math2png =  Config.add config "use-math2png" boolean "Convert latex formulas to PNG using Math2png extension" true
+  let image_extensions = Config.add config "image-extensions" (list string) "The list of extensions to be considered as images"
+    [".png"; ".jpg"; ".jpeg"; ".gif"; ".bmp"]
   type interface = exporter
   let concatmap f l = List.concat (List.map f l)
   let assoc l s = try List.assoc s l with _ -> ""
-  class htmlExporter { get } = object(self)
+  class htmlExporter ({ get } as conf) = object(self)
     inherit [Xml.t list] Document.bottomUp as super
     method bot = []
     method combine = List.concat
@@ -42,10 +45,17 @@ module E = struct
           [Xml.data e.html]
       | Latex_Fragment (Inline.Math s) -> [Xml.data ("\\("^s^"\\)")]
       | Link {url; label} ->
-          [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
-              (self#inlines label)]
+          let href = Inline.string_of_url url in
+          if List.exists (String.ends_with href) (get image_extensions) then
+            [Xml.block "img" ~attr: ["src", href;
+                                     "title", Inline.asciis label] []]
+          else
+            [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
+                (self#inlines label)]
       | Verbatim s -> 
           [Xml.block "code" [Xml.data s]]
+      | Latex_Fragment (Inline.Math s) ->
+          [Xml.block "img" ~attr:["src", Math2png.math2png conf ("$"^s^"$")] []]
       | x -> super#inline x
     method list_item x = 
       let contents = match x.contents with
@@ -65,6 +75,17 @@ module E = struct
           [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
       | Quote l ->
           [Xml.block "blockquote" (self#blocks l)]
+      | Math b ->
+          [Xml.block "img" ~attr:["style", "align=center";
+                                  "src", Math2png.math2png conf ("$$"^b^"$$");
+                                  "title", b] []]
+      | Latex_Environment (name, opts, lines) ->
+          let source = Printf.sprintf "\\begin{%s}%s\n%s\n\\end{%s}"
+            name opts (String.concat "\n" lines) name
+          in
+          [Xml.block "img" ~attr:["style", "align=center";
+                                  "src", Math2png.math2png conf source;
+                                  "title", source] []]
       | x -> super#block x
     method heading d = 
       (Xml.block (Printf.sprintf "h%d" d.level)
@@ -83,6 +104,9 @@ module E = struct
   let doctype = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
 
   let with_custom_exporter o { get } doc out = 
+    let doc = if get use_math2png then Math2png.transform { get } doc 
+      else doc
+    in
     if get full then
       (IO.nwrite out doctype;
        Xml.output_xhtml out [o#wrap doc (o#document doc)])

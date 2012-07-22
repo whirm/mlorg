@@ -39,25 +39,29 @@ $extraheader
       | ('a'..'z' | 'A'..'Z' | '0' .. '9') as c -> String.of_char c
       | ' ' | '_' -> "_" | c -> Printf.sprintf "-%x-" (int_of_char c)
     in String.to_list s |> List.map map_char  |> String.concat ""
+
+  let escape_inside s = s
+  let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"]
+  let write_header { get } out doc =
+    let vars = ["classname", escape_inside (get classname);
+                "packages", "";
+                "extraheader", get extraheader;
+                "title", escape_inside doc.title;
+                "author", escape_inside doc.author;
+               ]
+    in
+    IO.nwrite out (substitute (assoc vars) (get header))
+
   let export { get } doc out = 
     let toc = Toc.gather doc in
     let o = object(self)
       inherit [unit] Document.folder as super
 
-      method escape_inside s = s
-      method escape = escape ["}"; "{"; "$"; "\\"; "["; "]"]
-      method header () = 
-        let vars = ["classname", self#escape_inside (get classname);
-                    "packages", "";
-                    "extraheader", get extraheader;
-                    "title", self#escape_inside doc.title;
-                    "author", self#escape_inside doc.author;
-                   ] in
-        IO.nwrite out (substitute (assoc vars) (get header))
+      method header () = write_header { get } out doc
       method footer () = 
         IO.nwrite out (get footer)
       method inline () = function
-        | Plain s -> IO.nwrite out (self#escape s)
+        | Plain s -> IO.nwrite out (tex_escape s)
         | Emphasis (kind, data) ->
           let l = [`Bold, "textbf"; `Italic, "emph"; `Underline, "underline"] in
           Printf.fprintf out "\\%s{" (List.assoc kind l);
@@ -74,7 +78,7 @@ $extraheader
         | Latex_Fragment (Command (name, "")) ->
           Printf.fprintf out "\\%s" name
         | Latex_Fragment (Command (name, option)) ->
-          Printf.fprintf out "\\%s{%s}" name (self#escape_inside option)
+          Printf.fprintf out "\\%s{%s}" name (escape_inside option)
         | Verbatim s -> 
           Printf.fprintf out "\\texttt{%s}" (escape ["}"] s)
         | Target s ->
@@ -113,10 +117,10 @@ $extraheader
         | Custom ("tableofcontents", _, _) ->
             Printf.fprintf out "\\tableofcontents\n"
         | Custom (name, opts, l) ->
-          Printf.fprintf out "\\begin{%s}{%s}\n" (self#escape_inside name)
-            (self#escape_inside opts);
+          Printf.fprintf out "\\begin{%s}{%s}\n" (escape_inside name)
+            (escape_inside opts);
           self#blocks () l;
-          Printf.fprintf out "\\end{%s}\n" (self#escape_inside name)
+          Printf.fprintf out "\\end{%s}\n" (escape_inside name)
         | With_Keywords (l, Custom ("figure", opts, lines)) ->
             Printf.fprintf out "\\begin{figure}%s\n\\centering" opts;
           self#blocks () lines;
