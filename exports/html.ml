@@ -58,33 +58,47 @@ module E = struct
                                        ["src", href;
                                         "title", Inline.asciis label]) []]
           else
-            [Xml.block "a" ~attr: ["href", Inline.string_of_url url]
+            let href = match url with
+              | Search x -> "#" ^ Toc.link x
+              | _ -> href
+            in
+            [Xml.block "a" ~attr: ["href", href]
                 (self#inlines label)]
       | Verbatim s -> 
           [Xml.block "code" [Xml.data s]]
       | x -> super#inline x
     method list_item x = 
       let contents = match x.contents with
-        | [Paragraph i] -> self#inlines i
+        | (Paragraph i :: rest) -> self#inlines i @ self#blocks rest
         | _ -> self#blocks x.contents
       in
       match x.number with
         | None -> [Xml.block "li" contents]
         | Some number ->
             [Xml.block ~attr: ["style", "list-style-type: none"] "li"
-                (Xml.data number :: contents)]
+                (Xml.data (number ^ " ") :: contents)]
+    method fancylink h = 
+      let target, descr = match h.father with
+        | Some {anchor; name} -> Toc.link anchor, Inline.asciis name
+        | None -> "content", "Come back at the top of the page"
+      in
+      Xml.block "span" ~attr:["style", "float:right"]
+        [Xml.block "a" ~attr:["title", descr; "href", "#"^target] [Xml.data "↑"]]
     method block = function
       | Paragraph l -> [Xml.block "p" (self#inlines l)]
       | List (l, _) ->
           [Xml.block "ul" (concatmap (self#list_item) l)]
       | Example (_, l) ->
           [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
+      | Custom (name, _, l) ->
+          [Xml.block "div" ~attr:["class", name] (self#blocks l)]
       | Quote l ->
           [Xml.block "blockquote" (self#blocks l)]
       | x -> super#block x
     method heading d = 
       (Xml.block (Printf.sprintf "h%d" d.level)
-         (self#inlines d.name)) ::
+         ~attr:["id", Toc.link d.anchor]
+         (self#inlines d.name @ [self#fancylink d])) ::
         (self#blocks d.content
          @ concatmap (self#heading) d.children)
     method document d =
@@ -98,8 +112,10 @@ module E = struct
 
   let doctype = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
 
-  let with_custom_exporter o { get } doc out = 
-    let doc = if get use_math2png then Math2png.transform { get } doc 
+  let with_custom_exporter o ({ get } as conf) doc out = 
+    let doc = Toc.transform conf doc in
+    let doc = if get use_math2png then 
+        Math2png.transform conf doc 
       else doc
     in
     if get full then
@@ -108,7 +124,8 @@ module E = struct
     else
       Xml.output_xhtml out (o#document doc)
   module E = struct
-    let export c = with_custom_exporter (new htmlExporter c) c
+    let export config doc = 
+      with_custom_exporter (new htmlExporter config) config doc
     let default_filename = change_ext "html"
   end
   let data = (module E : Exporter)
