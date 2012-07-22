@@ -34,11 +34,6 @@ $extraheader
     ["section"; "subsection"; "subsubsection"; "paragraph"; "subparagraph"]
 
   let assoc l s = try List.assoc s l with _ -> ""
-  let link s =
-    let map_char = function 
-      | ('a'..'z' | 'A'..'Z' | '0' .. '9') as c -> String.of_char c
-      | ' ' | '_' -> "_" | c -> Printf.sprintf "-%x-" (int_of_char c)
-    in String.to_list s |> List.map map_char  |> String.concat ""
 
   let escape_inside s = s
   let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"]
@@ -82,12 +77,12 @@ $extraheader
         | Verbatim s -> 
           Printf.fprintf out "\\texttt{%s}" (escape ["}"] s)
         | Target s ->
-          Printf.fprintf out "\\label{%s}" (link s)
+          Printf.fprintf out "\\label{%s}" (Toc.link s)
         | Link {url; label} ->
             (match url, label with
               | Search title, _ ->
                   if Toc.mem title toc then
-                    Printf.fprintf out "\\ref{sec:%s}" (link title)
+                    Printf.fprintf out "\\ref{sec:%s}" (Toc.link title)
                   else
                     Printf.fprintf out "\\ref{%s}" title
               | _, label ->
@@ -133,7 +128,7 @@ $extraheader
         let command = List.nth (get sections) (d.level - 1) in
         Printf.fprintf out "\\%s{" command;
         self#inlines () d.name;
-        Printf.fprintf out "}\\label{sec:%s}\n" (link (Inline.asciis d.name));
+        Printf.fprintf out "}\\label{sec:%s}\n" (Toc.link (Inline.asciis d.name));
         self#blocks () d.content;
         List.iter (self#heading ()) d.children
       method document () d = 
