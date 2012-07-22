@@ -35,6 +35,7 @@ type heading = {
   tags      : string list;
   marker    : string option;
   meta      : meta;
+  anchor     : string;
 }
 (** A heading in a document *)
 

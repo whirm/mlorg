@@ -34,6 +34,7 @@ type heading = {
   tags       : string list;
   marker     : string option;
   meta       : meta;
+  anchor     : string;
 }
 (** A heading in a document *)
 
@@ -219,6 +220,7 @@ let from_blocks filename blocks =
         if k > heading.level then
           let child, rest = 
             aux false { name = h.Block.title; father = None;
+                        anchor = Inline.asciis h.Block.title;
                         level = k; content = []; children = []; 
                         tags = h.Block.tags; marker = h.Block.marker;
                         meta = empty_meta } rest
@@ -233,6 +235,7 @@ let from_blocks filename blocks =
   (* In the end, don't forget to parse the directives *)
   let main, _ = 
     aux false { name = []; level = 0; content = []; father = None;
+                anchor = "";
                 children = []; tags = []; marker = None;
                 meta = empty_meta } blocks
   in
