@@ -24,7 +24,7 @@ let alphabetic_sys alphabet =
   in 
   let encode n = 
     let rec aux acc n = 
-      if n < base then alphabet.(n) :: acc
+      if n < base then alphabet.(max 0 (n-1)) :: acc
       else aux (alphabet.(n mod base) :: acc) (n/base)
     in
     String.concat "" (aux [] n)
@@ -106,13 +106,15 @@ let extract s =
         | None, _ -> aux acc s (k+1)
       in aux [] s 0
 
-let update fmt l = 
+let update ?(trunc = false) fmt l = 
   let rec aux start len acc k l =
     let rest () = String.sub fmt start len in
     if k >= String.length fmt then 
       List.rev (rest () :: acc)
     else if l = [] then
-      List.rev (String.sub fmt start (String.length fmt - start) :: acc)
+      (if trunc then List.rev acc
+       else 
+          List.rev (String.sub fmt start (String.length fmt - start) :: acc))
     else
       match decode (String.lchop ~n:k fmt) with
         | None, _ ->

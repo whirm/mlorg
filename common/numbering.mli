@@ -37,5 +37,8 @@ val extract : string -> int list
 (** Extracts the number appearing in a string. 
     For instance [extract "I.i"] returns [[1; 1]] *)
 
-val update : string -> int list -> string
-(** Updates a format. For instance [update "I.i" [2; 2]] returns ["II.ii"] *)
+val update : ?trunc : bool -> string -> int list -> string
+(** Updates a format. For instance [update "I.i" [2; 2]] returns ["II.ii"].  If
+    [trunc] is set to true (default: false) then the string is truncate when all
+    the numbers in the list have been consumed.
+*)
