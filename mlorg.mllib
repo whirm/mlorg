@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 98205f51704f2594454844248db93aa3)
+# DO NOT EDIT (digest: 486dda1f6d6277b0be3c1a336e78d4df)
 Mlorg
 common/Prelude
 common/Log
@@ -20,14 +20,20 @@ syntax/blocks/Aut_drawers
 syntax/blocks/Aut_heading
 syntax/blocks/Aut_list
 syntax/blocks/Aut_math
+syntax/blocks/Aut_hr
+syntax/blocks/Aut_latex_env
 syntax/blocks/Aut_paragraph
 syntax/blocks/Aut_verbatim
 syntax/blocks/Parser
 document/Document
 document/Filter
+document/Plugin
+exports/Toc
+exports/Org
 exports/Xml
 exports/Html
 exports/Latex
 exports/Xml_exp
 exports/Quote
+plugins/Math2png
 # OASIS_STOP

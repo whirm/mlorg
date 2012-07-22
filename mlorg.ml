@@ -12,4 +12,8 @@ module Backends = struct
   module Xml = Xml_exp
   module Org = Org
 end
+module General = struct
+  module Math2png = Math2png
+end
+
 module Xml = Xml

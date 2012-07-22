@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 53255e7972951295ad366e21516b1e3c) *)
+(* DO NOT EDIT (digest: 318e24be501c5aaebc08b8802dc1b051) *)
 module OASISGettext = struct
 # 21 "/home/asmanur/T\195\169l\195\169chargements/oasis-0.3.0/src/oasis/OASISGettext.ml"
 
@@ -483,20 +483,42 @@ let package_default =
      includes =
        [
           ("syntax/inline",
-            ["common"; "document"; "exports"; "syntax/blocks"]);
+            ["common"; "document"; "exports"; "plugins"; "syntax/blocks"]);
           ("syntax/blocks",
-            ["common"; "document"; "exports"; "syntax/inline"]);
+            ["common"; "document"; "exports"; "plugins"; "syntax/inline"]);
+          ("plugins",
+            [
+               "common";
+               "document";
+               "exports";
+               "syntax/blocks";
+               "syntax/inline"
+            ]);
           ("exports",
-            ["common"; "document"; "syntax/blocks"; "syntax/inline"]);
+            [
+               "common";
+               "document";
+               "plugins";
+               "syntax/blocks";
+               "syntax/inline"
+            ]);
           ("document",
-            ["common"; "exports"; "syntax/blocks"; "syntax/inline"]);
+            ["common"; "exports"; "plugins"; "syntax/blocks"; "syntax/inline"
+            ]);
           ("common",
-            ["document"; "exports"; "syntax/blocks"; "syntax/inline"]);
+            [
+               "document";
+               "exports";
+               "plugins";
+               "syntax/blocks";
+               "syntax/inline"
+            ]);
           ("",
             [
                "common";
                "document";
                "exports";
+               "plugins";
                "syntax/blocks";
                "syntax/inline"
             ])
@@ -506,6 +528,6 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 510 "myocamlbuild.ml"
+# 532 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;

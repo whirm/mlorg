@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 117785f12289e737898a47476374a9ae)
+# DO NOT EDIT (digest: d08d28dc86d5238f1c73569ae24eeec7)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -21,6 +21,8 @@
 <document/*.ml{,i}>: pkg_dynlink
 <exports/*.ml{,i}>: pkg_batteries
 <exports/*.ml{,i}>: pkg_dynlink
+<plugins/*.ml{,i}>: pkg_batteries
+<plugins/*.ml{,i}>: pkg_dynlink
 <syntax/blocks/*.ml{,i}>: pkg_batteries
 <syntax/blocks/*.ml{,i}>: pkg_dynlink
 <syntax/inline/*.ml{,i}>: pkg_batteries
