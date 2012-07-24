@@ -52,8 +52,8 @@ type t = {
   (** The timestamp present in the beginning *)
   exts : string list;
   (** The extensions used by the documents *)
-  ext_opts : (string * (string * string) list) list;
-  (** The options of the extensions *)
+  opts : (string * string) list;
+  (** The options set by the file *)
   title: string;
   (** The document's title *)
   author: string;
@@ -169,11 +169,7 @@ extensions to load *)
 let handle_directives doc = 
   { doc with exts = (try words (List.assoc "extensions" doc.directives)
     with _ -> []);
-    ext_opts = List.filter_map (fun (key, value) ->
-      try Scanf.sscanf key "%[^-]-%s" (fun mod_name name -> Some (mod_name, (name, value)))
-      with _ -> None) doc.directives
-    |> List.group (fun (x,_) (y, _) -> compare x y)
-    |> List.map (fun g -> fst (List.hd g), List.map snd g)
+    opts = List.filter (fun (s, _) -> String.exists s ".") doc.directives
  }
 
 
@@ -242,7 +238,7 @@ let from_blocks filename blocks =
   gather_keywords 
     (handle_directives
        { beginning = main.content; directives;
-         exts = []; ext_opts = [];
+         exts = []; opts = [];
          headings = main.children;
          beg_meta = main.meta;
          title = (try List.assoc "TITLE" directives with _ -> "");

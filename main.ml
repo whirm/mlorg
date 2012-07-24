@@ -2,9 +2,10 @@
 
 open Batteries
 open Mlorg
+open Document
 
 (* pure part *)
-let generate filename backend output config = 
+let generate filename backend output opts = 
   try
     let export = Plugin.Exporters.find backend in
     let module E = (val export : Plugin.Exporter) in
@@ -23,6 +24,7 @@ let generate filename backend output config =
       else 
         Document.from_file filename
     in
+    let config = Plugin.global_config (opts @ doc.opts) in
     Plugin.Exporters.run export config doc fdout;
     if output = "-" then IO.close_out fdout
 
@@ -45,5 +47,5 @@ let _ = if not !Sys.interactive then (
              "--possible-options", Unit (fun () -> Plugin.eprint_config_descr (); exit 0), "Describe possible options of backends";
               "--backend", Set_string backend, "Output backend"]
       (fun _ -> ()) "mlorg";
-      generate !filename !backend !output (Plugin.global_config !opts)
+      generate !filename !backend !output !opts
 )
