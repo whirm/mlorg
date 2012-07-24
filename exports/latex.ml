@@ -138,7 +138,7 @@ $extraheader
     end
     in o#document () doc
 
-  module D = struct let export = export and default_filename = change_ext "ext" end
+  module D = struct let export = export and default_filename = change_ext "tex" end
   type interface = exporter
   let data = (module D : Exporter)
 end
