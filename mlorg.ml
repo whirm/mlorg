@@ -15,5 +15,5 @@ end
 module General = struct
   module Math2png = Math2png
 end
-
+module Dynamic = Dynamic
 module Xml = Xml
