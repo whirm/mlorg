@@ -11,5 +11,5 @@ _build
 /README.html
 /setup.data
 /setup.log
-manual.html
-manual.tex
+*.html
+*.tex
