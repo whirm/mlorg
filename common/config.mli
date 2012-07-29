@@ -78,9 +78,11 @@ type t
 val create : unit -> t
 (** Creates an empty configuration *)
 
-val add : t -> string -> 'a serializable -> string -> 'a -> 'a item
+val add : ?long: string -> t -> string -> 'a serializable -> string -> 'a -> 'a item
 (** [add config name serial description default] adds a new item composed with
-    the arguments in the configuration [config]. It returns the created item *)
+    the arguments in the configuration [config]. It returns the created item.
+    The [long] optional option can be used to specify a long description for the option.
+ *)
 
 val concat : (string * t) list -> t
 (** Concat many configs in one. Takes a name-indexed list of configurations and

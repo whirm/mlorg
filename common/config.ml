@@ -108,6 +108,7 @@ module type Item = sig
   module T : SerializableType with type t = t
   val name : string
   val description : string
+  val long_description : string
   val index : int
   val default : t
   val tmp : t ref
@@ -120,12 +121,12 @@ type instance =
 
 let create () = Hashtbl.create 8
 let counter = ref 0
-let add (type u) config name (typ : u serializable) description default = 
+let add (type u) ?(long = "") config name (typ : u serializable) description default = 
   let module I = struct
     type t = u
     module T = (val typ : SerializableType with type t = u)
     let name = name and description = description
-    let index = !counter
+    let index = !counter and long_description = long
     and default = default and tmp = ref default
   end in
   incr counter;
@@ -189,11 +190,20 @@ let prettyprint out config =
       let module I = (val i : Item) in
       let s = I.T.show I.default in
       let l = lines s in
+      let pad = List.map ((^) "  :") in
+      let s' = if s = "" then ""
+        else "=" ^ escape ["="] s ^ "="
+      in
       if List.length l <= 1 then
-        Printf.fprintf out "%s [type:%s] (default: %s) -- %s\n" I.name
-          I.T.description s I.description
+        Printf.fprintf out "- =%s= [type: =%s=] (default: %s) -- %s\n" I.name
+          I.T.description s' I.description
       else
-        Printf.fprintf out "%s [type:%s] -- %s. Default value:\n%s\n"
+        Printf.fprintf out "=%s= [type: =%s=] -- %s. Default value:\n%s\n"
           I.name I.T.description I.description
-          (String.concat "\n" (List.map ((^) "  ") l)))
+          (String.concat "\n" (pad l));
+      if I.long_description <> "" then
+        Printf.fprintf out "  \n%s\n" 
+          (String.concat "\n" (pad (lines I.long_description)))
+    )          
+    
     config
