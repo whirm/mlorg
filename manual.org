@@ -36,7 +36,7 @@ You may be interested  in =mlorg= for a few reasons:
 - You want to access information that are in your org-mode files and you don't
   want to do it in ELisp.
 
-Then =mlorg= is perfect for the task. You should check out the [[file:syntax.org][syntax]] reference
+Then =mlorg= is perfect for the task. You should check out the [[./syntax.org][syntax]] reference
 recognized by =mlorg=.
 
 ** =mlorg= invocation
@@ -75,54 +75,132 @@ Each plugins exports a list of configuration item that can be changed to
 customize it. The list of configurations item:
 
 - =mlorg.verbose= [type: =integer=] (default: =0=) -- Verbosity level
-- =general.math2png.dir= [type: =any string=] (default: =lxtpng=) -- The directory where to store images of preprocessed formulas
-- =general.math2png.latex= [type: =any string=] (default: =latex -interaction\=batchmode=) -- The latex command to invoke
-- =general.math2png.dvipng= [type: =any string=] (default: =dvipng=) -- The dvipng command to invoke
-- =general.math2png.header= [type: =any string=] (default: ) -- Header to add to the tex files
+- =general.math2png.dir= [type: =any string=] (default: ="lxtpng"=) -- The directory where to store images of preprocessed formulas
+- =general.math2png.latex= [type: =any string=] (default: ="latex -interaction\=batchmode"=) -- The latex command to invoke
+- =general.math2png.dvipng= [type: =any string=] (default: ="dvipng"=) -- The dvipng command to invoke
+- =general.math2png.header= [type: =any string=] (default: =""=) -- Header to add to the tex files
 - =general.math2png.inline= [type: =boolean (true, yes, no, false)=] (default: =no=) -- Tell whether inline math should be processed
 - =general.math2png.inline= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Tell whether block math (between $$) should be processed
 - =general.toc.number-heading= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- True if headings should be numbered
-- =general.toc.number-format= [type: =any string=] (default: =1.1.1.1.1=) -- The format used to number the headings
+- =general.toc.number-format= [type: =any string=] (default: ="1.1.1.1.1"=) -- The format used to number the headings
 - =general.toc.number-toc= [type: =boolean (true, yes, no, false)=] (default: =no=) -- True if there should be numbers in the table of contents
-- =exporters.html.encoding= [type: =any string=] (default: =utf-8=) -- The document's encoding
+- =exporters.html.encoding= [type: =any string=] (default: ="utf-8"=) -- The document's encoding
 - =exporters.html.wrap= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Shall the output be a full html document ?
-- =exporters.html.style= [type: =any string=] (default: =style.css=) -- The stylesheet to use
+- =exporters.html.style= [type: =any string=] (default: ="style.css"=) -- The stylesheet to use
 - =exporters.html.use-math2png= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Convert latex formulas to PNG using Math2png extension
-- =exporters.html.image-extensions= [type: =List of any string=] (default: =[.png, .jpg, .jpeg, .gif, .bmp]=) -- The list of extensions to be considered as images
-- =exporters.latex.classname= [type: =any string=] (default: =article=) -- The LaTeX class name to use
-=exporters.latex.header= [type: =any string=] -- The LaTeX header. You can use the following variables in it:
-- classname: the class name chosen for this document
-- packages: the list of packages to be loaded (formatted)
-- extraheader: user's extra header
-- title, author: document's metadata. Default value:
-  :\documentclass{$classname}
-  :$packages
-  :$extraheader
-  :\title{$title}
-  :\author{$author}
-  :\begin{document}
-  :\maketitle
-  :
-- =exporters.latex.footer= [type: =any string=] (default: =\end{document}=) -- The LaTeX footer
-- =exporters.latex.extraheader= [type: =any string=] (default: ) -- Extra LaTeX header
-- =exporters.latex.sections= [type: =List of any string=] (default: =[section, subsection, subsubsection, paragraph, subparagraph]=) -- The name of the sections
-- =general.dynamic.ocamlc= [type: =any string=] (default: =ocamlfind ocamlc -c -package batteries,mlorg=) -- ocamlc command to use
-- =general.dynamic.ocamlopt= [type: =any string=] (default: =ocamlfind ocamlopt -shared -package batteries,mlorg=) -- ocamlopt command to use
-- =exporters.quote.block= [type: =any string=] (default: =export=) -- Name of the codeblock to use to export
-- =exporters.quote.external-file= [type: =any string=] (default: ) -- Optional name of the file to load
-- =exporters.quote.code= [type: =any string=] (default: ) -- Optional code (as a string) to load
-- =exporters.quote.save= [type: =any string=] (default: ) -- Non-empty: set to a ML file in which the generated source will be put (instead of a temporary file
+- =exporters.html.image-extensions= [type: =List of any string=] (default: =[".png", ".jpg", ".jpeg", ".gif", ".bmp"]=) -- The list of extensions to be considered as images
+- =exporters.latex.classname= [type: =any string=] (default: ="article"=) -- The LaTeX class name to use
+- =exporters.latex.header= [type: =any string=] -- The LaTeX header. Default value:
 
- Here is a list of plugins.
+  : "\documentclass{$classname}
+  : $packages
+  : $extraheader
+  : \title{$title}
+  : \author{$author}
+  : \begin{document}
+  : \maketitle
+  : "
+
+  Possible variables to use in this item:
+  - =classname=: the class name chosen for this document
+  - =packages=: the list of packages to be loaded (formatted)
+  - =extraheader=: user's extra header (set by extraheader option)
+  - =title=: Document's title
+  - =author=: Document's author
+- =exporters.latex.footer= [type: =any string=] (default: ="\end{document}"=) -- The LaTeX footer
+- =exporters.latex.extraheader= [type: =any string=] (default: =""=) -- Extra LaTeX header
+- =exporters.latex.sections= [type: =List of any string=] (default: =["section", "subsection", "subsubsection", "paragraph", "subparagraph"]=) -- The name of the sections
+- =general.dynamic.ocamlc= [type: =any string=] (default: ="ocamlfind ocamlc -c -package batteries,mlorg"=) -- ocamlc command to use
+- =general.dynamic.ocamlopt= [type: =any string=] (default: ="ocamlfind ocamlopt -shared -package batteries,mlorg"=) -- ocamlopt command to use
+- =exporters.quote.block= [type: =any string=] (default: ="export"=) -- Name of the codeblock to use to export
+- =exporters.quote.external-file= [type: =any string=] (default: =""=) -- Optional name of the file to load
+- =exporters.quote.code= [type: =any string=] (default: =""=) -- Optional code (as a string) to load
+- =exporters.quote.save= [type: =any string=] (default: =""=) -- Non-empty: set to a ML file in which the generated source will be put (instead of a temporary file
+Here is a list of plugins.
 *** Exporters
 Those plugins are meant to output a document to a specific format. The format of
 a configuration name for those module is =exporters.<plugin>.<name>=.
 **** Html
 The default backend. It exports the file to HTML. It can be used to generate
 full pages or only fragment of pages and can be configured to use [[math2png]], the
-plugin to deal with converting math formulas to image files. Options known by the html backend:
+plugin to deal with converting math formulas to image files. What actually
+happens is that every formula the html exporter finds, it uses MathJax to render
+it. If the option =use-math2png= is set, then the document is preprocessed by
+math2png that replaces formula by images.
 
-- =encoding= (=string=) : The document's encoding (default: =utf-8). 
+Note that targets are translated to anchors, and search links are translated to
+links toward anchors. On top of that, an anchor is added to each heading, so
+that search links pointing to headings are correctly translated.
+
+**** Latex
+Outputs to LaTeX. The output to LaTeX is quite straightforward. Again anchors
+are translated to labels. There is to way to translate a search link:
+
+- if it has an empty label, then it is translated to =ref=
+- if is has an non-emty label, it is translated to =hyperref=
+**** Org
+A backend to output to org-mode. Not finished
+**** XML
+A backend that outputs the abstract tree to XML for further uses by other
+programs or to debug =mlorg='s parser.
+
+**** Quote
+This backend allows you to run arbitrary OCaml programs on the abstract document. There is two way of using it:
+- by running a program in a separate file
+- by running a program contained in a block of the document
+
+The first approach is for batch processing of org files whereas the second
+allows the document to be defined along with methods to get the desired
+information. In any case, the ML source file is compiled in a seperate file
+(temporary or not) and dynlinked. See the section [[Retrieving information from
+org-mode files]] for more information on how to write such modules.
 
 
 
+
+*** General
+Those plugin are general purpose modules inside =mlorg= that offers some
+functionnality not related to exporting.
+
+**** Math2png
+This modules translates latex formulas to images. It can be configured to only
+translate inline or blocks formula (or all of them). It requires a installation
+of LaTeX (with the package =preview=) along with the program =dvipng=. It works
+by putting all the formula to convert in a TeX, and then compiling it to a dvi
+file which contains one formula per pages. =dvipng= is then invoked to convert
+each page to an image. Images are renamed so that their filenames is the MD5
+hash of the formulas.
+
+=math2png= also handles the depth annotations of dvipng, by annotating images
+with a special protocol =depth-<depth>= where =<depth>= is the value returned by
+=dvipng=. Thus the alignment of the images (espcially in inline text) is quite
+good.
+**** Dynamic
+Configures the loading of modules that registers values of specific types.
+** Retrieving information from org-mode files
+The backend [[quote][Quote]] can be used to retrieve raw information from org-mode
+files. When using it, you should provide a ML expression that has the type
+=Document.t -> unit IO.output -> unit=, in the following context:
+: open Mlorg
+: open Batteries
+: open Printf
+: open Block
+: open Inline
+: module D = Document
+: module F = Filter
+: let write = Printf.fprintf
+You should consult the [[Mlorg's technical documentation][code documentation]] to know how to handle the document. An
+exemple, to retrieve the current clocked item along with its total clocking
+time:
+
+: fun d out -> match D.current_clocked_item d with 
+:                 None -> () 
+:               | Some d -> write out "%s (%s)" (D.name d) 
+:                             (Timestamp.string_of_seconds (D.clocking_time d))
+
+To use it on a file, just do:
+
+: mlorg.opt --filename $XORGDIR/master.org --backend quote --set exporters.quote.save=/tmp/clock.ml --set exporters.quote.code='fun d out -> match D.current_clocked_item d with None -> () | Some d -> write out "%s (%s)" (D.name d) (Timestamp.string_of_seconds (D.clocking_time d))'
+* Mlorg's technical documentation
+The documentation of the code of mlorg can be found [[http:doc][here]]. It contains the
+documentation generated by =ocamldoc= on the sources.
