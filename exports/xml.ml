@@ -47,13 +47,13 @@ let rec indent fd num =
 let output_lines fd indent_level lines = 
   match Prelude.lines lines with
     | t :: q ->
-        output_string fd t; 
+        output_string_rewrite fd t; 
 	List.iter (fun s -> IO.write fd '\n'; 
           indent fd indent_level; 
           output_string_rewrite fd s) q;
         
         if lines.[String.length lines - 1] = '\n' then
-          output_string fd "\n"
+          output_string_rewrite fd "\n"
           
     | [] -> ()
 
