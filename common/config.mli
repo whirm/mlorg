@@ -75,13 +75,22 @@ type 'a item
 type t
 (** A configuration, describing a list of entry *)
 
+type variable
+(** A variable, that can be used in a configuration item.
+    Each item can set its own variables to be preprocessed *)
+
+val make_var : string -> string -> variable
+(** [make_var name description] creates a variable whose name is [name] and
+    description is [description] *)
+
 val create : unit -> t
 (** Creates an empty configuration *)
 
-val add : ?long: string -> t -> string -> 'a serializable -> string -> 'a -> 'a item
+val add : ?long: string -> ?vars: variable list -> t -> string -> 'a serializable -> string -> 'a -> 'a item
 (** [add config name serial description default] adds a new item composed with
     the arguments in the configuration [config]. It returns the created item.
-    The [long] optional option can be used to specify a long description for the option.
+    The [long] optional parameter can be used to specify a long description for the option.
+    The [vars] optional parameter can be used to specify a list of variables.
  *)
 
 val concat : (string * t) list -> t
@@ -89,8 +98,10 @@ val concat : (string * t) list -> t
     returns a configuration where item names have been prefixed by the name of
     the parent configuration with a dot between them.
 *)
-type instance = {get : 'a. 'a item -> 'a}
-(** An instance of a configuration -- defining a value of a finite number of item *)
+type instance = {get : 'a. ?vars: (string * string) list -> 'a item -> 'a}
+ (** An instance of a configuration -- defining a value of a finite number of
+     item.  The optional parameter [vars] defines the values of the variable of
+     that item. Default: empty *)
 
 val make : t -> (string * string) list -> instance
 (** Make an instance out of an t and a few defined values *)

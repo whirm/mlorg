@@ -38,8 +38,13 @@ let string =
   let module String = struct
     type t = string
     let description = "any string"
-    let show x = x
-    let read x = Some x
+    let show x = "\"" ^ escape ["\""] x ^ "\""
+    let read x = 
+      let s = String.trim x in
+      if s = "" then Some ""
+      else if s.[0] = '"' || '"' = '_' then
+        (try Scanf.sscanf s "%S" (fun s -> Some s) with _ -> None)
+      else Some s
   end 
   in (module String : SerializableType with type t = string)
 
@@ -102,7 +107,12 @@ let parse_keyvalue s =
 let parse_comma s = 
   split ',' s |> List.map parse_keyvalue
       
-  
+type variable = { 
+  var_name : string;
+  var_descr : string;
+}
+let make_var var_name var_descr = { var_name; var_descr }
+
 module type Item = sig
   type t
   module T : SerializableType with type t = t
@@ -112,21 +122,23 @@ module type Item = sig
   val index : int
   val default : t
   val tmp : t ref
+  val variables : variable list
 end
 type 'a item = (module Item with type t = 'a)
 type t = (int, (module Item)) Hashtbl.t
 
 type instance = 
-    {get : 'a. 'a item -> 'a}
+    {get : 'a. ?vars: (string * string) list -> 'a item -> 'a}
 
 let create () = Hashtbl.create 8
 let counter = ref 0
-let add (type u) ?(long = "") config name (typ : u serializable) description default = 
+let add (type u) ?(long = "") ?(vars = []) config name (typ : u serializable) description default = 
   let module I = struct
     type t = u
     module T = (val typ : SerializableType with type t = u)
     let name = name and description = description
     let index = !counter and long_description = long
+    and variables = vars
     and default = default and tmp = ref default
   end in
   incr counter;
@@ -154,30 +166,33 @@ let concat configs =
 
 let append config list instance = 
   let hashtbl = Hashtbl.create (Hashtbl.length config) in
-  let () = Hashtbl.iter (fun _ i ->
-    let module I = (val i : Item) in
-    let v, b = 
+  let compute (type u) (item: u item) vars = 
+    let module I = (val item : Item with type t = u) in
+    let v = 
       try 
-        Option.get (I.T.read (List.assoc I.name list)), true
+        let string = List.assoc I.name list in
+        let assoc l s = try List.assoc s l with _ -> "" in
+        let string = substitute (assoc vars) string in
+        Option.get (I.T.read string)
       with 
-        | Not_found -> I.default, false 
+        | Not_found -> instance.get ~vars item
         | _ -> Log.warning "Value %s is invalid for configuration item %s"
             (List.assoc I.name list) I.name;
-            I.default, false
+            I.default
     in
-    Hashtbl.add hashtbl I.index (fun () -> I.tmp := v; b))
-    config
+    Hashtbl.add hashtbl I.index (fun () -> I.tmp := v);
+    v
   in
-  {get = fun (type u) item ->
-    let module I = (val item : Item with type t = u) in
-    if Hashtbl.find hashtbl I.index () then
-      !I.tmp
-    else
-      instance.get item
-  }
+  let lookup (type u) (item: u item) vars = 
+    try let module I = (val item : Item with type t = u) in
+        Hashtbl.find hashtbl I.index ();
+        !I.tmp
+    with Not_found -> compute item vars
+  in
+  {get = fun (type u) ?(vars = []) item -> lookup item vars}
     
 let make config list = append config list
-  {get = (fun (type u) i ->
+  {get = (fun (type u) ?(vars=[]) i ->
     let module I = (val i : Item with type t = u) in
     I.default)
   }
@@ -190,7 +205,7 @@ let prettyprint out config =
       let module I = (val i : Item) in
       let s = I.T.show I.default in
       let l = lines s in
-      let pad = List.map ((^) "  :") in
+      let pad s = List.map ((^) s) |- String.concat "\n" in
       let s' = if s = "" then ""
         else "=" ^ escape ["="] s ^ "="
       in
@@ -199,11 +214,17 @@ let prettyprint out config =
           I.T.description s' I.description
       else
         Printf.fprintf out "=%s= [type: =%s=] -- %s. Default value:\n%s\n"
-          I.name I.T.description I.description
-          (String.concat "\n" (pad l));
+          I.name I.T.description I.description (pad "  : " l);
       if I.long_description <> "" then
-        Printf.fprintf out "  \n%s\n" 
-          (String.concat "\n" (pad (lines I.long_description)))
+        Printf.fprintf out "  \n%s\n" (pad "  : " (lines I.long_description));
+      if I.variables <> [] then 
+        begin
+          Printf.fprintf out "  Possible variables to use in this item:\n";
+          List.iter (fun {var_name; var_descr} -> 
+            Printf.fprintf out "  - =%s=: %s\n" (escape ["="] var_name) var_descr)
+            I.variables
+        end
     )          
     
     config
+    

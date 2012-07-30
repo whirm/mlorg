@@ -12,11 +12,13 @@ module E = struct
   let classname = 
     add config "classname" string "The LaTeX class name to use" "article"
   let header = add config "header" string
-    "The LaTeX header. You can use the following variables in it:
-- classname: the class name chosen for this document
-- packages: the list of packages to be loaded (formatted)
-- extraheader: user's extra header
-- title, author: document's metadata"
+    "The LaTeX header."
+~vars:
+    [make_var "classname" "the class name chosen for this document";
+     make_var "packages" "the list of packages to be loaded (formatted)";
+     make_var "extraheader" "user's extra header (set by extraheader option)";
+     make_var "title" "Document's title";
+     make_var "author" "Document's author"]
 "\\documentclass{$classname}
 $packages
 $extraheader
