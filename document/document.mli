@@ -130,3 +130,6 @@ val clocking_time : heading -> int
 
 val current_clocking_time : t -> int option
 (** Returns the clocking time of the currently clocked in entry *)
+
+val has_tag : string -> heading -> bool
+(** [has_tag tag heading] returns true if [heading] has the tag [tag] (or inherits it) *)
