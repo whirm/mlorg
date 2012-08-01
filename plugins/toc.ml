@@ -1,5 +1,6 @@
 (* Toc-based operations *)
 open Batteries
+open Prelude
 open Inline
 open Block
 open Plugin
@@ -60,16 +61,28 @@ let generate { get } toc =
 
 let transform ({ get } as conf) doc =
   let o = object(self)
-    inherit [int list] Document.mapper as super
-    method heading numbers t = 
-      {
-        (super#heading numbers t) with Document.name = 
-          Plain (format (get number_format) numbers ^ " ") :: t.Document.name;
-          Document.children = 
-          List.mapi (fun k i -> self#heading (numbers @ [1+k]) i) 
-            t.Document.children
-      }
-    method document _ doc = 
+    inherit [int list * t ref] Document.mapper as super
+    method heading (numbers, toc) t = 
+      if shall_be_numbered t then
+        let entry = List.hd !toc in
+        let echildren = ref entry.children in
+        let () = (toc := List.tl !toc) in
+        let children = List.mapi (fun k i ->
+          self#heading (numbers @ [1+k], echildren) i)
+          t.Document.children
+        in
+        let assoc l s = try List.assoc s l with _ -> "" in
+        let prefix = substitute (assoc ["number", entry.number]) 
+          (get number_heading_format) in
+        let name = Plain prefix :: t.Document.name in
+        { t with 
+          Document.name; Document.children;
+          Document.content = 
+            self#blocks (numbers, toc) t.Document.content
+        }
+      else
+        t
+    method document (_, toc) doc = 
       if get number_heading then
         {doc with Document.headings = 
             List.mapi (fun k i -> self#heading [1+k] i) doc.Document.headings;
