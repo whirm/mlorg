@@ -72,6 +72,7 @@ let math2png { get } formulas =
     formulas 
   in
   let pwd = Sys.getcwd () in
+  let () = try Sys.mkdir (get dir) with _ -> () in
   let () = Sys.chdir (get dir) in
   let texfile = "_tmp.tex" in
   let rm ext = try Sys.remove ("_tmp."^ext) with _ -> () in
