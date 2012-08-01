@@ -171,7 +171,6 @@ let append config list instance =
     try 
       let i = Hashtbl.find config I.index in
       let module I' = (val i : Item) in
-      Printf.printf "Computing: %s\n" I'.name;
       let v = 
         let string = List.assoc I'.name list in
         let assoc l s = try List.assoc s l with _ -> "" in
