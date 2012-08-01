@@ -51,7 +51,7 @@ $extraheader
     IO.nwrite out (substitute (assoc vars) (get header))
 
   let export { get } doc out = 
-    let toc = Toc.gather doc in
+    let toc = Toc.gather { get } doc in
     let footnote_stack = ref [] in
     let footnote_defs = ref [] in
     let o = object(self)
