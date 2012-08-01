@@ -1,6 +1,6 @@
 INC=-I common -I syntax/inline -I syntax/blocks -I document -I exports
 
-mlorg:
+all:
 	ocaml setup.ml -build
 
 top: all
@@ -10,7 +10,7 @@ install:
 	ocaml setup.ml -reinstall
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
-manual.html: mlorg
+manual.html: all
 	./_build/main.native --filename manual.org --backend html
 
 web: README.html
