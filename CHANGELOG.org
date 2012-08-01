@@ -1,0 +1,14 @@
+#+TITLE: mlorg's Changelog
+
+
+
+* r2
+Release: <2012-08-04 sam.>
+- Added a plugin Dynamic to take care of dynamic linking
+- Config: added a field 'long_description' and 'variables' respectively being a
+  long description for the item and a list of variables that can be used in the configuration
+- A beginning of a manual
+- Bugfixes in Xml, Inline
+- Latex: handling of footnotes
+- Toc: handles the latex's \appendix as well as non-numbered headings
+- Toc: allows the user to customize the way that number are prepended to headings
