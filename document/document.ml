@@ -121,6 +121,8 @@ let collect =
     method block meta = function
       | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
+      | Block.Footnote_Definition (name, def) ->
+        { meta with footnotes = (name, def) :: meta.footnotes }
       | block -> super#block meta block (* no recursion *)
     method inline meta = 
       let open Inline in function
