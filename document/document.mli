@@ -88,6 +88,12 @@ class virtual ['a] bottomUp : object
   method heading : heading -> 'a
 end
 
+class virtual ['a, 'b] bottomUpWithArg : object
+  inherit ['a, 'b] Block.bottomUpWithArg
+  method document : 'b -> t -> 'a
+  method heading : 'b -> heading -> 'a
+end
+
 (** {1 Parsing documents} *)    
 val from_chan : string -> BatIO.input -> t
 (** From an input (the first argument is the filename) *)

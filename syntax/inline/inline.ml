@@ -434,6 +434,33 @@ class virtual ['a] bottomUp = object(self)
     | Entity _ -> self#bot
   method inlines = self#combine -| List.map self#inline
 end
+
+class virtual ['a, 'b] bottomUpWithArg = object(self)
+  method virtual bot : 'a
+  method virtual combine : 'a list -> 'a
+  method inline (arg: 'b) = function
+    | Emphasis (a, b) ->
+        self#inlines arg b
+    | Footnote_Reference ref ->
+        Option.map_default (self#inlines arg) self#bot ref.definition
+    | Link {label=t}
+    | Subscript t 
+    | Superscript t -> self#inlines arg t
+    | Macro _
+    | Radio_Target _
+    | Verbatim _
+    | Cookie _
+    | Timestamp _
+    | Plain _
+    | Inline_Call _
+    | Inline_Source_Block _
+    | Latex_Fragment _
+    | Break_Line 
+    | Target _
+    | Export_Snippet _ 
+    | Entity _ -> self#bot
+  method inlines arg = self#combine -| List.map (self#inline arg)
+end
 let string_of_url = function
   | File s | Search s -> s
   | Complex {link; protocol} -> protocol ^ ":" ^ link

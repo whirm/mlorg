@@ -102,4 +102,25 @@ class virtual ['a] bottomUp = object(self)
           | Example _ | Math _ | Directive _) -> self#bot
   method list_item { contents } = self#blocks contents
 end
+
+class virtual ['a, 'b] bottomUpWithArg = object(self)
+  inherit ['a, 'b] Inline.bottomUpWithArg
+  method blocks arg = self#combine -| List.map (self#block arg)
+  method block arg = function
+    | Heading h -> self#inlines arg h.title
+    | Table t ->
+        let combine_arr f = self#combine -| Array.to_list -| Array.map f in
+        combine_arr (combine_arr (self#inlines arg)) t.rows 
+    | List (l, b) -> self#combine (List.map (self#list_item arg) l)
+    | Paragraph i | Footnote_Definition (_, i) -> self#inlines arg i 
+    | With_Keywords (_, t) -> self#block arg t
+    | Custom (_, _, t)
+    | (Drawer (_, t) | Quote t) -> self#blocks arg t
+    | Table t ->
+        let f = self#combine -| Array.to_list in
+        f (Array.map (f -| Array.map (self#inlines arg)) t.rows)
+    | (Property_Drawer _ | Src _ | Latex_Environment _  | Horizontal_Rule
+          | Example _ | Math _ | Directive _) -> self#bot
+  method list_item arg { contents } = self#blocks arg contents
+end
   

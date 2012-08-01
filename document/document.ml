@@ -107,6 +107,16 @@ class virtual ['a] bottomUp = object(self)
                   self#blocks h.content :: 
                   List.map self#heading h.children)
 end
+
+class virtual ['a, 'b] bottomUpWithArg = object(self)
+  inherit ['a, 'b] Block.bottomUpWithArg
+  method document arg d = 
+    self#combine (self#blocks arg d.beginning :: List.map (self#heading arg) d.headings)
+  method heading arg h = 
+    self#combine (self#inlines arg h.name ::
+                  self#blocks arg h.content :: 
+                  List.map (self#heading arg) h.children)
+end
   
 
 (** {1 Importing a tree} *)

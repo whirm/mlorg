@@ -210,6 +210,20 @@ end
     where contents is created from the leaf and propagated upward.
     This is very useful for exporters *)
 
+class virtual ['a, 'b] bottomUpWithArg :
+object
+  method virtual bot : 'a
+  (** The default value for leaf *)
+  method virtual combine : 'a list -> 'a
+  (** Combining a list of result *)
+  method inline : 'b -> t -> 'a
+  (** Traverse a single element *)
+  method inlines : 'b -> t list -> 'a
+(** Traverse a list of elements and combine their results *)
+end
+(** As bottomUp but this can take an argument that is propaged downwards.
+    This is very useful for exporters *)
+
 (** {1 Useful tools about inline} *)
 val ascii : t -> string
 val asciis : t list -> string
