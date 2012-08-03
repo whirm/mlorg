@@ -107,3 +107,9 @@ class virtual ['a] bottomUp : object
   method blocks : t list -> 'a
   method list_item : list_item -> 'a
 end
+class virtual ['a, 'b] bottomUpWithArg : object
+  inherit ['a, 'b] Inline.bottomUpWithArg
+  method block : 'b -> t -> 'a
+  method blocks : 'b -> t list -> 'a
+  method list_item : 'b -> list_item -> 'a
+end

@@ -24,11 +24,9 @@ module Make (T : sig val table : (char * (char * bool)) list end) = struct
   let valid_delimiter s k = 
     let isspace c = c = ' ' || c = '\t' in
     (* for a delimiter to be valid,
-       we don't want it to be surrounded by two spaces OR two delimiters
-       but a delimiter and a space is ok. *)
+       we don't want it to be surrounded by two spaces *)
     let striking () = match s.[k-1], s.[k+1] with
       | c, c' when isspace c && isspace c' -> false
-      | c, c' when is_symbol c && is_symbol c' -> false
       | _ -> true
     in
     (not (shall_be_in_word s.[k]) 

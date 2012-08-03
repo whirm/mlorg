@@ -10,6 +10,8 @@ install:
 	ocaml setup.ml -reinstall
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
+manual.html: all
+	./_build/main.native --filename manual.org --backend html
 
 web: README.html
 	mkdir -p $(WEBDESTDIR)

@@ -15,7 +15,7 @@ module P = struct
   let dvipng = Config.add config "dvipng" string "The dvipng command to invoke" "dvipng"
   let header = Config.add config "header" string "Header to add to the tex files" ""
   let pinline = Config.add config "inline" boolean "Tell whether inline math should be processed" false
-  let pblock = Config.add config "inline" boolean "Tell whether block math (between $$) should be processed" true
+  let pblock = Config.add config "block" boolean "Tell whether block math (between $$) should be processed" true
   type interface = unit
   let data = ()
 end

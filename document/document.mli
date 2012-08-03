@@ -88,6 +88,12 @@ class virtual ['a] bottomUp : object
   method heading : heading -> 'a
 end
 
+class virtual ['a, 'b] bottomUpWithArg : object
+  inherit ['a, 'b] Block.bottomUpWithArg
+  method document : 'b -> t -> 'a
+  method heading : 'b -> heading -> 'a
+end
+
 (** {1 Parsing documents} *)    
 val from_chan : string -> BatIO.input -> t
 (** From an input (the first argument is the filename) *)
@@ -124,3 +130,6 @@ val clocking_time : heading -> int
 
 val current_clocking_time : t -> int option
 (** Returns the clocking time of the currently clocked in entry *)
+
+val has_tag : string -> heading -> bool
+(** [has_tag tag heading] returns true if [heading] has the tag [tag] (or inherits it) *)

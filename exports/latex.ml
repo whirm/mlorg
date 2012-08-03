@@ -6,17 +6,20 @@ open Block
 open Document
 open Plugin
 open Config
+
 module E = struct
   let name = "latex"
   let config = Config.create ()
   let classname = 
     add config "classname" string "The LaTeX class name to use" "article"
   let header = add config "header" string
-    "The LaTeX header. You can use the following variables in it:
-- classname: the class name chosen for this document
-- packages: the list of packages to be loaded (formatted)
-- extraheader: user's extra header
-- title, author: document's metadata"
+    "The LaTeX header."
+~vars:
+    [make_var "classname" "the class name chosen for this document";
+     make_var "packages" "the list of packages to be loaded (formatted)";
+     make_var "extraheader" "user's extra header (set by extraheader option)";
+     make_var "title" "Document's title";
+     make_var "author" "Document's author"]
 "\\documentclass{$classname}
 $packages
 $extraheader
@@ -48,7 +51,9 @@ $extraheader
     IO.nwrite out (substitute (assoc vars) (get header))
 
   let export { get } doc out = 
-    let toc = Toc.gather doc in
+    let toc = Toc.gather { get } doc in
+    let footnote_stack = ref [] in
+    let footnote_defs = ref [] in
     let o = object(self)
       inherit [unit] Document.folder as super
 
@@ -63,6 +68,29 @@ $extraheader
           self#inlines () data;
           Printf.fprintf out "}"
         | Break_Line -> Printf.fprintf out "\\\\\n"
+        | Footnote_Reference {Inline.name; Inline.definition} -> 
+          (match definition with
+            | Some u -> 
+              Printf.fprintf out "\\footnote{"; 
+              self#inlines () u;
+              Printf.fprintf out "}";
+              (match name with
+                | Some name -> footnote_stack := !footnote_stack @ [name]
+                | None -> footnote_stack := !footnote_stack @ [""])
+            | None -> match name with
+                | None -> Log.fatal "Empty footnote"
+                | Some name ->
+                  try
+                    let body = List.assoc name !footnote_defs in
+                    try 
+                      let (k, _) = List.findi (fun _ -> (=) name) !footnote_stack in
+                      Printf.fprintf out "\\footnotemark[%d]" (1+k);
+                    with Not_found ->
+                      footnote_stack := !footnote_stack @ [name];
+                      Printf.fprintf out "\\footnote{";
+                      self#inlines () body;
+                      Printf.fprintf out "}";
+                  with Not_found -> Log.warning "Reference to undefined footnote: %s" name)
         | Entity e -> 
           if not e.latex_mathp then 
             Printf.fprintf out "%s" e.latex
@@ -126,6 +154,7 @@ $extraheader
         | x -> super#block () x
       method heading () d = 
         let command = List.nth (get sections) (d.level - 1) in
+        let () = footnote_defs := d.meta.footnotes in
         Printf.fprintf out "\\%s{" command;
         self#inlines () d.name;
         Printf.fprintf out "}\\label{sec:%s}\n" (Toc.link (Inline.asciis d.name));
@@ -133,6 +162,7 @@ $extraheader
         List.iter (self#heading ()) d.children
       method document () d = 
         self#header ();
+        footnote_defs := d.beg_meta.footnotes;
         super#document () d;
         self#footer ()
     end

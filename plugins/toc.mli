@@ -6,7 +6,7 @@
 type t
 (** The type of a table of contents *)
 
-val gather : Document.t -> t
+val gather : Config.instance -> Document.t -> t
 (** Get the toc of a document *)
 
 val mem : string -> t -> bool

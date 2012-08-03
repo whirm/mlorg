@@ -7,3 +7,4 @@ common/Numbering
 common/Timestamp
 syntax/inline/Entity
 syntax/inline/Inline
+syntax/blocks/Block

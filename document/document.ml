@@ -107,6 +107,16 @@ class virtual ['a] bottomUp = object(self)
                   self#blocks h.content :: 
                   List.map self#heading h.children)
 end
+
+class virtual ['a, 'b] bottomUpWithArg = object(self)
+  inherit ['a, 'b] Block.bottomUpWithArg
+  method document arg d = 
+    self#combine (self#blocks arg d.beginning :: List.map (self#heading arg) d.headings)
+  method heading arg h = 
+    self#combine (self#inlines arg h.name ::
+                  self#blocks arg h.content :: 
+                  List.map (self#heading arg) h.children)
+end
   
 
 (** {1 Importing a tree} *)
@@ -121,6 +131,8 @@ let collect =
     method block meta = function
       | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
+      | Block.Footnote_Definition (name, def) ->
+        { meta with footnotes = (name, def) :: meta.footnotes }
       | block -> super#block meta block (* no recursion *)
     method inline meta = 
       let open Inline in function
@@ -309,3 +321,12 @@ let clocking_time h =
     (Option.map_default Timestamp.from_now 0  h.meta.current_clock)
     (List.map Timestamp.duration h.meta.clocks)
 let current_clocking_time doc = Option.map clocking_time (current_clocked_item doc)
+
+let rec has_tag t h = 
+  List.mem t h.tags || Option.map_default (has_tag t) false h.father
+
+let rec has_tag t h = 
+  List.mem t h.tags || Option.map_default (has_tag t) false h.father
+
+let rec has_tag t h = 
+  List.mem t h.tags || Option.map_default (has_tag t) false h.father
