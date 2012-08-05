@@ -133,3 +133,6 @@ val current_clocking_time : t -> int option
 
 val has_tag : string -> heading -> bool
 (** [has_tag tag heading] returns true if [heading] has the tag [tag] (or inherits it) *)
+
+val footnotes : t -> (string * Inline.t list) list
+(** [footnotes document] returns all the footnotes present in a document by order of first reference. *)

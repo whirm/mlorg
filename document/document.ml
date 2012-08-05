@@ -330,3 +330,10 @@ let rec has_tag t h =
 
 let rec has_tag t h = 
   List.mem t h.tags || Option.map_default (has_tag t) false h.father
+
+let footnotes doc = 
+  let rec handle_heading h = 
+    h.meta.footnotes @ List.concat (List.map handle_heading h.children)
+  in
+  doc.beg_meta.footnotes @ List.concat (List.map handle_heading doc.headings)
+  
