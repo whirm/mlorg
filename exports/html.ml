@@ -36,6 +36,22 @@ module E = struct
       Xml.block "html"
         ~attr:["xmlns", "http://www.w3.org/1999/xhtml"]
         [head; Xml.block "body" contents]
+    method handle_image_link url href label = 
+      match url with
+        | Complex {protocol; link} ->
+            (* slight hack here to handle math2png annotations *)
+            let opts, href = 
+              try
+                Scanf.sscanf protocol "depth-%d" 
+                  (fun n -> ["style", Printf.sprintf "vertical-align: -%dpx" n], link)
+              with _ -> [], href
+            in
+            [Xml.block "img" ~attr: (opts @
+                                       ["src", href;
+                                        "title", Inline.asciis label]) []]
+        | Search s | File s ->
+            [Xml.block "img" 
+                ~attr: (["src", href; "title", Inline.asciis label]) []]
     method inline = function
       | Plain s -> [Xml.data s]
       | Superscript l -> [Xml.block "sup" (self#inlines l)]
@@ -48,17 +64,9 @@ module E = struct
       | Latex_Fragment (Inline.Math s) -> [Xml.data ("\\("^s^"\\)")]
       | Link {url; label} ->
           let href = Inline.string_of_url url in
+          (* If it is an image *)
           if List.exists (String.ends_with href) (get image_extensions) then
-            let opts, href = 
-              print_endline href;
-              try let (Complex {protocol; link}) = url in
-                  Scanf.sscanf protocol "depth-%d" 
-                    (fun n -> ["style", Printf.sprintf "vertical-align: -%dpx" n], link)
-              with _ -> [], href
-            in
-            [Xml.block "img" ~attr: (opts @
-                                       ["src", href;
-                                        "title", Inline.asciis label]) []]
+            self#handle_image_link url href label
           else
             let href = match url with
               | Search x -> "#" ^ Toc.link x
