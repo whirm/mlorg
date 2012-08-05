@@ -60,11 +60,11 @@ and export_snippet = string * string
 
 (** {2 Footnote reference} *)
 (** A footnote reference contains:
-    - a name (optional)
+    - a name (if not specified, generated)
     - a definition (optional) *)
 
 and footnote_reference = {
-  name : string option;
+  name : string;
   definition : t list option;
 }
 

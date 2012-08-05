@@ -44,10 +44,10 @@ module E = struct
         IO.nwrite out "}"
       | Footnote_Reference {Inline.name; definition} ->
         (match definition with
-          | Some def -> ws "[fn:%s:" (Option.default "" name);
+          | Some def -> ws "[fn:%s:" name;
             self#inlines def;
             Printf.fprintf out "]"
-          | None -> ws "[fn:%s]" (Option.default "" name))
+          | None -> ws "[fn:%s]" name)
       | Inline_Call {program; arguments; inside_headers; end_headers} ->
         let arguments = List.map (fun (a, b) -> Printf.sprintf "%s=%s" a b) arguments
                         |> String.concat ", "

@@ -126,13 +126,22 @@ let empty_meta = {
 }
 
 let collect = 
+  let orphans = ref [] in
   let collector = object(self)
     inherit [meta] Block.folder as super
     method block meta = function
       | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
       | Block.Footnote_Definition (name, def) ->
-        { meta with footnotes = (name, def) :: meta.footnotes }
+          let b = ref false in
+          let l' = meta.footnotes |> List.map (fun (name', x) -> 
+            if name = name' then 
+              (b := true; name, def)
+            else name', x) 
+          in
+          if !b then { meta with footnotes = meta.footnotes }
+          else
+            (orphans := (name, def) :: !orphans; meta)
       | block -> super#block meta block (* no recursion *)
     method inline meta = 
       let open Inline in function
@@ -142,8 +151,13 @@ let collect =
         | Timestamp (Range t) -> { meta with ranges = t :: meta.ranges }
         | Timestamp (Clock (Stopped t)) -> { meta with clocks = t :: meta.clocks }
         | Timestamp (Clock (Started t)) -> { meta with current_clock = Some t }
-        | Footnote_Reference ({name = Some name; definition = Some def}) ->
+        | Footnote_Reference ({name; definition = Some def}) ->
           { meta with footnotes = (name, def) :: meta.footnotes }
+        | Footnote_Reference ({name}) ->
+            try
+              { meta with footnotes = (name, List.assoc name !orphans) :: meta.footnotes }
+            with Not_found ->
+              { meta with footnotes = (name, []) :: meta.footnotes }
         | x -> super#inline meta x
   end
   in

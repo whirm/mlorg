@@ -8,7 +8,7 @@ type emphasis = [`Bold | `Italic | `Underline] * t list
 and entity = Entity.t
 and export_snippet = string * string
 and footnote_reference = {
-  name : string option;
+  name : string;
   definition : t list option;
 }
 and inline_call = {
@@ -180,19 +180,24 @@ let export_snippet_parser _ rest =
     | Some s -> Some ([Export_Snippet (name, unescape (all s))], rest)
 
 (** {2 Footnote reference parser} *)
+let id = ref 0
 let footnote_reference_parser parse rest = 
   let contents, rest = inside obracket rest in
   match contents with
     | None -> None
     | Some contents ->
       if (try int_of_string contents; true with _ -> false) then
-        Some ([Footnote_Reference { name = Some contents; definition = None }], 
+        Some ([Footnote_Reference { name = contents; definition = None }], 
               rest)
       else
         let contents = see "fn:" (Substring.all contents) in
         let name, contents = until ((=) ':') contents in
         let contents = skip contents in
-        let name = if name = "" then None else Some name in
+        let name = if name = "" then
+          (incr id;  "_anon_" ^ string_of_int !id)
+          else
+            name
+        in
         let definition = 
           if String.is_empty contents then None 
           else Some (parse (String.to_string contents))

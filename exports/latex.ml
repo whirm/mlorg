@@ -74,23 +74,19 @@ $extraheader
               Printf.fprintf out "\\footnote{"; 
               self#inlines () u;
               Printf.fprintf out "}";
-              (match name with
-                | Some name -> footnote_stack := !footnote_stack @ [name]
-                | None -> footnote_stack := !footnote_stack @ [""])
-            | None -> match name with
-                | None -> Log.fatal "Empty footnote"
-                | Some name ->
-                  try
-                    let body = List.assoc name !footnote_defs in
-                    try 
-                      let (k, _) = List.findi (fun _ -> (=) name) !footnote_stack in
-                      Printf.fprintf out "\\footnotemark[%d]" (1+k);
-                    with Not_found ->
-                      footnote_stack := !footnote_stack @ [name];
-                      Printf.fprintf out "\\footnote{";
-                      self#inlines () body;
-                      Printf.fprintf out "}";
-                  with Not_found -> Log.warning "Reference to undefined footnote: %s" name)
+              footnote_stack := !footnote_stack @ [name]
+            | None ->
+                try
+                  let body = List.assoc name !footnote_defs in
+                  try 
+                    let (k, _) = List.findi (fun _ -> (=) name) !footnote_stack in
+                    Printf.fprintf out "\\footnotemark[%d]" (1+k);
+                  with Not_found ->
+                    footnote_stack := !footnote_stack @ [name];
+                    Printf.fprintf out "\\footnote{";
+                    self#inlines () body;
+                    Printf.fprintf out "}";
+                with Not_found -> Log.warning "Reference to undefined footnote: %s" name)
         | Entity e -> 
           if not e.latex_mathp then 
             Printf.fprintf out "%s" e.latex

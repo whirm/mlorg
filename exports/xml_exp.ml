@@ -32,7 +32,7 @@ module E = struct
           [Xml.block "export-snippet" ~attr:["backend", backend]
               [Xml.data text]]
       | Footnote_Reference {Inline.name; definition} ->
-          [Xml.block "footnote-reference" ~attr: (opt_attr "name" name)
+          [Xml.block "footnote-reference" ~attr: ["name", name]
               (Option.map_default self#inlines [] definition)]
       | Inline_Call {program; arguments; inside_headers; end_headers} ->
           [Xml.block "inline-call" ~attr: (["program", program]
