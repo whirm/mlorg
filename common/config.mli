@@ -25,13 +25,9 @@
 (** {2 How to use it} *)
 
 (** See the exporters for some example.  Basically you need first to create a
-    {!preconfiguration} in which you {!add} your argument. Each subsequent call
+    {!t} in which you {!add} your arguments. Each subsequent call
     to {!add} will give you an item you should conserve and will be used to
     retrieve the options's value.
-
-    When you added all the options, you create configuration by {!validate}-ing
-    your preconfiguration that will optimize the representation for O(1) access
-    to variables.
 *)
 
 (** {1 Documentation} *)
