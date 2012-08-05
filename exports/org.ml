@@ -126,36 +126,21 @@ module E = struct
         ws ":%s:\n" name;
         self#blocks c;
         ws ":END:\n"
-      | x -> super#block x
-(*      | Property_Drawer _ -> []
+      | Property_Drawer l -> 
+        ws ":PROPERTY:\n";
+        List.iter (fun (name, v) -> ws " :%s: %s" name v) l;
+        ws ":END:\n";
       | Table t ->
-          let index = Option.map_default
-            (Xml.block "sizes" -| Array.to_list -| 
-                Array.mapi (fun i v -> Xml.block "index" 
-                  ~attr: ["index", string_of_int i; "size", string_of_int v] []))
-            Xml.empty t.align_line
-          in
-          let groups = Option.map_default
-            (Xml.block "groups" -| 
-                List.mapi (fun i (start, stop) -> Xml.block "group" 
-                  ~attr: ["index", string_of_int i; 
-                          "start", string_of_int start;
-                          "stop", string_of_int stop] []))
-            Xml.empty t.groups
-          in
-          let contents = Array.to_list
-            (Array.map (Xml.block "row"
-                           -| Array.to_list 
-                           -| Array.map (Xml.block "cell" -| self#inlines))
-            t.rows)
-          in    
-          [Xml.block "table" ~attr: (opt_attr "format" t.format)
-              (index :: groups :: contents)]
-     | Horizontal_Rule -> [Xml.block "horizontal-rule" []]
-     | Footnote_Definition (name, contents) ->
-       [Xml.block "footnote-definition" ~attr:["name", name]
-           (self#inlines contents)]
-*)
+        let pr_row = Array.iter (fun x -> ws "| "; self#inlines x) in
+        Array.iter (fun x -> pr_row x; ws " |\n") t.rows;
+        Option.map_default (ws "#+tblfm: %s") () t.format
+      | Horizontal_Rule -> ws "-----"
+      | Latex_Environment (name, opts, contents) ->
+        ws "\\begin{%s}%s\n%s\n\b\\end{%s}" name opts
+          (String.concat "\n" contents) name
+      | Footnote_Definition (name, contents) ->
+        ws "[%s] " name;
+        self#inlines contents
     method heading d = 
       let iter f = Option.map_default f () in 
       for i = 1 to d.level do ws "*" done;
