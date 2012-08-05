@@ -33,7 +33,7 @@ type 'a plugin = (module Plugin with type interface = 'a)
 module type Exporter = sig
   val default_filename : string -> string
   (** [default_filename file] should return the output file corresponding to input file [file].
-      See {!Prelude.change_extension} to deal with most common case.  *)
+      See {!Prelude.change_ext} to deal with most common case.  *)
   val export : Config.instance -> Document.t -> unit BatIO.output -> unit
   (** The export function. *)
 end
@@ -49,14 +49,20 @@ end
 module General : sig
   val add : unit plugin -> unit
 end
+(** General purpose plugins (such as Transformers) *)
 
 (** {3 Global item configuration} *)
 module Global : sig
   val verbose : int Config.item
+  (** Verbosity level *)
 end
+(** The global configuration. In this module are stored
+    the global parameter of mlorg. *)
 
 (** {2 Configuration management} *)
+
 val global_config : (string * string) list -> Config.instance
-  
+(** Creates a configuration instance for all registered plugins from a list of
+    key-value terms. *)
 val eprint_config_descr : unit -> unit
 (** Prints on stderr the description of all the configuration items *)

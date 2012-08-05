@@ -1,6 +1,5 @@
 (** Inline contents: type definition and output. *)
 
-
 (** {1 Description} *)
 
 (** This file deal with parsing inline contents. It is called /objects= in =org-element=.
@@ -12,15 +11,17 @@ This is the list of possible elements:
 - footnote reference : [[fn:foo]] for instance
 - inline babel call : make a call to a babel source block. More details [[http://orgmode.org/manual/Evaluating-code-blocks.html][here]].
 - inline source block : [src_lang[arg]\{contents\}]
-- latex fragment : =$foo$=
+- latex fragment : [$foo$] or [\foo{}]
 - line break : =\\\\= at the end of a line
 - link : =[[descr][target]]= 
 - macro : text substitution [{{{name(arg1, arg2)}}}]. Documentation [[http://orgmode.org/manual/Macro-replacement.html][here]].
 - radio target : special links  [<<<target>>>]
-- statistics-cookie : statistics about the percentage of done children
+- targets : anchors [<<anchor>>]
+- subscript [_{foo}]
+- superscript [^{foo}]
 - verbatim : [=plaincode=]
+- statistics-cookie : statistics about the percentage of done children
 - superscript/subscript : [^\{foo\}] and [_\{foo\}]
-- targets : special links (?)
 - timestamp : scheduled/deadline or plain/inactive timestamp
 
 The file is organized as follows :
@@ -182,7 +183,9 @@ val parse : string -> t list
 
 
 (** {1 Mappers and folders} *)
-(** In this section we define mapper and folders overline *)
+(** In this section we define mapper and folders overline. See Document for the
+    full documentation of these traversal. *)
+
 class ['a] mapper :
 object
   method inline : 'a -> t -> t

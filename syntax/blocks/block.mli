@@ -17,23 +17,27 @@ For now it covers :
 (** {1 Type definition} *)
 
 (** {2 Headings} *)
+
 type heading = {
-  title: Inline.t list;
-  tags: string list;
+  title: Inline.t list; (** The title as inline formatted content *)
+  tags: string list; (** The tags set by the user *)
   marker: string option; (** TODO, DONE, and so on *)
-  level: int;
-  priority: char option
+  level: int; (** The level (numbero of stars) -- starts at 1 *)
+  priority: char option (** The optional priority *)
 }
 (** The data for a heading. *)
+
 (** {2 Lists} *)
+
 and list_item = {
-  contents: t list;
+  contents: t list; (** The item's contents *)
   number: string option; (** The optional number of the item *)
   checkbox: bool option; (** Does it have a checkbox ([[ ]]) and is it checked ? *)
 }
 (** A list item *)
 
 (** {2 Tables} *)
+
 and table = {
   groups : (int * int) list option;
   (** List of columns to group. A list of couple (start, stop) *)
@@ -44,7 +48,8 @@ and table = {
   format : string option
   (** The table's format *)
 }
-(** Table *)
+(** Tables *)
+
 (** {2 Blocks} *)
 and t = 
   | Paragraph of Inline.t list
@@ -72,9 +77,9 @@ and t =
   #+end *)
   | Latex_Environment of string * string * string list
       (** Latex environment. Of the form
-          {v \begin{foo}
-          bar
-          \end{foo} v}
+{v \begin{foo}
+bar
+\end{foo} v}
       *)
   | Drawer of string * t list
   (** A drawer *)
@@ -85,8 +90,11 @@ and t =
   | Horizontal_Rule
   (** Horizontal rule *)
   | Table of table
+(** A block *)
 
 (** {1 Mapper and folders} *)
+(** See document for a description *)
+
 class ['a] mapper : object
   inherit ['a] Inline.mapper
   method block : 'a -> t -> t

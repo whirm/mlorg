@@ -6,6 +6,7 @@ open Batteries
 open Prelude
 
 (** {1 Type definitions} *) 
+
 type meta = { 
   timestamps : Timestamp.t list;
   (** The plain timestamps appearing in the heading *)
@@ -27,18 +28,17 @@ type meta = {
 (** The metadata of a heading in a document. *)
 
 type heading = {
-  name      : Inline.t list;
-  level     : int;
-  content   : Block.t list;
-  mutable father : heading option; (* mutable to break the recursion during the construction *)
-  children  : heading list;
-  tags      : string list;
-  marker    : string option;
-  meta      : meta;
-  anchor     : string;
+  name      : Inline.t list; (** Its name, as inline formatted content *)
+  level     : int; (** Its level (number of star), starts at 1 *)
+  content   : Block.t list; (** The content before the first children *)
+  mutable father : heading option; (** The optional father of the heading. [None] if it is the root heading. *)
+  children  : heading list; (** The children *)
+  tags      : string list; (** The tags *)
+  marker    : string option; (** The optional marker *)
+  meta      : meta; (** The metadata gathered in the heading's content *)
+  anchor     : string; (** The anchor  -- to refer to the heading *)
 }
 (** A heading in a document *)
-
 
 type t = { 
   filename : string;
@@ -48,7 +48,7 @@ type t = {
   directives : (string * string) list;
   (** The directives present in the file *)
   headings : heading list;
-  (** The top-level heading *)
+  (** The top-level headings *)
   beg_meta : meta;
   (** The timestamp present in the beginning *)
   exts : string list;
@@ -72,35 +72,49 @@ type t = {
 *)
     
 (** {1 Mapping and folding} *)
+
+(** In this section we define document traversal. The idea is to be able to
+    completely traverse a document by just specifying the case we are interested
+    in, and not having to write the cursion calls each time. *)
+
+
 class ['a] mapper : object
   inherit ['a] Block.mapper
   method document : 'a -> t -> t
   method heading : 'a -> heading -> heading
 end
+(** Maps an ast. Takes a value that is passed top-down *)
+
 class ['a] folder : object
   inherit ['a] Block.folder
   method document : 'a -> t -> 'a
   method heading : 'a -> heading -> 'a
 end
+(** Destruct an ast (fold). Takes a value that is built along the way *)
+
 class virtual ['a] bottomUp : object
   inherit ['a] Block.bottomUp
   method document : t -> 'a
   method heading : heading -> 'a
 end
+(** BottomUp traversal. Values is generated from the leaf and is combined as we climb up the tree *)
 
 class virtual ['a, 'b] bottomUpWithArg : object
   inherit ['a, 'b] Block.bottomUpWithArg
   method document : 'b -> t -> 'a
   method heading : 'b -> heading -> 'a
 end
+(** BottomUp traversal with an argument which is passed top-down *)
 
 (** {1 Parsing documents} *)    
+
 val from_chan : string -> BatIO.input -> t
 (** From an input (the first argument is the filename) *)
 val from_file  : string -> t
 (** From a file *)
 
 (** {1 Handling documents} *)
+
 val descendants : heading -> heading list
 (** Returns the descendants of the given heading (including this one) *)
 
@@ -120,7 +134,8 @@ val dump : heading list -> unit
 (** Dump a list of heading as a tree *)
 
 val find_block_by_name : t -> string -> Block.t option
-
+(** [find_block_by_name document name] finds the first block of [document]
+    called [name] *)
 
 val current_clocked_item : t -> heading option
 (** Returns the current clocked item of a document, if it exists *)

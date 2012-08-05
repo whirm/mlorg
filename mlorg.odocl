@@ -8,3 +8,7 @@ common/Timestamp
 syntax/inline/Entity
 syntax/inline/Inline
 syntax/blocks/Block
+syntax/blocks/Parser
+document/Document
+document/Filter
+document/Plugin
