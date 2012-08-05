@@ -31,11 +31,12 @@ val unescape : ?l : char list -> BatSubstring.t -> string
 val escape : string list -> string -> string
 (** [escape chars string] escapes every occurence of any character in [chars], in [string] *)
 
-val substitute : (string -> string) -> string -> string
-(** [substitute f s] substitues every variable present in [s] by applying [f] on the name of the variable. It uses the same format as [Buffer.add_substitute] *)
-
 (** {2 Other} *)
 
 val change_ext : string -> string ->string
 (** [change_ext new_ext file] replaces the old extension of [file] by [new_ext].
     Does nothing if [file = ""]. *)
+
+val substitute : (string -> string) -> string -> string
+(** [substitute f s] substitues every variable present in [s] by applying [f] on the name of the variable. It uses the same format as [Buffer.add_substitute] *)
+

@@ -1,8 +1,10 @@
 open Batteries
 
+(* *)
 let words s = String.nsplit s " "
 let lines s = String.nsplit s "\n"
 
+(* *)
 let filteri f s =
   let r = ref (-1) in
   String.filter (fun _ -> incr r; f !r) s
@@ -19,7 +21,15 @@ let unescape ?(l = []) s =
   filteri (fun k -> not (is_escaping s k) || test k)
     (BatSubstring.to_string s)
 
+let escape chars s = 
+  let regexp =
+    Str.regexp
+      (String.concat "\\|" (List.map Str.quote chars))
+  in
+  Str.global_replace regexp "\\\\\\0" s
 
+
+(* *)
 let change_ext ext file =
   if file = "-" then file
   else Filename.chop_extension file ^ "." ^ ext
@@ -30,13 +40,6 @@ let rec concat_fmt f sep ppf l = match l with
   | [x] -> f ppf x
   | t :: q -> Format.fprintf ppf "%a%s%a" f t sep 
       (concat_fmt f sep) q
-let escape chars s = 
-  let regexp =
-    Str.regexp
-      (String.concat "\\|" (List.map Str.quote chars))
-  in
-  Str.global_replace regexp "\\\\\\0" s
-
 let substitute f s = 
   let b = Buffer.create (String.length s) in
   Buffer.add_substitute b f s;
