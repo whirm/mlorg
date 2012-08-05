@@ -123,9 +123,9 @@ let rec run_parsers parsers string =
 (* The table of delimiters used to parse inline contents *)
  let delim_table = [('[', (']', false)); ('<', ('>', false));
                    ('{', ('}', false)); ('(', (')', false));
-                   ('*', ('*', true)); ('_', ('_', true));
-                   ('~', ('~', true)); ('$', ('$', false)); 
-                   ('=', ('=', true)); ('/', ('/', true))]
+                   ('*', ('*', false)); ('_', ('_', true));
+                   ('~', ('~', false)); ('$', ('$', true)); 
+                   ('=', ('=', true)); ('/', ('/', false))]
 module D = Delimiters.Make (struct let table = delim_table end)
 open Substring
 module String = Substring

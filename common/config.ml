@@ -53,8 +53,7 @@ let string =
 let table = [
   '(', (')', false);
   '[', (']', false);
-  '"', ('"', false);
-  ',', (',', false);
+  '"', ('"', true);
 ]
 module D = Delimiters.Make (struct let table = table end)
   

@@ -7,15 +7,19 @@
 (** Note that the delimiter parsing is more subtle than what you can get with
     for instance [Str.split]. In particular it will match other delimiters and
     handle escpaes. For instance with the proper table, [enclosing_delimiter
-    "{foo{bar}}" '{'] would return ["foo{bar}"].
+    "{foo{bar}}" '{'] would return ["foo{bar}"]. Not all delimiters are
+    considered as 'valid'. Non-valid delimiters are ignored. A delimiter is valid when:
+
+    - it is not escaped
+    - it is not surrounded by space
 *)
 
 module type Table = sig
   val table : (char * (char * bool)) list
 end
-(** A table, composed of elements of the form [(opening, closing, in_word?)]
-    where the boolean [in_word?] tell whether an occurence of either opening or
-    closing delimiter inside a word is considered valid.
+(** A table, composed of elements of the form [(opening, (closing, quote))].
+    If [quote] is true it means that the contents held inside this delimiter is to be quoted
+    and you don't have to look for delimiters inside.
 *)
 module Make (T : Table) : sig
   val enclosing_delimiter : BatSubstring.t -> char -> (string * BatSubstring.t) option
