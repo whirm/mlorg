@@ -101,31 +101,33 @@ module E = struct
       indent_level := !indent_level - 2;
     method block = function
       | Paragraph l -> self#inlines l; IO.write out '\n'
-      | x -> super#block x
-(*      | Heading _ -> []
-      | List (l, _) ->
-          [Xml.block "list" (concatmap (self#list_item) l)]
-      | Directive _ -> []
-      | Math s -> [Xml.block "math-block" [Xml.data s]]
+      | Heading _ -> () (* heading is handled in the heading method *)
+      | List (l, _) -> List.iter self#list_item l
+      | Directive (a, b) -> ws "#+%s: %s\n" a b
+      | Math s -> ws "$$ %s $$" s
       | Quote l ->
-          [Xml.block "quote" (self#blocks l)]
-      | With_Keywords (l, b) -> [Xml.block "with-keywords" ~attr: l (self#block b)]
-      | Example (line, l) ->
-          [Xml.block "example" ~attr: ["linenumber", string_of_int line]
-              [Xml.data (String.concat "\n" l)]]
+        ws "#+begin_quote\n";
+        self#blocks l;
+        ws "#+end_quote\n";
+      | With_Keywords (l, b) -> 
+        List.iter (fun (name, v) -> ws "#+%s: %s\n" name v) l;
+        self#block b
+      | Example (_, lines) ->
+        List.iter (ws ": %s\n") lines
       | Src (number, opts, lines) ->
-          [Xml.block "source" ~attr:["options", opts; "linenumber", string_of_int number]
-              [Xml.data (String.concat "\n" lines)]]
+        ws "#+begin_src %s\n" opts;
+        List.iter (ws "%s\n") lines;
+        ws "#+end_src\n"
       | Custom (name, opt, contents) ->
-          [Xml.block "custom" ~attr:["name", name; "options", opt]
-              (self#blocks contents)]
-      | Latex_Environment (name, opts, contents) ->
-          [Xml.block "latex-environment" ~attr: ["name", name; "opts", opts]
-              [Xml.data (String.concat "\n" contents)]]
+        ws "#+begin_%s %s\n" name opt;
+        self#blocks contents;
+        ws "#+end_%s\n" name
       | Drawer (name, c) ->
-          [Xml.block "drawer" ~attr:["name", name]
-              (self#blocks c)]
-      | Property_Drawer _ -> []
+        ws ":%s:\n" name;
+        self#blocks c;
+        ws ":END:\n"
+      | x -> super#block x
+(*      | Property_Drawer _ -> []
       | Table t ->
           let index = Option.map_default
             (Xml.block "sizes" -| Array.to_list -| 
@@ -153,39 +155,22 @@ module E = struct
      | Footnote_Definition (name, contents) ->
        [Xml.block "footnote-definition" ~attr:["name", name]
            (self#inlines contents)]
-
-    method footnote (name, contents) = 
-      Xml.block "footnote" ~attr: ["name", name] (self#inlines contents)
-    method property (key, value) = 
-      Xml.block "properties" ~attr:["name", key; "value", value] []
+*)
     method heading d = 
-      let mk_list name f l = if l = [] then Xml.empty
-        else Xml.block name (List.map f l)
-      in
-      let attr = ["level", string_of_int d.level] @ opt_attr "marker" d.marker in
-      let children = Xml.block "meta"
-        [Xml.block "name" (self#inlines d.name);
-          mk_list "scheduled" self#timestamp d.meta.scheduled;
-          mk_list "deadlines" self#timestamp d.meta.deadlines;
-          mk_list "timestamps" self#timestamp d.meta.timestamps;
-          mk_list "range" self#range d.meta.ranges;
-          mk_list "footnotes" self#footnote d.meta.footnotes;
-          mk_list "clocks" self#range d.meta.clocks;
-          (match d.meta.current_clock with
-            | Some t -> Xml.block "current-clock" [self#timestamp t]
-            | None -> Xml.empty);
-          mk_list "properties" self#property d.meta.properties] ::
-          (self#blocks d.content
-           @ concatmap self#heading d.children)
-      in [Xml.block "heading" ~attr children]
-    method document d =
-      [Xml.block "document" 
-          ~attr: ["title", d.title; "author", d.author;
-                  "filename", d.filename]
-          (self#blocks d.beginning @
-             concatmap self#heading d.headings)]*)
+      let iter f = Option.map_default f () in 
+      for i = 1 to d.level do ws "*" done;
+      ws " ";
+      iter (ws "[#%c] ") d.Document.priority;
+      iter (ws "%s ") d.marker;
+      self#inlines d.name;
+      if d.tags <> [] then
+        ws "     :%s:" (String.concat ":" d.tags);
+      ws "\n";
+      self#blocks d.Document.content;
+      List.iter self#heading d.children
     end
-  module Exp = struct
+  
+module Exp = struct
     let export _ doc out = 
       (new orgExporter out)#document doc
     let default_filename = change_ext "org"
