@@ -72,9 +72,9 @@ and t =
   #+end *)
   | Latex_Environment of string * string * string list
       (** Latex environment. Of the form
-          \begin{foo}
+          {v \begin{foo}
           bar
-          \end{foo}
+          \end{foo} v}
       *)
   | Drawer of string * t list
   (** A drawer *)
