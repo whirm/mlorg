@@ -154,10 +154,10 @@ let collect =
         | Footnote_Reference ({name; definition = Some def}) ->
           { meta with footnotes = (name, def) :: meta.footnotes }
         | Footnote_Reference ({name}) ->
-            try
+            (try
               { meta with footnotes = (name, List.assoc name !orphans) :: meta.footnotes }
             with Not_found ->
-              { meta with footnotes = (name, []) :: meta.footnotes }
+              { meta with footnotes = (name, []) :: meta.footnotes })
         | x -> super#inline meta x
   end
   in

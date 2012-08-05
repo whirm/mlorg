@@ -11,9 +11,13 @@ module E = struct
   let data = ()
   let name = "toc"
   let config = Config.create ()
+  let rewrite_footnotes = Config.add config "rewrite-footnotes" boolean "True if footnotes should be handled" true
   let number_heading = Config.add config "number-heading" boolean "True if headings should be numbered" true
-  let number_format = Config.add config "number-format" string "The format used to number the headings" "1.1.1.1.1"
-  let number_format_appendix = Config.add config "appendix-format" string "The format used to number the headings in the appendix" "A.1.1.1.1"
+  let heading_format = Config.add config "heading-format" string "The format used to number the headings" "1.1.1.1.1"
+  let footnote_format = Config.add config "footnote-format" string "The format used to number the footnotes" "1"
+  let appendix_format = Config.add config "appendix-format" string "The format used to number the headings in the appendix" "A.1.1.1.1"
+  let footnotes_level = Config.add config "footnotes-level" int "Displays the footnotes at the end of sections of given level"
+    2
   let number_heading_format = Config.add config "number-heading-format" string 
     "The format in which insert the the number in the heading (beginning)" 
     ~vars: [make_var "number" "The number of the heading"] "$number "
@@ -40,8 +44,8 @@ let contains_appendix =
 let gather { get } doc = 
   let appendix = ref false in
   let compute_number numbers is_appendix = 
-    format (get (if is_appendix then number_format_appendix 
-                                else number_format))
+    format (get (if is_appendix then appendix_format
+                                else heading_format))
       numbers
   in
   let o = object(self)
@@ -92,9 +96,48 @@ let generate { get } toc =
 
 let transform ({ get } as conf) doc =
   let global_toc = gather conf doc in
+  let footnotes = Document.footnotes doc 
+        |> List.mapi (fun i (a, b) -> (a, (i, b))) in
+  let footnotes_seen = ref [] in
   let o = object(self)
     inherit [int list * t ref] Document.mapper as super
+    method make_footnote_label n = "_footnote_"^n
+    method flush_footnotes () = 
+      if !footnotes_seen <> [] then
+        let b = Horizontal_Rule :: 
+          List.map (fun (name, contents) ->
+            let number, _ = List.assoc name footnotes in
+          Paragraph (Target (self#make_footnote_label name) ::
+                       Superscript [Plain (format (get footnote_format) [1+number])] ::
+                       Plain " " ::
+                       contents)) !footnotes_seen
+        in (footnotes_seen := []; b)
+      else []
+    method inline (numbers, toc) = function
+      | Footnote_Reference {Inline.name; definition} as x ->
+        (try
+          let (number, _) = List.assoc name footnotes in
+          Inline.(
+            Superscript 
+              [Link {
+                label = [Plain (format (get footnote_format) [1+number])];
+                url= Search (self#make_footnote_label name)
+              }])
+        with Not_found -> 
+          Log.warning "Reference to unknown footnote `%s' (It is defined in the same section?)" name;
+          x)
+      | x -> super#inline (numbers, toc) x
+    method block (numbers, toc) = function
+      | Footnote_Definition _ -> Paragraph []
+      | x -> super#block (numbers, toc) x
     method heading (numbers, toc) t = 
+      let () = footnotes_seen := !footnotes_seen @ 
+        Document.(t.meta.footnotes) in
+      let ft_contents = 
+        if get rewrite_footnotes && t.Document.level <= get footnotes_level then 
+          self#flush_footnotes ()
+        else []
+      in
       if shall_be_numbered t then
         let entry = List.hd !toc in
         let echildren = ref entry.children in
@@ -110,18 +153,22 @@ let transform ({ get } as conf) doc =
         { t with 
           Document.name; Document.children;
           Document.content = 
-            self#blocks (numbers, toc) t.Document.content
+            self#blocks (numbers, toc) t.Document.content @ ft_contents
         }
       else
-        t
+        { t with Document.content = t.Document.content @ ft_contents }
     method document (_, toc) doc = 
+      let open Document in
+      let () = footnotes_seen := doc.beg_meta.footnotes in
+      let footnotes = if get rewrite_footnotes then self#flush_footnotes () 
+        else [] in
       if get number_heading then
-        {doc with Document.headings = 
-            List.mapi (fun k i -> self#heading ([1+k], toc) i) doc.Document.headings;
-          beginning = self#blocks ([], toc) doc.Document.beginning
-        }
+        {doc with 
+          headings = 
+            List.mapi (fun k i -> self#heading ([1+k], toc) i) doc.headings;
+          beginning = self#blocks ([], toc) doc.beginning @ footnotes}
       else
-        doc
+        { doc with beginning = doc.beginning @ footnotes }
     method block l = function
       | Custom ("tableofcontents", opts, contents) ->
           Custom ("tableofcontents", opts,
