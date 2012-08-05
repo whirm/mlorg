@@ -1,0 +1,10 @@
+mlorg is an org-mode parser written in OCaml. It is not as complete as the
+reference implementation but it should be fairly easy to extend it (provided you
+know OCaml). See the website for more information
+
+  http://kiwi.iuwt.fr/~asmanur/projets/mlorg/
+
+or the provided manual.org with the distribution which documents invocation,
+uses and so on.
+
+If you have any question and want to contribute, please send an email to simon.castellan@iuwt.fr

@@ -1,0 +1,7 @@
+To compile mlorg:
+- make
+
+To install mlorg:
+- sudo make install
+
+You can build the doc via `make doc'.
