@@ -160,7 +160,8 @@ module E = struct
       let mk_list name f l = if l = [] then Xml.empty
         else Xml.block name (List.map f l)
       in
-      let attr = ["level", string_of_int d.level] @ opt_attr "marker" d.marker in
+      let attr = ["level", string_of_int d.level] @ opt_attr "marker" d.marker 
+      @ opt_attr "priority" (Option.map string_of_char d.priority) in
       let children = Xml.block "meta"
         [Xml.block "name" (self#inlines d.name);
           mk_list "scheduled" self#timestamp d.meta.scheduled;

@@ -35,6 +35,7 @@ type heading = {
   children  : heading list; (** The children *)
   tags      : string list; (** The tags *)
   marker    : string option; (** The optional marker *)
+  priority  : char option; (** The optional priority *)
   meta      : meta; (** The metadata gathered in the heading's content *)
   anchor     : string; (** The anchor  -- to refer to the heading *)
 }

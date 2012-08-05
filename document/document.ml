@@ -33,6 +33,7 @@ type heading = {
   children   : heading list;
   tags       : string list;
   marker     : string option;
+  priority  : char option; (** The optional priority *)
   meta       : meta;
   anchor     : string;
 }
@@ -133,13 +134,8 @@ let collect =
       | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
       | Block.Footnote_Definition (name, def) ->
-          let b = ref false in
-          let l' = meta.footnotes |> List.map (fun (name', x) -> 
-            if name = name' then 
-              (b := true; name, def)
-            else name', x) 
-          in
-          if !b then { meta with footnotes = meta.footnotes }
+          let b = meta.footnotes |> List.exists (fst |- (=) name) in
+          if b then { meta with footnotes = meta.footnotes }
           else
             (orphans := (name, def) :: !orphans; meta)
       | block -> super#block meta block (* no recursion *)
@@ -245,7 +241,8 @@ let from_blocks filename blocks =
                         anchor = Inline.asciis h.Block.title;
                         level = k; content = []; children = []; 
                         tags = h.Block.tags; marker = h.Block.marker;
-                        meta = empty_meta } rest
+                        priority = h.Block.priority; meta = empty_meta } 
+              rest
           in aux true { heading with 
             children = child :: heading.children;
             content = up_contents start
@@ -257,7 +254,7 @@ let from_blocks filename blocks =
   (* In the end, don't forget to parse the directives *)
   let main, _ = 
     aux false { name = []; level = 0; content = []; father = None;
-                anchor = "";
+                anchor = ""; priority = None;
                 children = []; tags = []; marker = None;
                 meta = empty_meta } blocks
   in
