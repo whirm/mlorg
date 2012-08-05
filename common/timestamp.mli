@@ -38,17 +38,26 @@ type range = {
 (** {3 A few accessors} *)
 
 val year : t -> int
+(** Get the year of timestamp *)
+
 val month : t -> int
+(** Get the month of timestamp *)
+
 val day : t -> int
+(** Get the day of a timestamp *)
 
 val hour : t -> int
+(** Get the hour of a timestamp (0 if not set) *)
 val min : t -> int
+(** Get the minute of a timestamp (0 if not set) *)
 
 val hour_opt : t -> int option
+(** Get the optional hour of a timestamp *)
 val min_opt : t -> int option
+(** Get the optional minute of a timestamp *)
 
 val null : t
-(** The null timestamp *)
+(** The null timestamp (all fields set to zero) *)
 
 (** {3 Converting to and from {!Unix.tm}} *)
 
@@ -91,7 +100,7 @@ val range_to_string : range -> string
 (** {3 Durations} *)
 
 val seconds_of_t : t -> float
-(* Returns the number of seconds denoted by a timestamp (since EPOCH) *)
+(** Returns the number of seconds denoted by a timestamp (since EPOCH) *)
 
 
 val duration : range -> int
