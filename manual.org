@@ -12,13 +12,12 @@ Table of contents:
 
 
 * Downloading, compiling and installing mlorg.
-
 ** Git repository
 The source code of mlorg is available on [[http://gitorious.org/mlorg/mlorg][gitorious]]. There is no official release
 of =mlorg= yet and there is a /revision/ each week (last revision: r1, as of
 <2012-07-29 dim.>).
 ** Compiling =mlorg= and installing.
-=mlorg= uses =oasis= to build. The default workflow to compile =mlorg= is thus:
+=mlorg= uses =oasis= to build. The default commands to compile =mlorg= is thus:
 
 : ocaml setup.ml -configure
 : ocaml setup.ml -build
@@ -28,7 +27,7 @@ install it (having a version installed is needed to dynamically load modules), t
 
 : ocaml setup.ml -install
 
-The =Makefile= provides aliases for this two commands. See the documentationof
+The =Makefile= provides aliases for this two commands. See the documentation of
 oasis to customize the build process.
 * =mlorg=, the binary, as a user
 You may be interested  in =mlorg= for a few reasons:
@@ -310,9 +309,15 @@ Directives are a way to tell org about something. Syntax:
 #+end_example
 
 *** Math
-=mlorg= do not handle all math constructions available in =org-mode=. The supported construction is
+There is two supported constructions:
 #+begin_example
 $$ foo $$
+#+end_example
+and
+#+begin_example
+\begin{foo}options
+Contents
+\end{foo}
 #+end_example
 
 *** Quote
