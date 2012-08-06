@@ -38,6 +38,8 @@ module E = struct
         [head; Xml.block "body" contents]
     method inline = function
       | Plain s -> [Xml.data s]
+      | Superscript l -> [Xml.block "sup" (self#inlines l)]
+      | Subscript l -> [Xml.block "sub" (self#inlines l)]
       | Emphasis (kind, data) ->
           let l = [`Bold, "b"; `Italic, "i"; `Underline, "u"] in
           [Xml.block (List.assoc kind l) (self#inlines data)]
