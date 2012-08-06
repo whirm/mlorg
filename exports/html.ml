@@ -86,6 +86,7 @@ module E = struct
         [Xml.block "a" ~attr:["title", descr; "href", "#"^target] [Xml.data "↑"]]
     method block = function
       | Paragraph l -> [Xml.block "p" (self#inlines l)]
+      | Horizontal_Rule -> [Xml.block "hr" []]
       | List (l, _) ->
           [Xml.block "ul" (concatmap (self#list_item) l)]
       | Example (_, l) ->
