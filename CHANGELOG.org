@@ -2,6 +2,12 @@
 
 
 
+* r3
+Release: <2012-08-11 sam.>
+- Improved the manual
+- Completed the org backend
+- Footnotes management in Toc
+- Improved html output a little bit.
 * r2
 Release: <2012-08-04 sam.>
 - Added a plugin Dynamic to take care of dynamic linking
@@ -12,3 +18,4 @@ Release: <2012-08-04 sam.>
 - Latex: handling of footnotes
 - Toc: handles the latex's \appendix as well as non-numbered headings
 - Toc: allows the user to customize the way that number are prepended to headings
+
