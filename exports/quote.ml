@@ -20,25 +20,27 @@ module E = struct
   let save_to = Config.add config "save" string "Non-empty: set to a ML file in which the generated source will be put (instead of a temporary file" ""
   module D = struct
     let run config lines file number doc out = 
-      let ml_source = if config.get save_to = "" then None
-        else Some (config.get save_to)
+      let ml_source = if Config.get config save_to = "" then None
+        else Some (Config.get config save_to)
       in
       match Dynamic.load ?ml_source config lines file number with
         | Some f -> f doc out
         | None -> ()
-    let export ({ get } as conf) doc out = 
-      if get external_file <> "" then
-        run conf 
-          (File.lines_of (get external_file) |> List.of_enum) 
-          (get external_file) 1 doc out
-      else if get code <> "" then
-        run conf [get code] "<user-entry>" 1 doc out
+    let export config doc out = 
+      if Config.get config external_file <> "" then
+        run config 
+          (File.lines_of (Config.get config external_file) |> List.of_enum)
+          (Config.get config external_file) 1 doc out
+      else if Config.get config code <> "" then
+        run config [Config.get config code] "<user-entry>" 1 doc out
       else
-        match Document.find_block_by_name doc (get block) with
-          | None -> Log.fatal "Block %s not found." (get block)
+        match Document.find_block_by_name doc (Config.get config block) with
+          | None -> 
+            Log.fatal "Block %s not found." (Config.get config block)
           | Some (Block.Src (number, _, lines)) ->
-            run conf lines doc.filename number doc out
-          | _ -> Log.fatal "Block %s has wrong type" (get block)
+            run config lines doc.filename number doc out
+          | _ -> 
+            Log.fatal "Block %s has wrong type" (Config.get config block)
             
     let default_filename _ = "-"
   end

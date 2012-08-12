@@ -51,9 +51,10 @@ let _ = %s.register (
       with _ -> false
     with _ -> true
 
-  let compile ?(clean = true) { get } source obj = 
+  let compile ?(clean = true) conf source obj = 
     let command = Printf.sprintf "%s %s -o %s"
-      (if Dynlink.is_native then get ocamlopt else get ocamlc)
+      (if Dynlink.is_native then Config.get conf ocamlopt 
+       else Config.get conf ocamlc)
       source
       obj
     in

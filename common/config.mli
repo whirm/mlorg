@@ -94,10 +94,15 @@ val concat : (string * t) list -> t
     returns a configuration where item names have been prefixed by the name of
     the parent configuration with a dot between them.
 *)
-type instance = {get : 'a. ?vars: (string * string) list -> 'a item -> 'a}
+type instance
  (** An instance of a configuration -- defining a value of a finite number of
-     item.  The optional parameter [vars] defines the values of the variable of
-     that item. Default: empty *)
+     item. *)
+
+val get : ?vars : (string * string) list -> instance -> 'a item -> 'a
+(** [get config item] retrieves the value of [item] within the instance [config].
+
+    The optional parameter [vars] defines the values of the variable of that
+    item. Default: empty *)
 
 val make : t -> (string * string) list -> instance
 (** Make an instance out of an t and a few defined values *)

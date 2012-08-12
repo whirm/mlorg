@@ -26,13 +26,15 @@ open P
 let write_tex_source conf formulas tex = 
   File.with_file_out tex (fun fd ->
     IO.nwrite fd "\\documentclass{article}\n\\pagestyle{empty}\n\n";
-    IO.nwrite fd (conf.get header ^ "\n\\usepackage[active,tightpage,textmath,displaymath]{preview}\n\\begin{document}\n");
+    IO.nwrite fd (Config.get conf header ^ "\n\\usepackage[active,tightpage,textmath,displaymath]{preview}\n\\begin{document}\n");
     List.iter (Printf.fprintf fd "%s\n") formulas;
     IO.nwrite fd "\n\\end{document}\n"
   )
 
-let compile { get } texfile = 
-  Sys.command (Printf.sprintf "%s %s > /dev/null 2> /dev/null" (get latex) (Filename.quote texfile))
+let compile config texfile = 
+  Printf.sprintf "%s %s > /dev/null 2> /dev/null" 
+    (Config.get config latex) 
+    (Filename.quote texfile) |> Sys.command
 
 let parse_dvipng_output s = 
   let open BatSubstring in
@@ -53,37 +55,40 @@ let parse_dvipng_output s =
     with _ -> List.rev acc
   in parse_out [] (of_string s)
 
-let dvi2png { get } texfile =
+let dvi2png config texfile =
   let command = 
-    Printf.sprintf "%s %s --depth -o %%d%s 2> /dev/null" (get dvipng) 
+    Printf.sprintf "%s %s --depth -o %%d%s 2> /dev/null" 
+      (Config.get config dvipng) 
       (Filename.quote (change_ext "dvi" texfile))
       (Filename.quote (change_ext "png" texfile))
   in
-  let fdin = Unix.open_process_in ~autoclose: true ~cleanup: true command in
+  let fdin = Unix.open_process_in ~autoclose: true 
+    ~cleanup: true command in
   let result = parse_dvipng_output (IO.read_all fdin) in
   let _ = Unix.close_process_in fdin in
   result
   
 
-let math2png { get } formulas = 
+let math2png config formulas = 
   let list = List.map 
-    (fun s -> s, Filename.concat (get dir)
+    (fun s -> s, Filename.concat (Config.get config dir)
       (Digest.to_hex (Digest.string s) ^ ".png")) 
     formulas 
   in
   let pwd = Sys.getcwd () in
-  let () = try Unix.mkdir (get dir) 0o640 with _ -> () in
-  let () = Sys.chdir (get dir) in
+  let () = try Unix.mkdir (Config.get config dir) 0o640 
+    with _ -> () in
+  let () = Sys.chdir (Config.get config dir) in
   let texfile = "_tmp.tex" in
   let rm ext = try Sys.remove ("_tmp."^ext) with _ -> () in
   if list = [] then []
   else begin
     let _ = 
       Log.info "Processing images (%d)..." (List.length list);
-      write_tex_source { get } formulas texfile;
-      compile { get } texfile
+      write_tex_source config formulas texfile;
+      compile config texfile
     in
-    let depths = dvi2png { get } texfile in
+    let depths = dvi2png config texfile in
     let () = 
       if List.length list <> List.length depths then
         (Log.fatal "Error while generating images at fragment:\n %s"
@@ -93,23 +98,26 @@ let math2png { get } formulas =
     let () = 
       List.iter rm ["dvi"; "log"; "aux"; "tex"];
       Sys.chdir pwd;
-      List.iteri (fun k (a, (b, c)) -> 
-        Sys.rename (Printf.sprintf "%s/%d_tmp.png" (get dir) (1+k)) b) list
+      list |> List.iteri (fun k (a, (b, c)) -> 
+        Sys.rename (Printf.sprintf "%s/%d_tmp.png" 
+                      (Config.get config dir) (1+k)) b)
     in list
   end
 
-let transform ({ get } as conf) doc = 
+let transform conf doc = 
   let gather_formulas () = 
     let o  = object(self)
       inherit [string list] Document.folder as super
       method inline l = function
-        | Inline.Latex_Fragment (Inline.Math s) when get pinline ->
-            ("$" ^ s ^ "$") :: l
+        | Inline.Latex_Fragment (Inline.Math s) 
+            when Config.get conf pinline ->
+          ("$" ^ s ^ "$") :: l
         | x -> super#inline l x
       method block l = function
-        | Math b when get pblock ->
-            ("$$" ^ b ^ "$$") :: l
-        | Latex_Environment (name, opts, lines) when get pblock ->
+        | Math b when Config.get conf pblock ->
+          ("$$" ^ b ^ "$$") :: l
+        | Latex_Environment (name, opts, lines) 
+            when Config.get conf pblock ->
           let source = Printf.sprintf "\\begin{%s}%s\n%s\n\\end{%s}"
             name opts (String.concat "\n" lines) name
           in
@@ -125,14 +133,14 @@ let transform ({ get } as conf) doc =
       Link {url=Complex {protocol="depth-"^string_of_int n; link = s}; 
             label = [Plain formula]}
     method inline k = function
-      | Inline.Latex_Fragment (Inline.Math s) when get pinline ->
+      | Inline.Latex_Fragment (Inline.Math s) when Config.get conf pinline ->
           let source = "$" ^ s ^ "$" in
           self#lookup source
       | x -> super#inline k x
     method block k = function
-      | Math b when get pblock ->
+      | Math b when Config.get conf pblock ->
           Custom ("center", "", [Paragraph [self#lookup ("$$"^b^"$$")]])
-      | Latex_Environment (name, opts, lines) when get pblock ->
+      | Latex_Environment (name, opts, lines) when Config.get conf pblock ->
           let source = Printf.sprintf "\\begin{%s}%s\n%s\n\\end{%s}"
             name opts (String.concat "\n" lines) name
           in

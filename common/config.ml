@@ -120,14 +120,20 @@ module type Item = sig
   val long_description : string
   val index : int
   val default : t
-  val tmp : t ref
+  val tmp : t option ref
   val variables : variable list
 end
 type 'a item = (module Item with type t = 'a)
 type t = (int, (module Item)) Hashtbl.t
 
 type instance = 
-    {get : 'a. ?vars: (string * string) list -> 'a item -> 'a}
+    {get : 'a. ?vars: (string * string) list -> 'a item -> 'a option}
+
+let get (type u) ?vars instance item = 
+  match instance.get ?vars item with
+    | Some v -> v
+    | None -> let module M = (val item : Item with type t = u) in
+              M.default
 
 let create () = Hashtbl.create 8
 let counter = ref 0
@@ -138,7 +144,7 @@ let add (type u) ?(long = "") ?(vars = []) config name (typ : u serializable) de
     let name = name and description = description
     let index = !counter and long_description = long
     and variables = vars
-    and default = default and tmp = ref default
+    and default = default and tmp = ref None
   end in
   incr counter;
   Hashtbl.add config I.index (module I : Item);
@@ -174,7 +180,7 @@ let append config list instance =
         let string = List.assoc I'.name list in
         let assoc l s = try List.assoc s l with _ -> "" in
         let string = substitute (assoc vars) string in
-        Option.get (I.T.read string)
+        Some (Option.get (I.T.read string))
       in
       Hashtbl.add hashtbl I.index (fun () -> I.tmp := v);
       v
@@ -185,20 +191,17 @@ let append config list instance =
         v
       | _ -> Log.warning "Value %s is invalid for configuration item %s"
         (List.assoc I.name list) I.name;
-        I.default
+        None
   in
   let lookup (type u) (item: u item) vars = 
-    try let module I = (val item : Item with type t = u) in
-        Hashtbl.find hashtbl I.index ();
-        !I.tmp
+    let module I = (val item : Item with type t = u) in
+    try Hashtbl.find hashtbl I.index (); !I.tmp
     with Not_found -> compute item vars
   in
   {get = fun (type u) ?(vars = []) item -> lookup item vars}
     
 let make config list = append config list
-  {get = (fun (type u) ?(vars=[]) i ->
-    let module I = (val i : Item with type t = u) in
-    I.default)
+  {get = (fun (type u) ?(vars=[]) i -> None)
   }
 let from_comma config s = parse_comma s |> make config
       

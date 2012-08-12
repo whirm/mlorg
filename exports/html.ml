@@ -19,7 +19,7 @@ module E = struct
   type interface = exporter
   let concatmap f l = List.concat (List.map f l)
   let assoc l s = try List.assoc s l with _ -> ""
-  class htmlExporter ({ get } as conf) = object(self)
+  class htmlExporter config = object(self)
     inherit [Xml.t list] Document.bottomUp as super
     method bot = []
     method combine = List.concat
@@ -27,10 +27,11 @@ module E = struct
       let head = Xml.block "head"
         [Xml.block "title" [Xml.data d.title];
          Xml.block "meta" ~attr: ["http-equiv", "Content-Type"; "content", "text/html";
-                                  "charset", get encoding] [];
+                                  "charset", Config.get config encoding] [];
          Xml.block "script" ~attr:["type","text/javascript"; 
                                    "src","http://orgmode.org/mathjax/MathJax.js"] [Xml.data " "];
-         Xml.block "link" ~attr: ["rel", "stylesheet"; "href", get style;
+         Xml.block "link" 
+           ~attr: ["rel", "stylesheet"; "href", Config.get config style;
                                     "type", "text/css"; "media", "screen"] []]
       in
       Xml.block "html"
@@ -65,7 +66,8 @@ module E = struct
       | Link {url; label} ->
           let href = Inline.string_of_url url in
           (* If it is an image *)
-          if List.exists (String.ends_with href) (get image_extensions) then
+          if List.exists (String.ends_with href) 
+            (Config.get config image_extensions) then
             self#handle_image_link url href label
           else
             let href = match url with
@@ -123,13 +125,13 @@ module E = struct
 
   let doctype = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
 
-  let with_custom_exporter o ({ get } as conf) doc out = 
-    let doc = Toc.transform conf doc in
-    let doc = if get use_math2png then 
-        Math2png.transform conf doc 
+  let with_custom_exporter o config doc out = 
+    let doc = Toc.transform config doc in
+    let doc = if Config.get config use_math2png then 
+        Math2png.transform config doc 
       else doc
     in
-    if get full then
+    if Config.get config full then
       (IO.nwrite out doctype;
        Xml.output_xhtml out [o#wrap doc (o#document doc)])
     else

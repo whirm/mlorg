@@ -40,26 +40,26 @@ $extraheader
 
   let escape_inside s = s
   let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"]
-  let write_header { get } out doc =
-    let vars = ["classname", escape_inside (get classname);
+  let write_header config out doc =
+    let vars = ["classname", escape_inside (Config.get config classname);
                 "packages", "";
-                "extraheader", get extraheader;
+                "extraheader", Config.get config extraheader;
                 "title", escape_inside doc.title;
                 "author", escape_inside doc.author;
                ]
     in
-    IO.nwrite out (substitute (assoc vars) (get header))
+    IO.nwrite out (substitute (assoc vars) (Config.get config header))
 
-  let export { get } doc out = 
-    let toc = Toc.gather { get } doc in
+  let export config doc out = 
+    let toc = Toc.gather config doc in
     let footnote_stack = ref [] in
     let footnote_defs = ref [] in
     let o = object(self)
       inherit [unit] Document.folder as super
 
-      method header () = write_header { get } out doc
+      method header () = write_header config out doc
       method footer () = 
-        IO.nwrite out (get footer)
+        IO.nwrite out (Config.get config footer)
       method inline () = function
         | Plain s -> IO.nwrite out (tex_escape s)
         | Emphasis (kind, data) ->
@@ -149,7 +149,7 @@ $extraheader
             
         | x -> super#block () x
       method heading () d = 
-        let command = List.nth (get sections) (d.level - 1) in
+        let command = List.nth (Config.get config sections) (d.level - 1) in
         let () = footnote_defs := d.meta.footnotes in
         Printf.fprintf out "\\%s{" command;
         self#inlines () d.name;
