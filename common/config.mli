@@ -79,6 +79,9 @@ val make_var : string -> string -> variable
 (** [make_var name description] creates a variable whose name is [name] and
     description is [description] *)
 
+val update_default : 'a item -> 'a -> 'a item
+(** [update_defaults item v] changes the default value of [item] to be [v] *)
+
 val create : unit -> t
 (** Creates an empty configuration *)
 

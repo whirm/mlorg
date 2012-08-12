@@ -129,6 +129,14 @@ type t = (int, (module Item)) Hashtbl.t
 type instance = 
     {get : 'a. ?vars: (string * string) list -> 'a item -> 'a option}
 
+let update_default (type u) (i : u item) v = 
+  let module I' = struct
+    include (val i : Item with type t = u)
+    let default = v
+  end
+  in
+  (module I' : Item with type t = u)
+
 let get (type u) ?vars instance item = 
   match instance.get ?vars item with
     | Some v -> v
