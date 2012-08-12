@@ -13,9 +13,9 @@ doc:
 manual.html: all
 	./_build/main.native --filename manual.org --backend html
 
-web: README.html
+web: manual.html
 	mkdir -p $(WEBDESTDIR)
-	cp README.html $(WEBDESTDIR)/index.html
+	cp manual.html $(WEBDESTDIR)/index.html
 
 testorg:
 	cat $(FILE) | mlorg --backend org > 1.org
