@@ -157,10 +157,12 @@ $extraheader
         Printf.fprintf out "}\\label{sec:%s}\n" (Toc.link (Inline.asciis d.name));
         self#blocks toc d.content;
         List.iter (self#heading toc) d.children
-      method document toc d = 
-        self#header d;
+      method _document toc d = 
         footnote_defs <- d.beg_meta.footnotes;
         super#document toc d;
+      method document toc d = 
+        self#header d;
+        self#_document toc d;
         self#footer ()
     end
 
