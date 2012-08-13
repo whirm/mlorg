@@ -134,10 +134,11 @@ let collect =
       | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
       | Block.Footnote_Definition (name, def) ->
-          let b = meta.footnotes |> List.exists (fst |- (=) name) in
-          if b then { meta with footnotes = meta.footnotes }
-          else
-            (orphans := (name, def) :: !orphans; meta)
+          if meta.footnotes |> List.exists (fst |- (=) name) then
+            { meta with footnotes = meta.footnotes |> 
+                List.map (fun (name', v) -> 
+                  name, if name' = name then def else v) }
+          else (orphans := (name, def) :: !orphans; meta)
       | block -> super#block meta block (* no recursion *)
     method inline meta = 
       let open Inline in function
