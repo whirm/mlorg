@@ -11,6 +11,7 @@ module Backends = struct
   module Latex = Latex
   module Xml = Xml_exp
   module Org = Org
+  module Beamer = Beamer
 end
 module General = struct
   module Math2png = Math2png
