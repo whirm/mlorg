@@ -152,7 +152,8 @@ $extraheader
       method heading () d = 
         let command = List.nth (Config.get config sections) (d.level - 1) in
         let () = footnote_defs := d.meta.footnotes in
-        Printf.fprintf out "\\%s{" command;
+        Printf.fprintf out "\\%s%s{" command 
+          (if Document.has_tag "nonumber" d then "*" else "");
         self#inlines () d.name;
         Printf.fprintf out "}\\label{sec:%s}\n" (Toc.link (Inline.asciis d.name));
         self#blocks () d.content;
