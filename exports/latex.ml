@@ -50,41 +50,40 @@ $extraheader
     in
     IO.nwrite out (substitute (assoc vars) (Config.get config header))
 
-  let export config doc out = 
-    let toc = Toc.gather config doc in
-    let footnote_stack = ref [] in
-    let footnote_defs = ref [] in
-    let o = object(self)
-      inherit [unit] Document.folder as super
-
-      method header () = write_header config out doc
+  class latexExporter config out = object(self)
+      inherit [unit, Toc.t] Document.bottomUpWithArg as super
+      val mutable footnote_stack = []
+      val mutable footnote_defs = []
+      method bot = ()
+      method combine _ = ()
+      method header doc = write_header config out doc
       method footer () = 
         IO.nwrite out (Config.get config footer)
-      method inline () = function
+      method inline toc = function
         | Plain s -> IO.nwrite out (tex_escape s)
         | Emphasis (kind, data) ->
           let l = [`Bold, "textbf"; `Italic, "emph"; `Underline, "underline"] in
           Printf.fprintf out "\\%s{" (List.assoc kind l);
-          self#inlines () data;
+          self#inlines toc data;
           Printf.fprintf out "}"
         | Break_Line -> Printf.fprintf out "\\\\\n"
         | Footnote_Reference {Inline.name; Inline.definition} -> 
           (match definition with
             | Some u -> 
               Printf.fprintf out "\\footnote{"; 
-              self#inlines () u;
+              self#inlines toc u;
               Printf.fprintf out "}";
-              footnote_stack := !footnote_stack @ [name]
+              footnote_stack <- footnote_stack @ [name]
             | None ->
                 try
-                  let body = List.assoc name !footnote_defs in
+                  let body = List.assoc name footnote_defs in
                   try 
-                    let (k, _) = List.findi (fun _ -> (=) name) !footnote_stack in
+                    let (k, _) = List.findi (fun _ -> (=) name) footnote_stack in
                     Printf.fprintf out "\\footnotemark[%d]" (1+k);
                   with Not_found ->
-                    footnote_stack := !footnote_stack @ [name];
+                    footnote_stack <- footnote_stack @ [name];
                     Printf.fprintf out "\\footnote{";
-                    self#inlines () body;
+                    self#inlines toc body;
                     Printf.fprintf out "}";
                 with Not_found -> Log.warning "Reference to undefined footnote: %s" name)
         | Entity e -> 
@@ -112,19 +111,19 @@ $extraheader
               | _, label ->
                   Printf.fprintf out "\\hyperref[%s]{"
                     (Inline.string_of_url url);
-                  self#inlines () label;
+                  self#inlines toc label;
                   Printf.fprintf out "}")
-        | x -> super#inline () x
-      method list_item () i = (match i.number with
+        | x -> super#inline toc x
+      method list_item toc i = (match i.number with
         | Some c -> Printf.fprintf out "  \\item[%s] " c
         | _ -> Printf.fprintf out "\\item ");
-        self#blocks () i.contents
+        self#blocks toc i.contents
 
-      method block () = function
-        | Paragraph l -> self#inlines () l; Printf.fprintf out "\n\n"
+      method block toc = function
+        | Paragraph l -> self#inlines toc l; Printf.fprintf out "\n\n"
         | List (i, _) ->
           Printf.fprintf out "\\begin{itemize}\n";
-          List.fold_left self#list_item () i;
+          List.iter (self#list_item toc) i;
           Printf.fprintf out "\\end{itemize}\n";
 
         | Latex_Environment (name, opts, lines) ->
@@ -139,32 +138,34 @@ $extraheader
         | Custom (name, opts, l) ->
           Printf.fprintf out "\\begin{%s}{%s}\n" (escape_inside name)
             (escape_inside opts);
-          self#blocks () l;
+          self#blocks toc l;
           Printf.fprintf out "\\end{%s}\n" (escape_inside name)
         | With_Keywords (l, Custom ("figure", opts, lines)) ->
             Printf.fprintf out "\\begin{figure}%s\n\\centering" opts;
-          self#blocks () lines;
+          self#blocks toc lines;
             (try Printf.fprintf out "\\caption{%s}\n" (List.assoc "CAPTION" l)
             with _ -> ());
           Printf.fprintf out "\\end{figure}\n"
             
-        | x -> super#block () x
-      method heading () d = 
+        | x -> super#block toc x
+      method heading toc d = 
         let command = List.nth (Config.get config sections) (d.level - 1) in
-        let () = footnote_defs := d.meta.footnotes in
+        let () = footnote_defs <- d.meta.footnotes in
         Printf.fprintf out "\\%s%s{" command 
           (if Document.has_tag "nonumber" d then "*" else "");
-        self#inlines () d.name;
+        self#inlines toc d.name;
         Printf.fprintf out "}\\label{sec:%s}\n" (Toc.link (Inline.asciis d.name));
-        self#blocks () d.content;
-        List.iter (self#heading ()) d.children
-      method document () d = 
-        self#header ();
-        footnote_defs := d.beg_meta.footnotes;
-        super#document () d;
+        self#blocks toc d.content;
+        List.iter (self#heading toc) d.children
+      method document toc d = 
+        self#header d;
+        footnote_defs <- d.beg_meta.footnotes;
+        super#document toc d;
         self#footer ()
     end
-    in o#document () doc
+
+  let export config doc out = 
+    (new latexExporter config out)#document (Toc.gather config doc) doc
 
   module D = struct let export = export and default_filename = change_ext "tex" end
   type interface = exporter
