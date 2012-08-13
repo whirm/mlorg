@@ -133,6 +133,7 @@ $extraheader
             Printf.fprintf out "\\end{%s}\n" name
         | Math b ->
             Printf.fprintf out "$$%s$$\n" b
+        | Footnote_Definition _ -> ()
         | Custom ("tableofcontents", _, _) ->
             Printf.fprintf out "\\tableofcontents\n"
         | Custom (name, opts, l) ->
