@@ -130,7 +130,30 @@ let rec parse list context lines =
   in
   aux [] context list None
 
-let parse = parse [(module Aut_paragraph : Automaton.Automaton);
+let parse_lazy list context lines = 
+  let with_buffer f =
+    let buffer = ref [] in
+    let rec g () = match !buffer with
+      | t :: q -> buffer := q; Some t
+      | [] -> match f () with
+          | None -> None
+          | Some l -> buffer := l; g ()
+    in Enum.from_while g
+  in
+  let f = 
+    let st = ref (Context.default, list, None) in
+    let myself context lines = parse list context lines in
+    fun () ->
+      let context, list, state = !st in
+      match handle_lines myself lines context list list state with
+        | Some (context, previous, state, blocks) ->
+          st := (context, previous, state);
+          Some blocks
+        | None -> None
+  in with_buffer f
+  
+
+let automata = [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_heading : Automaton.Automaton);
  (module Aut_list : Automaton.Automaton);
  (module Aut_directive : Automaton.Automaton);
@@ -141,5 +164,7 @@ let parse = parse [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_latex_env : Automaton.Automaton);
  (module Aut_verbatim : Automaton.Automaton);
  (module Aut_hr : Automaton.Automaton)
-] Context.default |- snd
+]
+let parse = parse automata Context.default |- snd
+let parse_lazy = parse_lazy automata Context.default
 
