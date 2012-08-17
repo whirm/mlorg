@@ -5,11 +5,9 @@ open Batteries
 type input = {
     line : string;
 (** The line *)
-    number : int;
-(** The number of the line in the input *)
-    mutable context: Context.t;
-(** The context, that is mutable *)
-    parse : string Enum.t -> Block.t list;
+    context: Context.t;
+(** The context *)
+    parse : Context.t -> string Enum.t -> Context.t * Block.t list;
 (** A parsing functions, for blocks that can contain blocks (lists for instance) *)
   }
 (** The input that will be given to automata. *)
@@ -29,11 +27,13 @@ type 'state return =
 module type Automaton = sig
   type state
   (** The internal state of the automaton *)
-  val parse_line : state -> input -> state return
+  val parse_line : state -> input -> (Context.t * state return)
   (** The parsing function. The integer is the number of the line in the stream.
       We give it a context it can modify.  *)
 
-  val interrupt : state -> (string Enum.t -> Block.t list) -> Block.t list
+  val interrupt : Context.t -> state 
+    -> (Context.t -> string Enum.t -> Context.t * Block.t list) 
+    -> Context.t * Block.t list
   (** - The interruption function, called when the parser decides to switch
       over to another automaton. *)
     
@@ -42,7 +42,7 @@ module type Automaton = sig
       says it is partially done, the parser will look for accepting automaton with
       higher priority. *)
     
-  val is_start : input -> state option
+  val is_start : input -> (Context.t * state) option
 (** The following function, on a line returns [Some initial_state] if it could
     be the beginning of a valid input for the automaton, [None] otherwise. *)
 end

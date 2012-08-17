@@ -4,8 +4,11 @@
 type t = {
   markers : string list;
 (** The list of markers ([TODO], [DONE], ...) *)
+  number : int;
+(** The number of the line in the input (Put here because in Parser it can be
+    given by the automata) *)
 }
-    (** A context to know about the configuration of the parser *)
+(** A context to know about the configuration of the parser *)
 
 
 val default : t

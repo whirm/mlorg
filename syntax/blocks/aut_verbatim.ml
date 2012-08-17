@@ -2,7 +2,7 @@
 open Batteries
 open Automaton
 type state = int * string list
-let interrupt (n, lines) _ = [Block.Example (n, List.rev lines)]
+let interrupt context (n, lines) _ = context, [Block.Example (n, List.rev lines)]
         
 let cut s = 
   if s = ":" then Some ""
@@ -10,9 +10,12 @@ let cut s =
     Some (String.sub s 2 (String.length s - 2))
   else
     None
-let parse_line (n, lines) { line } = match cut line with
-  | Some s -> Next (n, s :: lines)
-  | None -> Done (interrupt (n, lines) (), false)
+let parse_line (n, lines) { line; context } = match cut line with
+  | Some s -> context, Next (n, s :: lines)
+  | None -> 
+    let context, block = interrupt context (n, lines) () in
+    context, Done (block, false)
 
-let is_start { line; number } = Option.map (fun s -> number, [s]) (cut line)
+let is_start { context; line } = 
+  Option.map (fun s -> context, (context.Context.number, [s])) (cut line)
 let priority = 5

@@ -5,36 +5,40 @@ open Automaton
 type state = int * string list * string * string
 (* The state : the linenumber, the lines seen so far, the name and options *)
 
-let interrupt (number, lines, name, opts) parse = 
+let interrupt ctx (number, lines, name, opts) parse = 
   let lines = List.rev lines in
-  [match name with
-    | "example" -> Example (number, lines)
-    | "src" -> Src (number, opts, lines)
-    | "quote" -> Quote (parse (List.enum lines))
+  match name with
+    | "example" -> ctx, [Example (number, lines)]
+    | "src" -> ctx, [Src (number, opts, lines)]
+    | "quote" ->
+      let ctx', blocks = parse ctx (List.enum lines) in
+      ctx', [Quote blocks]
     | _ ->
-      Custom (name, opts, parse (List.enum lines))]
+      let ctx', blocks = parse ctx (List.enum lines) in
+      ctx', [Custom (name, opts, blocks)]
         
-let parse_line (number, lines, name, opts) { line; parse } = 
+let parse_line (number, lines, name, opts) { line; context; parse } = 
   let re = Str.regexp "#\\+\\(end\\|END\\)_\\([^ ]+\\)" in
   if Str.string_match re line 0 then
     if Str.matched_group 2 line <> name then 
-      Next (number, line :: lines, name, opts)
+      context, Next (number, line :: lines, name, opts)
     else 
-      Done (interrupt (number, lines, name, opts) parse, true)
+      let ctx, blocks = interrupt context (number, lines, name, opts) parse in
+      ctx, Done (blocks, true)
   else 
-    Next (number, line :: lines, name, opts)
+    context, Next (number, line :: lines, name, opts)
 
-let interrupt ((number, _, name, _) as x) y =
+let interrupt context ((number, _, name, _) as x) y =
   Log.warning "Unterminated block %s started at line %d" name number;
-  interrupt x y
+  interrupt context x y
 
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
-let is_start { line; number } = 
+let is_start { line; context } = 
   let re = Str.regexp "#\\+\\(begin\\|BEGIN\\)_\\([^ ]+\\)\\( +\\(.+\\)\\)?" in
   if Str.string_match re line 0 then
     let name = Str.matched_group 2 line 
     and options = try Str.matched_group 4 line with Not_found -> "" in
-    Some (number, [], name, String.trim options)
+    Some (context, (context.Context.number, [], name, String.trim options))
   else
     None
 

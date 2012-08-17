@@ -63,14 +63,15 @@ let parse_heading context s =
 
 type state = heading
 
-let interrupt heading _ = [Heading heading]
+let interrupt context heading _ = context, [Heading heading]
 
 let is_start { line; context } = 
   try
-    Some (parse_heading context line)
+    Some (context, parse_heading context line)
   with _ -> None
 
-let parse_line heading p = 
-  Done (interrupt heading p, false)
+let parse_line heading p =
+  let context, block = interrupt p.context heading p in
+  context, Done (block, false)
 
 let priority = 100

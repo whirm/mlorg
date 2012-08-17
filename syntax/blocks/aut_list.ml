@@ -68,52 +68,60 @@ let parse_first_line s =
               | Some (fmt, rest) -> Some (ordered, b, parse_fmt fmt, rest)
 (** Parse the first line of an item *)
 
-let is_start { Automaton.line } = 
+let is_start { Automaton.line; Automaton.context } = 
   match parse_first_line line with
     | None -> None
     | Some (ordered, checkbox, format, contents) ->
       let format' = Option.default "1" format in
-      Some { items = []; last_line_empty = false;
-             current = [BatSubstring.to_string contents]; 
-             format = format'; checkbox; ordered;
-             number = compute_number ordered format 1;
-           }
+      Some (context, 
+            { items = []; last_line_empty = false;
+              current = [BatSubstring.to_string contents]; 
+              format = format'; checkbox; ordered;
+              number = compute_number ordered format 1;
+            })
 (** is_start basically checks if the line is a valid star for an item *)
 
-let update_current parse st = 
+let update_current context parse st = 
+  let context, contents = parse context (List.enum (List.rev st.current)) in
+  context,
   {
     Block.number = (match st.number with
       | Some n -> Some (Numbering.update st.format [n])
       | _ -> None);
-    Block.contents = parse (List.enum (List.rev st.current));
-    Block.checkbox = st.checkbox
+    Block.contents; Block.checkbox = st.checkbox
   } :: st.items
+    
+let interrupt context st parse =
+  let context, items = update_current context parse st in
+  context, [Block.List (List.rev items, st.ordered)]
 
-let interrupt st parse =
-    [Block.List (List.rev (update_current parse st), st.ordered)]
-
-let parse_line st { Automaton.line; Automaton.parse } =
+let parse_line st { Automaton.line; Automaton.parse; Automaton.context } =
   if line = "" then 
-    if st.last_line_empty then Automaton.Done (interrupt st parse, false)
-    else Automaton.Partial { st with last_line_empty = true }
+    if st.last_line_empty then 
+      let context, block = interrupt context st parse in
+      context, Automaton.Done (block, false)
+    else 
+      context, Automaton.Partial { st with last_line_empty = true }
   else 
     let st = { st with last_line_empty = false } in
     match parse_first_line line with
     | None ->
       if String.starts_with line "  " then
-        Automaton.Partial
+        context, Automaton.Partial
           { st with current = String.lchop ~n:2 line :: st.current }
       else
-        Automaton.Done (interrupt st parse, false)
+        let context, block = interrupt context st parse in
+        context, Automaton.Done (block, false)
     | Some (_, checkbox, format, contents) ->
       let format' = Option.default st.format format in
       let number = Option.default 0 st.number in
+      let context, items = update_current context parse st in
       let st' = { st with
         current = [BatSubstring.to_string contents];
         format = format'; checkbox;
         number = compute_number st.ordered format (number+1);
-        items = update_current parse st
+        items
       }
-      in Automaton.Partial st'
+      in context, Automaton.Partial st'
       
 let priority = 10

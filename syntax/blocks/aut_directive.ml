@@ -13,7 +13,8 @@ let keywords_translation =
     ("RESULT", "RESULTS"); ("HEADERS", "HEADER")]
 
 let translate x = try List.assoc x keywords_translation with Not_found -> x
-let interrupt (a, b) _ =
+let interrupt ctx (a, b) _ =
+  ctx, 
   if List.mem (String.uppercase a) affiliated_keywords then
     [With_Keywords ([translate (String.uppercase a), b], Paragraph [])] (* little hack *)
   else
@@ -22,13 +23,15 @@ let interrupt (a, b) _ =
       
 (* To parse a string, we just check if it's empty. If so we are done. If not, we
    are partially done (can be interrupted). *)
-let parse_line st { line } = 
-  Done (interrupt st (), false)
+let parse_line st { context } = 
+  let ctx, block = interrupt context st () in
+  ctx, Done (block, false)
 
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
-let is_start { line } = 
+let is_start { line; context } = 
   try
-    Scanf.sscanf line "#+%[^:]: %[^\n]" (fun key value -> Some (key, value))
+    Scanf.sscanf line "#+%[^:]: %[^\n]" 
+      (fun key value -> Some (context, (key, value)))
   with _ -> None
 
 let priority = 10

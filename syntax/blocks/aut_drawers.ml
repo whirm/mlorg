@@ -5,9 +5,10 @@ open Block
 open Batteries
 type state = string list * string
 
-let is_start { line } = 
+let is_start { line; context } = 
   try
-    Scanf.sscanf (String.trim line) ":%[^:]:%!" (fun name -> Some ([], name))
+    Scanf.sscanf (String.trim line) ":%[^:]:%!" 
+      (fun name -> Some (context, ([], name)))
   with _ -> None
 
 
@@ -25,19 +26,21 @@ let parse_properties =
           (key, v ^ line) :: acc')
     []
 
-let interrupt (lines, name) parse = 
+let interrupt context (lines, name) parse = 
   let lines = List.rev lines in
   if name = "properties" || name = "PROPERTIES" then
-    [Property_Drawer (parse_properties lines)]
+    context, [Property_Drawer (parse_properties lines)]
   else
-    [Drawer (name, parse (List.enum lines))]
+    let context, blocks = parse context (List.enum lines) in
+    context, [Drawer (name, blocks)]
 
-let parse_line (lines, name) { line; parse } = 
+let parse_line (lines, name) { line; context; parse } = 
   try Scanf.sscanf (String.trim line) " :%[^:]:" (fun name' ->
     if name' = "end" || name' = "END" then
-      Done (interrupt (lines, name) parse , true)
+      let context, block = interrupt context (lines, name) parse in
+      context, Done (block, true)
     else
-      Next (line :: lines, name))
-  with _ -> Next (line :: lines, name)
+      context, Next (line :: lines, name))
+  with _ -> context, Next (line :: lines, name)
 
 let priority = 10

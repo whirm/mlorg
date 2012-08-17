@@ -57,7 +57,8 @@ let analyse_line (table, rows) row =
         | EndGroup when last > 0 -> (last-1, i-1) :: li, -1 (* because the / will get destroyed *)
         | EndGroup -> 
             Log.warning "Group annotation not making any sense: Two > in a row";
-            (li, last))
+            (li, last)
+        | _ -> assert false)
         ([], -1) row
     in
     { table with groups = Some (List.rev result) }, rows
@@ -84,26 +85,27 @@ let build lines =
   in
   { table with rows = Array.of_list rows }
 
-let is_start { line } = match is_valid line with
+let is_start { context; line } = match is_valid line with
   | None -> None
-  | Some None -> Some []
-  | Some (Some l) -> Some [l]
+  | Some None -> Some (context, [])
+  | Some (Some l) -> Some (context, [l])
 
-let interrupt lines r = 
-  [Table (build lines)]
+let interrupt context lines r = 
+  context, [Table (build lines)]
 
-let parse_line lines ({ line } as r) = match is_valid line with
+let parse_line lines ({ line; context } as r) = match is_valid line with
   | None -> 
       let pattern = "#+tblfm:" in
       if String.starts_with (String.lowercase line) pattern then
         let n = String.length pattern in
         let table = build lines in
-        Done ([Table { table with format = Some (String.lchop ~n line) }], true)
+        context, Done ([Table { table with format = Some (String.lchop ~n line) }], true)
       else
-        Done (interrupt lines r, false)
+        let context, blocks = interrupt context lines r in
+        context, Done (blocks, false)
   | Some None ->
-      Next lines
+      context, Next lines
   | Some (Some line) ->
-      Next (line :: lines)
+      context, Next (line :: lines)
 
 let priority = 12

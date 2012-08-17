@@ -32,12 +32,12 @@ returned will be the list with higher priority than the one returned.
 *)
 let faa input = 
   let rec aux acc = function
-    | [] -> failwith "No accepting automaton."
+    | [] -> failwith ("No accepting automaton for " ^ input.line)
     | t :: q -> 
       let module A = (val t : Automaton.Automaton) in
       match A.is_start input with
         | None -> aux (t :: acc) q
-        | Some state -> List.rev acc, 
+        | Some (context, state) -> context, List.rev acc, 
           (module struct type state = A.state
                          let state = state
                          module Aut = A
@@ -47,80 +47,90 @@ let faa input =
 (**
 The following functions are wrapper around the inner functions contained in [State]
 *)
-let interrupt v = 
+let interrupt context v = 
   let module S = (val v : State) in
-  S.Aut.interrupt S.state
+  S.Aut.interrupt context S.state
     
 let parse_line v i = 
   let module S = (val v : State) in
   match S.Aut.parse_line S.state i with
-    | Automaton.Done _ as c -> c
-    | Automaton.Next st ->
-      Automaton.Next (module struct include S let state = st end : State)
-    | Automaton.Partial st ->
-      Automaton.Partial (module struct include S let state = st end : State)
+    | x, Automaton.Done _ as c -> c
+    | x, Automaton.Next st ->
+      x, Automaton.Next (module struct include S let state = st end : State)
+    | x, Automaton.Partial st ->
+      x, Automaton.Partial (module struct include S let state = st end : State)
 
 (*
 In particular, note that parse_line returns a [return] of a modified type.
 *)
 
 
-let rec parse number list context lines = 
-  let list = Automaton.sort list in
-  let myself () x = 
-    parse (ref !number) list context x
+let rec handle_lines myself lines ({ Context.number } as context_) 
+    all previous state = 
+  let aux ?context number = 
+    handle_lines myself lines 
+      { (Option.default context_ context) with Context.number} all
   in
-  let rec aux blocks (previous, state) = 
-    (* We distinguish cases depending on :
-       - whether there is still line to parse
-       - whether we have a running automaton
-    *)
-    match Enum.get lines, state with
-      (* First case : empty input, no running automaton: just return the accumulator *)
-      | None, None -> List.rev blocks
-  (* Second case : no input, but a running automaton. Interrupt it 
-     and append the result to the accumulator *)
-      | None, Some st -> List.rev (interrupt st (myself ()) @ blocks)
-  (* A line, but no running automata. Use the {!faa} 
-     function to elect a new automaton, *if* the line is non-empty, or a comment
-     Otherwise skip the line *)
-      | Some line, None -> 
-        if line = "" || String.starts_with line "# " then (incr number; aux blocks (previous, None))
-        else
-          (let input = { line; number = !number; context; 
-                         parse = myself () } in
-           let previous, state = faa input list in
-           incr number;
-           aux blocks (previous, Some state))
-            
-      (* A line, and a running automaton. Give it the line to eat, and act upon its return. *)
-      | Some line, Some state ->
-        let input = { line; number = !number; context; 
-                      parse = myself () } in
-        incr number;
-        match parse_line state input with
+  let context = context_ in
+  (* We distinguish cases depending on :
+     - whether there is still line to parse
+     - whether we have a running automaton
+  *)
+  match Enum.get lines, state with
+    (* First case : empty input, we do not have anything to return *)
+    | None, None -> None
+    (* Second case : no input, but a running automaton. Interrupt it 
+       and append the result to the accumulator *)
+    | None, Some st -> 
+      let context, blocks = interrupt context st myself in
+      Some (context, [], None, blocks)
+    (* A line, but no running automata. Use the {!faa} 
+       function to elect a new automaton, *if* the line is non-empty.
+       Otherwise skip the line *)
+    | Some line, None -> 
+      if line = "" then
+        aux (number + 1) previous None
+      else
+        let input = { line; context; parse = myself } in
+        let context, previous, state = faa input previous in
+        aux ~context (number + 1) previous (Some state)
+
+    (* A line, and a running automaton. Give it the line to eat, and act upon its return. *)
+    | Some line, Some state ->
+      let input = { line; context; 
+                    parse = myself } in
+      match parse_line state input with
           (* He's done. Whether he digested the line, make the proper modification on lines/number. *)
-          | Automaton.Done (bl, b) ->
-            if not b then (Enum.push lines line; decr number);
-            aux (bl @ blocks) (list, None)
+        | context, Automaton.Done (bl, b) ->
+          let number = if not b then (Enum.push lines line; number)
+            else number + 1
+          in
+          Some ({ context with Context.number }, all, None, bl)
+        (* He wants to continue. Fine ! *)
+        | context, Automaton.Next st' ->
+          aux ~context (number + 1) previous (Some st')
+        (* He can be interrupted. Look for a potential interruption, or go on *)
+        | context, Automaton.Partial st' -> 
+          try
+            let context, previous', state' = faa input previous in
+            let context, blocks = interrupt context state myself in
+            Some ({ context with Context.number = number + 1 }, previous, 
+                  Some state', blocks)
+          with _ ->
+            aux (number + 1) previous (Some st')
 
-          (* He wants to continue. Fine ! *)
-          | Automaton.Next st' ->
-            aux blocks (previous, Some st')
-          (* He can be interrupted. Look for a potential interruption, or go on *)
-          | Automaton.Partial st' -> 
-            try
-              let previous', state' = faa input previous in
-              aux (interrupt state (myself ()) @ blocks) 
-                (previous', Some state')
-            with _ ->
-              aux blocks (previous, Some st')
+let rec parse list context lines = 
+  let list = Automaton.sort list in
+  let myself context lines = parse list context lines in
+  let rec aux blocks context previous state = 
+    match handle_lines myself lines context list previous state with
+      | None -> context, List.rev blocks
+      | Some (context, previous, state, blocks') ->
+        aux (blocks' @ blocks) context previous state
+  in
+  aux [] context list None
 
-    in
-    aux [] (list, None)
-
-
-let parse = parse (ref 1) [(module Aut_paragraph : Automaton.Automaton);
+let parse = parse [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_heading : Automaton.Automaton);
  (module Aut_list : Automaton.Automaton);
  (module Aut_directive : Automaton.Automaton);
@@ -131,5 +141,5 @@ let parse = parse (ref 1) [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_latex_env : Automaton.Automaton);
  (module Aut_verbatim : Automaton.Automaton);
  (module Aut_hr : Automaton.Automaton)
-] Context.default
+] Context.default |- snd
 
