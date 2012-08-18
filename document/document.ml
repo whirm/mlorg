@@ -102,21 +102,27 @@ end
 class virtual ['a] bottomUp = object(self)
   inherit ['a] Block.bottomUp
   method document d = 
-    self#combine (self#blocks d.beginning :: List.map self#heading d.headings)
+    let a = self#blocks d.beginning in
+    let b = List.map self#heading d.headings in
+    self#combine (a :: b)
   method heading h = 
-    self#combine (self#inlines h.name ::
-                  self#blocks h.content :: 
-                  List.map self#heading h.children)
+    let a = self#inlines h.name in
+    let b = self#blocks h.content in
+    self#combine (a :: b ::
+                    List.map self#heading h.children)
 end
 
 class virtual ['a, 'b] bottomUpWithArg = object(self)
   inherit ['a, 'b] Block.bottomUpWithArg
   method document arg d = 
-    self#combine (self#blocks arg d.beginning :: List.map (self#heading arg) d.headings)
+    let a = self#blocks arg d.beginning in
+    let b = List.map (self#heading arg) d.headings in
+    self#combine (a :: b)
   method heading arg h = 
-    self#combine (self#inlines arg h.name ::
-                  self#blocks arg h.content :: 
-                  List.map (self#heading arg) h.children)
+    let a = self#inlines arg h.name in
+    let b = self#blocks arg h.content in
+    self#combine (a :: b ::
+                    List.map (self#heading arg) h.children)
 end
   
 
