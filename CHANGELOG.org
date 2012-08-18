@@ -2,6 +2,12 @@
 
 
 
+* r4
+Release: <2012-08-18 sam.>
+- Latex exporter made into a class, latexExporter
+- An exporter to beamer, beamerExporter
+- Bugfixes in Latex
+- Changed Config Interface
 * r3
 Release: <2012-08-11 sam.>
 - Improved the manual
