@@ -120,7 +120,6 @@ let rec handle_lines myself lines ({ Context.number } as context_)
             aux (number + 1) previous (Some st')
 
 let rec parse list context lines = 
-  let list = Automaton.sort list in
   let myself context lines = parse list context lines in
   let rec aux blocks context previous state = 
     match handle_lines myself lines context list previous state with
@@ -153,7 +152,7 @@ let parse_lazy list context lines =
   in with_buffer f
   
 
-let automata = [(module Aut_paragraph : Automaton.Automaton);
+let automata = Automaton.sort [(module Aut_paragraph : Automaton.Automaton);
  (module Aut_heading : Automaton.Automaton);
  (module Aut_list : Automaton.Automaton);
  (module Aut_directive : Automaton.Automaton);
