@@ -320,7 +320,11 @@ let statistics_cookie_parser _ rest =
 
 (** {2 Timestamp parser} *)
 let timestamp_parser _ rest = 
-  let handle f rest =
+  let handle f rest = 
+    let rest = if Substring.length rest = 0 then rest
+      else if Substring.get rest 0 = ' ' then Substring.triml 1 rest
+      else rest
+    in
     match Timestamp.parse_substring rest with
       | Some (a, rest) -> f a, rest
       | None -> raise (Failure "")
