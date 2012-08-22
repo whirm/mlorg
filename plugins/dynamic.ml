@@ -60,8 +60,10 @@ let _ = %s.register (
     in
     let () = 
       Log.info "Compiling %s [%s]" source command;
-      if Sys.command command <> 0 then
-        Log.fatal "Compiling failed." 
+      try
+        Command.run command |> ignore
+      with Command.Failed (command, error) ->
+        Log.fatal "While compiling (command: %s):\n%s" command error
     in
     let () = load obj in
     if clean then
