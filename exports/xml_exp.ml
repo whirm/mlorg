@@ -183,15 +183,17 @@ module E = struct
                   "filename", d.filename]
           (self#blocks d.beginning @
              concatmap self#heading d.headings)]
+
   end
+  let write out = Xml.output out
+    ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
+     "math-inline"; "footnote-reference"; "inline-source"; "inline-call"]
+    ["paragraph"; "name"; "named-block"]
+    []
+    ["verbatim-inline"; "example"; "source"]
+
   module D = struct
-    let export _ doc out = 
-      Xml.output out
-        ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
-         "math-inline"; "footnote-reference"; "inline-source"; "inline-call"]
-        ["paragraph"; "name"; "named-block"]
-        []
-        ["verbatim-inline"; "example"; "source"]
+    let export _ doc out = write out
         ((new xmlExporter)#document doc)
     let default_filename = change_ext "xml"
   end
