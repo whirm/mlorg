@@ -134,7 +134,11 @@ val prop_val_ : string -> heading -> string
 val dump : heading list -> unit
 (** Dump a list of heading as a tree *)
 
-val find_block_by_name : t -> string -> Block.t option
+val blocks_by_keywords : ((string * string) list -> bool) -> t -> Block.t list
+(** [blocks_by_property document pred] returns all the block in [document]
+    whose keywords satisfy [pred] *)
+
+val find_block_by_name : string -> t -> Block.t option
 (** [find_block_by_name document name] finds the first block of [document]
     called [name] *)
 
@@ -152,3 +156,4 @@ val has_tag : string -> heading -> bool
 
 val footnotes : t -> (string * Inline.t list) list
 (** [footnotes document] returns all the footnotes present in a document by order of first reference. *)
+

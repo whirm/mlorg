@@ -34,7 +34,7 @@ module E = struct
       else if Config.get config code <> "" then
         run config [Config.get config code] "<user-entry>" 1 doc out
       else
-        match Document.find_block_by_name doc (Config.get config block) with
+        match Document.find_block_by_name (Config.get config block) doc with
           | None -> 
             Log.fatal "Block %s not found." (Config.get config block)
           | Some (Block.Src (number, _, lines)) ->

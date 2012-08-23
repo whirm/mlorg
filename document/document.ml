@@ -310,20 +310,22 @@ let dump =
       aux (i + 4) heading.children)
   in aux 0
 
-let find_block_with_property f doc =
+let blocks_by_keywords pred doc =
   let folder = object(self)
-    inherit [Block.t option] folder as super
-    method blocks v = function
-      | Block.With_Keywords (l, t) :: _ when f l -> Some t
-      | t :: q -> self#blocks (super#block v t) q
-      | [] -> v
+    inherit [Block.t list] folder as super
+    method block acc = function
+      | Block.With_Keywords (l, t) when pred l ->
+        self#block (t :: acc) t
+      | x -> super#block acc x
   end
-  in folder#document None doc
+  in folder#document [] doc
 
 
-let find_block_by_name doc name = 
-  find_block_with_property 
-    (fun l -> try List.assoc "NAME" l = name with _ -> false) doc
+let find_block_by_name name doc = 
+  match blocks_by_keywords 
+    (fun l -> try List.assoc "NAME" l = name with _ -> false) doc with
+    | x :: _ -> Some x
+    | _ -> None
 
 let current_clocked_item doc =
   let o = object(self)
