@@ -2,6 +2,13 @@
 
 
 
+* r5
+Release: <2012-08-26 dim.>
+- Rewrite of the parser, to support lazy parsing
+- Improved the interface of the mlorg program
+- A few bugfixes in Document
+- A function =Document.blocks_by_keywords= to find blocks which have a
+  particular keyword
 * r4
 Release: <2012-08-18 sam.>
 - Latex exporter made into a class, latexExporter
