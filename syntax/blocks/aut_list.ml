@@ -122,6 +122,6 @@ let parse_line st { Automaton.line; Automaton.parse; Automaton.context } =
         number = compute_number st.ordered format (number+1);
         items
       }
-      in context, Automaton.Partial st'
+      in context, Automaton.Next st'
       
 let priority = 10
