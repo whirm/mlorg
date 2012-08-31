@@ -15,7 +15,10 @@ Each step will correspond to a function of type [BatSubstring.t -> (t * BatSubst
 
 let count_stars s =
   let s' = BatSubstring.dropl ((=) '*') s in
-  BatSubstring.size s - BatSubstring.size s', BatSubstring.trim s'
+  if BatSubstring.length s' > 0 && BatSubstring.get s' 0 = ' ' then
+    BatSubstring.size s - BatSubstring.size s', BatSubstring.trim s'
+  else
+    failwith ""
 
 
 let get_marker context s = 
