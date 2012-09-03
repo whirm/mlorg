@@ -52,6 +52,13 @@ $extraheader
          Printf.fprintf out "\\end{frame}\n")
       else
         super#heading toc heading
+    method block toc = function
+      | Custom (name, opts, blocks) 
+          when List.mem name ["alert"; "color"; "uncover"; "alt"; "invisible"; "only"] ->
+          Printf.fprintf out "\\%s%s{\n" name opts;
+          self#blocks toc blocks;
+          Printf.fprintf out "\n}\n"
+      | x -> super#block toc x
     method document toc document =
       write_header config out document;
       super#_document toc document;
