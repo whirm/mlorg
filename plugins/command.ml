@@ -8,10 +8,11 @@ let run ?(feed = []) command =
     ~autoclose: true ~cleanup: true command (Unix.environment ())
   in
   List.iter (IO.write_line stdin) feed;
+  IO.close_out stdin;
   let stdout_c = IO.read_all stdout
   and stderr_c = IO.read_all stderr in
   match Unix.close_process_full (stdout, stdin, stderr) with
-    | Unix.WEXITED 0 -> stdout_c
+    | Unix.WEXITED 0 ->  stdout_c
     | _ -> raise (Failed (command, stderr_c))
 
 let run_fmt ?feed fmt = 
