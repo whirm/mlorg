@@ -125,7 +125,12 @@ let transform conf doc =
         | x -> super#block l x
     end in o#document [] doc
   in
-  let formulas = math2png conf (gather_formulas ()) in
+  let formulas = 
+    let l = gather_formulas () in
+    if l <> [] then
+      math2png conf (gather_formulas ())
+    else []
+  in
   let o = object(self)
     inherit [unit] Document.mapper as super
     method lookup formula =
@@ -148,5 +153,8 @@ let transform conf doc =
       | x -> super#block k x
   end
   in
-  let doc' = o#document () doc in
+  let doc' = if formulas <> [] then
+      o#document () doc 
+    else doc
+  in
   Printf.eprintf "\n"; doc'
