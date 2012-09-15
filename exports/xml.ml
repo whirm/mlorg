@@ -6,12 +6,12 @@ type t =
   | Empty
   | Data of string
   | Block of string * (string * string) list * t list
-
+  | Raw of string
 let empty = Empty
 let block ?(attr = []) name children = 
   Block (name, attr, children)
 let data s = Data s
-  
+let raw s = Raw s
   
 let quote, _ = '"', '"'
 let output_string_rewrite fd s = 
@@ -44,16 +44,19 @@ let rec output_attribs fd =
   
 let rec indent fd num = 
   IO.nwrite fd (String.make num ' ')
-let output_lines fd indent_level lines = 
+let output_lines ?(rewrite = true) fd indent_level lines = 
   match Prelude.lines lines with
     | t :: q ->
-        output_string_rewrite fd t; 
-	List.iter (fun s -> IO.write fd '\n'; 
-          indent fd indent_level; 
-          output_string_rewrite fd s) q;
-        
-        if lines.[String.length lines - 1] = '\n' then
-          output_string_rewrite fd "\n"
+      let output = if rewrite then output_string_rewrite fd
+        else IO.write_string fd
+      in
+      output t; 
+      List.iter (fun s -> IO.write fd '\n'; 
+        indent fd indent_level; 
+        output s) q;
+      
+      if lines.[String.length lines - 1] = '\n' then
+        output "\n"
           
     | [] -> ()
 
@@ -61,6 +64,7 @@ let output ?(offset = 0) fd inlines prep_inlines exceptions space_significants t
   let rec write ?(ctx_inline = false) indent_level = function
     | Empty -> ()
     | Data s -> output_lines fd indent_level s
+    | Raw s -> output_lines ~rewrite: false fd indent_level s
     | Block (name, attribs, children) ->
 	let inline = List.mem name inlines in
 	let close_tag = children = [] && not (List.mem name exceptions) in

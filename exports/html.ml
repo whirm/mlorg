@@ -16,6 +16,9 @@ module E = struct
   let use_math2png =  Config.add config "use-math2png" boolean "Convert latex formulas to PNG using Math2png extension" true
   let image_extensions = Config.add config "image-extensions" (list string) "The list of extensions to be considered as images"
     [".png"; ".jpg"; ".jpeg"; ".gif"; ".bmp"]
+
+  let use_pygments = Config.add config "use-pygments" boolean "Shall we use pygments to color code ?" true
+
   type interface = exporter
   let concatmap f l = List.concat (List.map f l)
   let assoc l s = try List.assoc s l with _ -> ""
@@ -30,6 +33,12 @@ module E = struct
                                   "charset", Config.get config encoding] [];
          Xml.block "script" ~attr:["type","text/javascript"; 
                                    "src","http://orgmode.org/mathjax/MathJax.js"] [Xml.data " "];
+         Xml.block "style" ~attr:["type", "text/css"]
+           [Xml.data 
+               (if Config.get config use_pygments then
+                   try Pygments.style_def config "html"
+                   with _ -> ""
+                else "")];
          Xml.block "link" 
            ~attr: ["rel", "stylesheet"; "href", Config.get config style;
                                     "type", "text/css"; "media", "screen"] []]
@@ -98,15 +107,32 @@ module E = struct
         [Xml.block "a" ~attr:["title", descr; "href", "#"^target] [Xml.data "↑"]]
     method block = function
       | Paragraph l -> [Xml.block "p" (self#inlines l)]
+
       | Horizontal_Rule -> [Xml.block "hr" []]
+
       | List (l, _) ->
           [Xml.block "ul" (concatmap (self#list_item) l)]
+
       | Example (_, l) ->
           [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
+
+      | Src (_, lang, lines) ->
+        if Config.get config use_pygments then
+          try
+            [Xml.raw (Pygments.color config lang "html" lines)]
+          with Command.Failed (command, message) ->
+            Log.warning "While running pygments (%s): %s" command message;
+            [Xml.block "pre" [Xml.data (String.concat "\n" lines)]]
+            
+        else
+          [Xml.block "pre" [Xml.data (String.concat "\n" lines)]]
+
       | Custom (name, _, l) ->
           [Xml.block "div" ~attr:["class", name] (self#blocks l)]
+
       | Quote l ->
           [Xml.block "blockquote" (self#blocks l)]
+
       | x -> super#block x
     method heading d = 
       (Xml.block (Printf.sprintf "h%d" d.level)

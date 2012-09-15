@@ -8,6 +8,9 @@ type t
 val data : string -> t
 (** Construct a leaf of the tree *)
 
+val raw : string -> t
+(** Used to insert raw xml as a string in the tree *)
+
 val block : ?attr : (string * string) list -> string -> t list -> t
 (** Construct a block with given attribute name and children. The indent
     parameter specify if it is allowed to indent the contents of this block (default true) *)
