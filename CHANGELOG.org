@@ -2,6 +2,10 @@ OB#+TITLE: mlorg's Changelog
 
 
 
+* r7
+Release: <2012-09-16 dim.>
+- Introduced the pygments plugin to color code in the html output
+- Math2png: do nothing if there is no formulas
 * r6
 Release: <2012-09-09 dim.>
 - Fixed a few bugs
