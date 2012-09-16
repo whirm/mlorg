@@ -64,7 +64,7 @@ let output ?(offset = 0) fd inlines prep_inlines exceptions space_significants t
   let rec write ?(ctx_inline = false) indent_level = function
     | Empty -> ()
     | Data s -> output_lines fd indent_level s
-    | Raw s -> output_lines ~rewrite: false fd indent_level s
+    | Raw s -> IO.write_string fd s
     | Block (name, attribs, children) ->
 	let inline = List.mem name inlines in
 	let close_tag = children = [] && not (List.mem name exceptions) in
