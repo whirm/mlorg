@@ -2,7 +2,7 @@
 open Batteries
 open Prelude
 open Block
-open Automaton
+open Org_automaton
 (** To parse headings, we need to 
 - we need to count the stars
 - to spot an eventual marker
@@ -24,7 +24,7 @@ let count_stars s =
 let get_marker context s = 
   let word, rest = BatSubstring.splitl ((<>) ' ') (BatSubstring.trim s) in
   let word = BatSubstring.to_string word in
-  if List.mem word context.Context.markers then
+  if List.mem word context.Org_context.markers then
     Some word, rest
   else
     None, s
@@ -40,7 +40,7 @@ let get_priority s =
 
 let get_title s = 
   let module String = BatSubstring in
-  let parse_inl = Inline.parse -| BatSubstring.to_string 
+  let parse_inl = Org_inline.parse -| BatSubstring.to_string 
     -| BatSubstring.trim in
   let title, tags = BatSubstring.splitr (fun c -> c = ':' 
   || Char.is_letter c || Char.is_digit c) s in

@@ -1,5 +1,5 @@
 (** Automata for horizontal rules *)
-open Automaton
+open Org_automaton
 type state = unit
 
 let interrupt context _ _ = context, [Block.Horizontal_Rule]

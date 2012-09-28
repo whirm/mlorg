@@ -2,7 +2,7 @@
 
 open Batteries
 open Block
-open Automaton
+open Org_automaton
 type state = string list * bool
 (* The state : the lines seen so far, and are we done *)
 

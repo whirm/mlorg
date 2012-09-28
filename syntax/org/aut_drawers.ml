@@ -1,6 +1,6 @@
 (* Automata for properties *)
 (* Lines seen so far and draw name *)
-open Automaton
+open Org_automaton
 open Block
 open Batteries
 type state = string list * string

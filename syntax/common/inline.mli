@@ -164,24 +164,6 @@ and t =
   | Timestamp of timestamp
   | Plain of string
 
-(** {1 Parsers} *)
-(** This section deals with defining what a parser for a construction is. *)
-
-type parser = (string -> t list) -> BatSubstring.t -> (t list * BatSubstring.t) option
-  (** A parser simply a function taking a [BatSubstring.t] and returning an option of
-      [t list]. The parser takes an extra parameter, a function to parse a
-      string and return a list of {!Inline.t}. The function may as well throw an
-      exception.
-  *)
-
-val run_parsers : parser list -> string -> t list
-(** Run a list of parsers over a string and returned the generated contents.
-    Note that the order matter : first parsers have higher priority. *)
-
-val parse : string -> t list
-(** Parse a string *)
-
-
 (** {1 Mappers and folders} *)
 (** In this section we define mapper and folders overline. See Document for the
     full documentation of these traversal. *)

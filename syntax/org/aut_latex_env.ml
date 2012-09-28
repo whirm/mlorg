@@ -1,7 +1,7 @@
 (** Automata for latex environment *)
 open Batteries
 open Block
-open Automaton
+open Org_automaton
 type state = string list * string * string
 (* The state : the lines seen so far, the name and options *)
 

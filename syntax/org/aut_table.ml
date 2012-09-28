@@ -2,7 +2,7 @@
 
 open Batteries
 open Block
-open Automaton
+open Org_automaton
 
 type state = string list
 
@@ -40,7 +40,7 @@ let compile_matrix matrix =
     else if s = "" then Empty
     else try
            Scanf.sscanf s "<%d>" (fun n -> Size n)
-      with _ -> Content (Inline.parse s)))
+      with _ -> Content (Org_inline.parse s)))
     matrix
 let analyse_line (table, rows) row = 
   if Array.for_all

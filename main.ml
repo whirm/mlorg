@@ -47,7 +47,7 @@ let with_filename s f =
 let get_directive s = 
   with_filename !filename
       (fun fd -> try
-        Parser.parse_lazy (BatIO.lines_of fd) |>
+        Org_parser.parse_lazy (BatIO.lines_of fd) |>
             Enum.find_map (function
               | Block.Directive (key, value) when key = s -> Some value
               | _ -> None) |> print_endline |> fun () -> exit 0

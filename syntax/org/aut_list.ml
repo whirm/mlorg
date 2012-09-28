@@ -68,7 +68,7 @@ let parse_first_line s =
               | Some (fmt, rest) -> Some (ordered, b, parse_fmt fmt, rest)
 (** Parse the first line of an item *)
 
-let is_start { Automaton.line; Automaton.context } = 
+let is_start { Org_automaton.line; Org_automaton.context } = 
   match parse_first_line line with
     | None -> None
     | Some (ordered, checkbox, format, contents) ->
@@ -95,23 +95,23 @@ let interrupt context st parse =
   let context, items = update_current context parse st in
   context, [Block.List (List.rev items, st.ordered)]
 
-let parse_line st { Automaton.line; Automaton.parse; Automaton.context } =
+let parse_line st { Org_automaton.line; Org_automaton.parse; Org_automaton.context } =
   if line = "" then 
     if st.last_line_empty then 
       let context, block = interrupt context st parse in
-      context, Automaton.Done (block, false)
+      context, Org_automaton.Done (block, false)
     else 
-      context, Automaton.Partial { st with last_line_empty = true }
+      context, Org_automaton.Partial { st with last_line_empty = true }
   else 
     let st = { st with last_line_empty = false } in
     match parse_first_line line with
     | None ->
       if String.starts_with line "  " then
-        context, Automaton.Partial
+        context, Org_automaton.Partial
           { st with current = String.lchop ~n:2 line :: st.current }
       else
         let context, block = interrupt context st parse in
-        context, Automaton.Done (block, false)
+        context, Org_automaton.Done (block, false)
     | Some (_, checkbox, format, contents) ->
       let format' = Option.default st.format format in
       let number = Option.default 0 st.number in
@@ -122,6 +122,6 @@ let parse_line st { Automaton.line; Automaton.parse; Automaton.context } =
         number = compute_number st.ordered format (number+1);
         items
       }
-      in context, Automaton.Next st'
+      in context, Org_automaton.Next st'
       
 let priority = 10

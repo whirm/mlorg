@@ -54,8 +54,6 @@ class ['a] mapper = object(self)
     | Quote t -> Quote (self#blocks v t)
     | Drawer (name, t) -> Drawer (name, self#blocks v t)
     | With_Keywords (vals, l) -> With_Keywords (vals, self#block v l)
-    | Table t -> Table {t with rows = 
-        Array.map (Array.map (self#inlines v)) t.rows}
     | (Property_Drawer _ | Src _ | Latex_Environment _ | Horizontal_Rule
           | Example _ | Math _ | Directive _ as x) -> x
   method list_item v ({ contents } as x) =
@@ -75,8 +73,6 @@ class ['a] folder = object(self)
     | With_Keywords (_, t) -> self#block v t
     | Custom (_, _, t)
     | Drawer (_, t) | Quote t -> self#blocks v t
-    | Table t -> 
-        Array.fold_left (Array.fold_left self#inlines) v t.rows
     | (Property_Drawer _ | Src _ | Latex_Environment _  | Horizontal_Rule
           | Example _ | Math _ | Directive _) -> v
   method list_item v { contents } = self#blocks v contents
@@ -95,9 +91,6 @@ class virtual ['a] bottomUp = object(self)
     | With_Keywords (_, t) -> self#block t
     | Custom (_, _, t)
     | (Drawer (_, t) | Quote t) -> self#blocks t
-    | Table t ->
-        let f = self#combine -| Array.to_list in
-        f (Array.map (f -| Array.map self#inlines) t.rows)
     | (Property_Drawer _ | Src _ | Latex_Environment _  | Horizontal_Rule
           | Example _ | Math _ | Directive _) -> self#bot
   method list_item { contents } = self#blocks contents
@@ -116,9 +109,6 @@ class virtual ['a, 'b] bottomUpWithArg = object(self)
     | With_Keywords (_, t) -> self#block arg t
     | Custom (_, _, t)
     | (Drawer (_, t) | Quote t) -> self#blocks arg t
-    | Table t ->
-        let f = self#combine -| Array.to_list in
-        f (Array.map (f -| Array.map (self#inlines arg)) t.rows)
     | (Property_Drawer _ | Src _ | Latex_Environment _  | Horizontal_Rule
           | Example _ | Math _ | Directive _) -> self#bot
   method list_item arg { contents } = self#blocks arg contents

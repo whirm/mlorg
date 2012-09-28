@@ -278,7 +278,7 @@ let from_blocks filename blocks =
 (** {1 Parsing from files} *)
 let from_chan filename channel = 
     BatIO.lines_of channel |> 
-    Parser.parse |> 
+    Org_parser.parse |> snd |>
     from_blocks filename
 
 let from_file filename = 

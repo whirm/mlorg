@@ -1,6 +1,6 @@
 (** Automata for directives *)
 open Block
-open Automaton
+open Org_automaton
 type state = string * string
 (* org mode keywords *)
 let affiliated_keywords = 

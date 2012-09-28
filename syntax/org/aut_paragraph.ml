@@ -6,7 +6,7 @@ lines that end with an empty line.
 Well, Actually it's not so simple. To ease things up, 
 On interruption we check that the block is (or not a footnote definition)  
 *)
-open Automaton
+open Org_automaton
 type state = string list
 (* The state : the lines seen so far *)
 
@@ -16,7 +16,7 @@ let interrupt context lines _ = match List.rev lines with
   (* This case is to avoid cluttering the output tree with empty blocks *)
   | [] -> context, []
   | (head :: tail) as lines ->
-      let parse lines = Inline.parse (String.concat "\n" lines) in
+      let parse lines = Org_inline.parse (String.concat "\n" lines) in
       (* We check for a footnote definition in the first line *)
       try Scanf.sscanf head "[%[^][]] %[^\n]" (fun name rest ->
         (* If it matches, we return a footnote definition *)

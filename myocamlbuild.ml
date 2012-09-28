@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 11f12e2ee2a347c2a19e1b3cc0d94715) *)
+(* DO NOT EDIT (digest: 4ffc90077a079654ab288bf19a1bd48f) *)
 module OASISGettext = struct
 (* # 21 "/tmp/install-oasis/oasis-0.3.0/src/oasis/OASISGettext.ml" *)
 
@@ -482,45 +482,26 @@ let package_default =
      flags = [];
      includes =
        [
-          ("syntax/inline",
-            ["common"; "document"; "exports"; "plugins"; "syntax/blocks"]);
-          ("syntax/blocks",
-            ["common"; "document"; "exports"; "plugins"; "syntax/inline"]);
+          ("syntax/org",
+            ["common"; "document"; "exports"; "plugins"; "syntax/common"]);
+          ("syntax/common",
+            ["common"; "document"; "exports"; "plugins"; "syntax/org"]);
           ("plugins",
-            [
-               "common";
-               "document";
-               "exports";
-               "syntax/blocks";
-               "syntax/inline"
-            ]);
+            ["common"; "document"; "exports"; "syntax/common"; "syntax/org"]);
           ("exports",
-            [
-               "common";
-               "document";
-               "plugins";
-               "syntax/blocks";
-               "syntax/inline"
-            ]);
+            ["common"; "document"; "plugins"; "syntax/common"; "syntax/org"]);
           ("document",
-            ["common"; "exports"; "plugins"; "syntax/blocks"; "syntax/inline"
-            ]);
+            ["common"; "exports"; "plugins"; "syntax/common"; "syntax/org"]);
           ("common",
-            [
-               "document";
-               "exports";
-               "plugins";
-               "syntax/blocks";
-               "syntax/inline"
-            ]);
+            ["document"; "exports"; "plugins"; "syntax/common"; "syntax/org"]);
           ("",
             [
                "common";
                "document";
                "exports";
                "plugins";
-               "syntax/blocks";
-               "syntax/inline"
+               "syntax/common";
+               "syntax/org"
             ])
        ];
      }
@@ -528,6 +509,6 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 532 "myocamlbuild.ml"
+# 513 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;

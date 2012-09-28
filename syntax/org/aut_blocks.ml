@@ -1,7 +1,7 @@
 (** Automata for blocks *)
 open Batteries
 open Block
-open Automaton
+open Org_automaton
 type state = int * string list * string * string
 (* The state : the linenumber, the lines seen so far, the name and options *)
 
@@ -38,7 +38,7 @@ let is_start { line; context } =
   if Str.string_match re line 0 then
     let name = Str.matched_group 2 line 
     and options = try Str.matched_group 4 line with Not_found -> "" in
-    Some (context, (context.Context.number, [], name, String.trim options))
+    Some (context, (context.Org_context.number, [], name, String.trim options))
   else
     None
 

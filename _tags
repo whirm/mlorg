@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d08d28dc86d5238f1c73569ae24eeec7)
+# DO NOT EDIT (digest: e473b9d97bc075c59a26d0f38ce7e404)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -23,10 +23,10 @@
 <exports/*.ml{,i}>: pkg_dynlink
 <plugins/*.ml{,i}>: pkg_batteries
 <plugins/*.ml{,i}>: pkg_dynlink
-<syntax/blocks/*.ml{,i}>: pkg_batteries
-<syntax/blocks/*.ml{,i}>: pkg_dynlink
-<syntax/inline/*.ml{,i}>: pkg_batteries
-<syntax/inline/*.ml{,i}>: pkg_dynlink
+<syntax/common/*.ml{,i}>: pkg_batteries
+<syntax/common/*.ml{,i}>: pkg_dynlink
+<syntax/org/*.ml{,i}>: pkg_batteries
+<syntax/org/*.ml{,i}>: pkg_dynlink
 # Executable mlorg
 "main.byte": pkg_batteries
 "main.byte": pkg_dynlink

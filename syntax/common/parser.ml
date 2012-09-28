@@ -2,8 +2,14 @@
 open Batteries
 open Prelude
 open Block
-open Automaton
 
+module Make (C : sig type context 
+                     val number : context -> int
+                     val set_number : context -> int -> context
+end) = struct
+  open C
+  module Automaton = Automaton.Make(C)
+  open Automaton
 (* The main parser for blocks content. The algorithm is the following, given a list
 of automata:
 
@@ -65,13 +71,16 @@ In particular, note that parse_line returns a [return] of a modified type.
 *)
 
 
-let rec handle_lines myself lines ({ Context.number } as context_) 
+let rec handle_lines myself lines context_
     all previous state = 
   let aux ?context number = 
+    let ctx = Option.default context_ context in
     handle_lines myself lines 
-      { (Option.default context_ context) with Context.number} all
+      (C.set_number ctx number)
+      all
   in
   let context = context_ in
+  let number = C.number context in
   (* We distinguish cases depending on :
      - whether there is still line to parse
      - whether we have a running automaton
@@ -105,7 +114,7 @@ let rec handle_lines myself lines ({ Context.number } as context_)
           let number = if not b then (Enum.push lines line; number)
             else number + 1
           in
-          Some ({ context with Context.number }, all, None, bl)
+          Some (C.set_number context number, all, None, bl)
         (* He wants to continue. Fine ! *)
         | context, Automaton.Next st' ->
           aux ~context (number + 1) previous (Some st')
@@ -114,12 +123,13 @@ let rec handle_lines myself lines ({ Context.number } as context_)
           try
             let context, previous', state' = faa input previous in
             let context, blocks = interrupt context state myself in
-            Some ({ context with Context.number = number + 1 }, previous, 
+            Some (C.set_number context (number + 1), previous, 
                   Some state', blocks)
           with _ ->
             aux (number + 1) previous (Some st')
 
 let rec parse list context lines = 
+  let list = Automaton.sort list in
   let myself context lines = parse list context lines in
   let rec aux blocks context previous state = 
     match handle_lines myself lines context list previous state with
@@ -130,6 +140,7 @@ let rec parse list context lines =
   aux [] context list None
 
 let parse_lazy list context lines = 
+  let list = Automaton.sort list in
   let with_buffer f =
     let buffer = ref [] in
     let rec g () = match !buffer with
@@ -140,7 +151,7 @@ let parse_lazy list context lines =
     in Enum.from_while g
   in
   let f = 
-    let st = ref (Context.default, list, None) in
+    let st = ref (context, list, None) in
     let myself context lines = parse list context lines in
     fun () ->
       let context, list, state = !st in
@@ -151,19 +162,4 @@ let parse_lazy list context lines =
         | None -> None
   in with_buffer f
   
-
-let automata = Automaton.sort [(module Aut_paragraph : Automaton.Automaton);
- (module Aut_heading : Automaton.Automaton);
- (module Aut_list : Automaton.Automaton);
- (module Aut_directive : Automaton.Automaton);
- (module Aut_math : Automaton.Automaton);
- (module Aut_drawers : Automaton.Automaton);
- (module Aut_blocks : Automaton.Automaton);
- (module Aut_table : Automaton.Automaton);
- (module Aut_latex_env : Automaton.Automaton);
- (module Aut_verbatim : Automaton.Automaton);
- (module Aut_hr : Automaton.Automaton)
-]
-let parse = parse automata Context.default |- snd
-let parse_lazy = parse_lazy automata Context.default
-
+end
