@@ -13,6 +13,7 @@ module E = struct
   let encoding = Config.add config "encoding" string "The document's encoding" "utf-8"
   let full = Config.add config "wrap" boolean "Shall the output be a full html document ?" true
   let style = Config.add config "style" string "The stylesheet to use" "style.css"
+  let number_lines = Config.add config "number-lines" boolean "Shall lines be numbered inside code blocks" true
   let use_math2png =  Config.add config "use-math2png" boolean "Convert latex formulas to PNG using Math2png extension" true
   let image_extensions = Config.add config "image-extensions" (list string) "The list of extensions to be considered as images"
     [".png"; ".jpg"; ".jpeg"; ".gif"; ".bmp"]
@@ -118,8 +119,12 @@ module E = struct
 
       | Src (_, lang, lines) ->
         if Config.get config use_pygments then
+          let options = 
+            if Config.get config number_lines then [Pygments.Lineno]
+            else []
+          in
           try
-            [Xml.raw (Pygments.color config lang "html" lines)]
+            [Xml.raw (Pygments.color ~options config lang "html" lines)]
           with Command.Failed (command, message) ->
             Log.warning "While running pygments (%s): %s" command message;
             [Xml.block "pre" [Xml.data (String.concat "\n" lines)]]
