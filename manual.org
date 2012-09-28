@@ -3,7 +3,8 @@
 #+EMAIL: simon.castellan@iuwt.fr
 #+begin_abstract
 =mlorg= is a parser written in OCaml for =org-mode= files. It focuses on letting
-the user interact with the user by means of OCaml source code
+the user interact with the user by means of OCaml source code, and is designed
+to be easily extendable.
 #+end_abstract
 Last updated: <2012-08-08 mer.>
 #+begin_tableofcontents
@@ -11,11 +12,10 @@ Table of contents:
 #+end_tableofcontents
 
 
-* Downloading, compiling and installing mlorg.
+* Installing mlorg
 ** Git repository
 The source code of mlorg is available on [[http://gitorious.org/mlorg/mlorg][gitorious]]. There is no official release
-of =mlorg= yet and there is a /revision/ each week (last revision: r1, as of
-<2012-07-29 dim.>).
+of =mlorg= yet and there is a /revision/ each week.
 ** Compiling =mlorg= and installing.
 =mlorg= uses =oasis= to build. The default commands to compile =mlorg= is thus:
 
@@ -29,7 +29,15 @@ install it (having a version installed is needed to dynamically load modules), t
 
 The =Makefile= provides aliases for this two commands. See the documentation of
 oasis to customize the build process.
-* =mlorg=, the binary, as a user
+** How to use mlorg
+=mlorg= is designed to be used in several ways:
+
+- As a standalone program that allows you to convert your org-mode files to
+  several formats such as HTML, LaTeX, and so on.
+
+- As a library that lets you parse and easily manipulate org-mode files.
+
+* The =mlorg= binary
 You may be interested  in =mlorg= for a few reasons:
 - You want to write and publish documents using org-mode.
 - You want to access information that are in your org-mode files and you don't
@@ -40,7 +48,7 @@ Then =mlorg= is perfect for the task.
 ** =mlorg= invocation
 The typical invocation of =mlorg= is as follows:
 
-: mlorg --filename <filename> --backend <backend>
+: mlorg --backend <backend> <filename>
 
 =mlorg= will parse =filename= and exports it to a seperate file according to
 =backend=. The backend will compute the filename to use to write the output in,
@@ -53,6 +61,7 @@ this setting by issuying =--output <output>=.
 - =--possible-options= Prints out the list of configuration options of mlorg (See [[Configuration options]])
 - =--set option=value= Sets the option =option= to =value=
 - =--backend <backend>= Sets the backend to =backend= (Default: html)
+
 ** Configuration options
 =mlorg= relies on plugins that can be customized using configuration
 items. There is two way to set a configuration parameter:
@@ -60,36 +69,22 @@ items. There is two way to set a configuration parameter:
   : #+key: value
 - in the commandline, with the =--set= switch.
 
-See the documentation of plugins to see a list of options expected by them.
-** Plugins
-Plugins are modules that work on the abstract representation of the input file
-(the AST of the file). There is several kinds of plugins
-
-- backends (or /exporters/) that exports the document to a specific format
-- module that maps the AST (for instance there is a plugin that computes the
-  table of contents of a document)
-
-Each plugins exports a list of configuration item that can be changed to
-customize it. The list of configurations item:
+Each component of =mlorg= can be configured by these means. Here is a list of
+the configurations keys existing in =mlorg=:
 
 - =mlorg.verbose= [type: =integer=] (default: =0=) -- Verbosity level
-- =general.math2png.dir= [type: =any string=] (default: ="lxtpng"=) -- The directory where to store images of preprocessed formulas
-- =general.math2png.latex= [type: =any string=] (default: ="latex -interaction\=batchmode"=) -- The latex command to invoke
-- =general.math2png.dvipng= [type: =any string=] (default: ="dvipng"=) -- The dvipng command to invoke
-- =general.math2png.header= [type: =any string=] (default: =""=) -- Header to add to the tex files
-- =general.math2png.inline= [type: =boolean (true, yes, no, false)=] (default: =no=) -- Tell whether inline math should be processed
-- =general.math2png.inline= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Tell whether block math (between $$) should be processed
+- =general.toc.rewrite-footnotes= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- True if footnotes should be handled
 - =general.toc.number-heading= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- True if headings should be numbered
-- =general.toc.number-format= [type: =any string=] (default: ="1.1.1.1.1"=) -- The format used to number the headings
+- =general.toc.heading-format= [type: =any string=] (default: ="1.1.1.1.1"=) -- The format used to number the headings
+- =general.toc.footnote-format= [type: =any string=] (default: ="1"=) -- The format used to number the footnotes
+- =general.toc.appendix-format= [type: =any string=] (default: ="A.1.1.1.1"=) -- The format used to number the headings in the appendix
+- =general.toc.footnotes-level= [type: =integer=] (default: =2=) -- Displays the footnotes at the end of sections of given level
+- =general.toc.number-heading-format= [type: =any string=] (default: ="$number "=) -- The format in which insert the the number in the heading (beginning)
+  Possible variables to use in this item:
+  - =number=: The number of the heading
 - =general.toc.number-toc= [type: =boolean (true, yes, no, false)=] (default: =no=) -- True if there should be numbers in the table of contents
-- =exporters.html.encoding= [type: =any string=] (default: ="utf-8"=) -- The document's encoding
-- =exporters.html.wrap= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Shall the output be a full html document ?
-- =exporters.html.style= [type: =any string=] (default: ="style.css"=) -- The stylesheet to use
-- =exporters.html.use-math2png= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Convert latex formulas to PNG using Math2png extension
-- =exporters.html.image-extensions= [type: =List of any string=] (default: =[".png", ".jpg", ".jpeg", ".gif", ".bmp"]=) -- The list of extensions to be considered as images
 - =exporters.latex.classname= [type: =any string=] (default: ="article"=) -- The LaTeX class name to use
-- =exporters.latex.header= [type: =any string=] -- The LaTeX header. Default value:
-
+=exporters.latex.header= [type: =any string=] -- The LaTeX header.. Default value:
   : "\documentclass{$classname}
   : $packages
   : $extraheader
@@ -98,7 +93,6 @@ customize it. The list of configurations item:
   : \begin{document}
   : \maketitle
   : "
-
   Possible variables to use in this item:
   - =classname=: the class name chosen for this document
   - =packages=: the list of packages to be loaded (formatted)
@@ -108,14 +102,62 @@ customize it. The list of configurations item:
 - =exporters.latex.footer= [type: =any string=] (default: ="\end{document}"=) -- The LaTeX footer
 - =exporters.latex.extraheader= [type: =any string=] (default: =""=) -- Extra LaTeX header
 - =exporters.latex.sections= [type: =List of any string=] (default: =["section", "subsection", "subsubsection", "paragraph", "subparagraph"]=) -- The name of the sections
+- =exporters.beamer.classname= [type: =any string=] (default: ="article"=) -- The LaTeX class name to use
+- =exporters.beamer.header= [type: =any string=] -- The LaTeX header.. Default value:
+  : "\documentclass{$classname}
+  : $packages
+  : $extraheader
+  : \title{$title}
+  : \author{$author}
+  : \begin{document}
+  : \maketitle
+  : "
+  Possible variables to use in this item:
+  - =classname=: the class name chosen for this document
+  - =packages=: the list of packages to be loaded (formatted)
+  - =extraheader=: user's extra header (set by extraheader option)
+  - =title=: Document's title
+  - =author=: Document's author
+- =exporters.beamer.footer= [type: =any string=] (default: ="\end{document}"=) -- The LaTeX footer
+- =exporters.beamer.extraheader= [type: =any string=] (default: =""=) -- Extra LaTeX header
+- =general.math2png.dir= [type: =any string=] (default: ="lxtpng"=) -- The directory where to store images of preprocessed formulas
+- =general.math2png.latex= [type: =any string=] (default: ="latex -interaction\=batchmode"=) -- The latex command to invoke
+- =general.math2png.dvipng= [type: =any string=] (default: ="dvipng"=) -- The dvipng command to invoke
+- =general.math2png.header= [type: =any string=] (default: =""=) -- Header to add to the tex files
+- =general.math2png.inline= [type: =boolean (true, yes, no, false)=] (default: =no=) -- Tell whether inline math should be processed
+- =general.math2png.block= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Tell whether block math (between $$) should be processed
+- =general.pygments.command= [type: =any string=] (default: ="pygmentize -f $formatter -l $lexer"=) -- The command to run to invoke pygments
+  Possible variables to use in this item:
+  - =formatter=: the name of the output format to use (eg. latex or html)
+  - =lexer=: the name of the input language (eg. ocaml)
+- =general.pygments.style= [type: =any string=] (default: ="default"=) -- The style for pygments to use
+- =general.pygments.style-spell-out= [type: =any string=] (default: ="pygmentize -S $style -f $formatter"=) -- The command to run to spell out the style definitions for a given formatter
+  Possible variables to use in this item:
+  - =style=: The style which to spell out the definition for
+  - =formatter=: Spell out the definition in this formatter
+- =exporters.html.encoding= [type: =any string=] (default: ="utf-8"=) -- The document's encoding
+- =exporters.html.wrap= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Shall the output be a full html document ?
+- =exporters.html.style= [type: =any string=] (default: ="style.css"=) -- The stylesheet to use
+- =exporters.html.use-math2png= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Convert latex formulas to PNG using Math2png extension
+- =exporters.html.image-extensions= [type: =List of any string=] (default: =[".png", ".jpg", ".jpeg", ".gif", ".bmp"]=) -- The list of extensions to be considered as images
+- =exporters.html.use-pygments= [type: =boolean (true, yes, no, false)=] (default: =yes=) -- Shall we use pygments to color code ?
 - =general.dynamic.ocamlc= [type: =any string=] (default: ="ocamlfind ocamlc -c -package batteries,mlorg"=) -- ocamlc command to use
 - =general.dynamic.ocamlopt= [type: =any string=] (default: ="ocamlfind ocamlopt -shared -package batteries,mlorg"=) -- ocamlopt command to use
 - =exporters.quote.block= [type: =any string=] (default: ="export"=) -- Name of the codeblock to use to export
 - =exporters.quote.external-file= [type: =any string=] (default: =""=) -- Optional name of the file to load
 - =exporters.quote.code= [type: =any string=] (default: =""=) -- Optional code (as a string) to load
 - =exporters.quote.save= [type: =any string=] (default: =""=) -- Non-empty: set to a ML file in which the generated source will be put (instead of a temporary file
-Here is a list of plugins.
-*** Exporters
+
+** Overview of how =mlorg= works
+When using =mlorg= to transform your documents into another format, here are the general step:
+
+1. The document is parsed using a parser. See [[Syntax]] to see more about the syntax recognized by =mlorg=
+2. Transformations are being made on the document depending on the backend. This
+   includes computing a table of contents, replacing latex formulas, and so
+   on. See [[Transformation modules]] for more details.
+3. The backend takes over and outputs the final results. See [[Backends]] to see the list of existing backends.
+
+** Backends
 Those plugins are meant to output a document to a specific format. The format of
 a configuration name for those module is =exporters.<plugin>.<name>=.
 **** Html
@@ -131,13 +173,14 @@ links toward anchors. On top of that, an anchor is added to each heading, so
 that search links pointing to headings are correctly translated.
 
 **** Latex
-Outputs to LaTeX. The output to LaTeX is quite straightforward. Again anchors
-are translated to labels. There is to way to translate a search link:
+Outputs to LaTeX. The output to LaTeX is quite straightforward. You can
+customize the header using the variables =extraheader= to load your custom
+definitions.
 
-- if it has an empty label, then it is translated to =ref=
-- if is has an non-emty label, it is translated to =hyperref=
+Links are exported using the =hyperref= package, except link toward labels of
+headings. Targets are exported using =\label=.
 **** Org
-A backend to output to org-mode. Not finished
+A backend to output to org-mode. Not finished.
 **** XML
 A backend that outputs the abstract tree to XML for further uses by other
 programs or to debug =mlorg='s parser.
@@ -150,13 +193,12 @@ This backend allows you to run arbitrary OCaml programs on the abstract document
 The first approach is for batch processing of org files whereas the second
 allows the document to be defined along with methods to get the desired
 information. In any case, the ML source file is compiled in a seperate file
-(temporary or not) and dynlinked. See the section [[Retrieving information from
-org-mode files]] for more information on how to write such modules.
+(temporary or not) and dynlinked. 
 
 
 
 
-*** General
+*** Transformation modules
 Those plugin are general purpose modules inside =mlorg= that offers some
 functionnality not related to exporting.
 
@@ -175,6 +217,7 @@ with a special protocol =depth-<depth>= where =<depth>= is the value returned by
 good.
 **** Dynamic
 Configures the loading of modules that registers values of specific types.
+You should not use it except if you are building on the [[mlorg library]]
 ** Retrieving information from org-mode files
 The backend [[quote][Quote]] can be used to retrieve raw information from org-mode
 files. When using it, you should provide a ML expression that has the type
@@ -199,6 +242,70 @@ time:
 To use it on a file, just do:
 
 : mlorg.opt --filename $XORGDIR/master.org --backend quote --set exporters.quote.save=/tmp/clock.ml --set exporters.quote.code='fun d out -> match D.current_clocked_item d with None -> () | Some d -> write out "%s (%s)" (D.name d) (Timestamp.string_of_seconds (D.clocking_time d))'
+* The =mlorg= library
+=mlorg= exports a library you can use to parse org-mode files in your
+program. This section gives an overview of the concepts behind =mlorg=.
+
+** How a document is represented
+The representation of a document is in three layer:
+
+- Document: represent the general structure of the document as a tree whose
+  nodes are the headings of the document. Each heading is tagged with /metadata/
+  such as timestamps appearing in it, or the footnotes defined in it and so on.
+
+- Blocks: the contents of each heading is a list of /blocks/: lists, tables, paragraphs and so on.
+
+- Inline: Inline contents inside blocks such as emphasis, links, ...
+
+** Parsing a document
+If you want to parse a document you need to use the functions in the [[http://kiwi.iuwt.fr/~asmanur/projets/mlorg/doc/Document.html][Document]]
+module. You can either parse from a channel or a file.
+
+Note that by definition, to have a document you need to have the full document
+in memory. If you don't want it, you can use the function of the [[http://kiwi.iuwt.fr/~asmanur/projets/mlorg/doc/Org_parser.html][Org_parser]]
+module. (More details about how parsing is done is available [[How%20parsing%20is%20done][here]]), especially
+the =parse_lazy= function.
+
+** Using the =Document.t= structure
+You can work on documents simply by pattern matching but if you want to
+completely traverse a document, it can be painful to define all the recursive
+case.
+
+You have two solutions:
+
+- Use the [[http://kiwi.iuwt.fr/~asmanur/projets/mlorg/doc/Filter.html][Filter]] module that provides an easy way to select nodes matching a
+  simple criteria.
+
+- Use /traversals/ that allow you to focus on what you want to do rather than
+  the recursive calls.
+
+Traversals are classes implementing different types of traversal, but /as is/
+they do nothing. By overriding the cases you are interested in, you can do what
+you want in very few lines.
+
+Here is an example:
+#+begin_src ocaml
+  let schedule_tomorrow = 
+    let o = object (self)
+      inherit [unit] Document.mapper as super
+      method heading () d = 
+        if List.mem "due-tomorrow" d.tags then
+          { super#heading () d with
+            scheduled = [Timestamp.add_days (Timestamp.today ()) 1] }
+        else
+          super#heading () d
+    end
+    in o#document ()
+#+end_src
+This function schedules tomorrow the headings with tag /due-tomorrow/.  There
+are other kind of traversal, see the [[http://kiwi.iuwt.fr/~asmanur/projets/mlorg/doc/Document.html][Document]] module for more information.
+
+
+** Full documentation
+The documentation of mlorg is available [[http://kiwi.iuwt.fr/~asmanur/projets/mlorg/doc/][here]].
+
+* How parsing is done
+
 * Syntax recognized by =mlorg=
 The syntax of org-mode is not well-defined. =mlorg= does its best to parse the
 main constructs. Here is detailed list of the construction available in =mlorg=.
@@ -223,6 +330,8 @@ pre-defined entities. The syntax is TeX's : =\alpha= (\alpha)
 Export snippet provide a way to insert some markup that will be exported only by
 a specific exporter, for instance =@html{some html markup}=.
 
+Note that they can be used by exporters to provide some kind of extension for
+the syntax.
 *** Footnotes references
 Footnotes references can be introduced by several ways:
 - old way, through a number: =[1]=
@@ -406,6 +515,3 @@ The list of affiliated keywords (taken from =org-element.el=): =ATTR_ASCII=
 
 
 
-* Mlorg's technical documentation
-The documentation of the code of mlorg can be found [[http:doc][here]]. It contains the
-documentation generated by =ocamldoc= on the sources.

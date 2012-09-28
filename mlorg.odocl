@@ -5,10 +5,10 @@ common/Config
 common/ExtList
 common/Numbering
 common/Timestamp
-syntax/inline/Entity
-syntax/inline/Inline
-syntax/blocks/Block
-syntax/blocks/Parser
+syntax/common/Entity
+syntax/common/Inline
+syntax/common/Block
+syntax/common/Parser
 document/Document
 document/Filter
 document/Plugin

@@ -13,10 +13,10 @@ doc:
 manual.html: all
 	./_build/main.native --filename manual.org --backend html
 
-web: manual.html
-	mkdir -p $(WEBDESTDIR)
+web: manual.html doc
+	mkdir -p $(WEBDESTDIR)/doc
 	cp manual.html $(WEBDESTDIR)/index.html
-
+	cp _build/mlorg.docdir/* $(WEBDESTDIR)/doc -Rf
 testorg:
 	cat $(FILE) | mlorg --backend org > 1.org
 	cat 1.org | mlorg --backend org > 2.org
