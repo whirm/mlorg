@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 5b6475ec61481e6ee011d382aec2c14e)
+# DO NOT EDIT (digest: fa6037f64115f34d3e3bd7edbacd5343)
 Mlorg
 common/Prelude
 common/Log
@@ -45,4 +45,5 @@ plugins/Math2png
 plugins/Dynamic
 plugins/Command
 plugins/Pygments
+Utils
 # OASIS_STOP
