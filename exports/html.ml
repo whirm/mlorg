@@ -7,7 +7,7 @@ open Document
 open Plugin
 open Config
 open Xml
-module E = struct
+module H = struct
   let name = "html"
   let config = Config.create ()
   let encoding = Config.add config "encoding" string "The document's encoding" "utf-8"
@@ -174,4 +174,10 @@ module E = struct
   end
   let data = (module E : Exporter)
 end
-let _ = Plugin.Exporters.add (module E : Plugin with type interface = exporter)
+
+module Config = struct
+  include H
+end
+include H
+include H.E
+let _ = Plugin.Exporters.add (module H : Plugin with type interface = exporter)

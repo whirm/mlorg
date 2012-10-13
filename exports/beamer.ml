@@ -6,7 +6,6 @@ open Block
 open Document
 open Plugin
 open Config
-open Latex.E
 module E = struct
   let name = "beamer"
   let config = Config.create ()
@@ -31,18 +30,19 @@ $extraheader
   let footer = add config "footer" string "The LaTeX footer"
     "\\end{document}"
   let extraheader = add config "extraheader" string "Extra LaTeX header" ""
-    
+  let assoc l s = try List.assoc s l with _ -> ""    
+
   let write_header config out doc =
-    let vars = ["classname", escape_inside (Config.get config classname);
+    let vars = ["classname", Latex.escape_inside (Config.get config classname);
                 "packages", "";
                 "extraheader", Config.get config extraheader;
-                "title", escape_inside doc.title;
-                "author", escape_inside doc.author;
+                "title", Latex.escape_inside doc.title;
+                "author", Latex.escape_inside doc.author;
                ]
     in
     IO.nwrite out (substitute (assoc vars) (Config.get config header))
   class beamerExporter config out = object(self)
-    inherit (Latex.E.latexExporter config out) as super
+    inherit (Latex.latexExporter config out) as super
     method heading toc heading = 
       if heading.children = [] then
         (Printf.fprintf out "\\begin{frame}{";

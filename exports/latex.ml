@@ -7,7 +7,7 @@ open Document
 open Plugin
 open Config
 
-module E = struct
+module L = struct
   let name = "latex"
   let config = Config.create ()
   let classname = 
@@ -57,7 +57,7 @@ $extraheader
       method bot = ()
       method combine _ = ()
       method header doc = write_header config out doc
-      method footer () = 
+      method footer doc = 
         IO.nwrite out (Config.get config footer)
       method inline toc = function
         | Plain s -> IO.nwrite out (tex_escape s)
@@ -163,7 +163,7 @@ $extraheader
       method document toc d = 
         self#header d;
         self#_document toc d;
-        self#footer ()
+        self#footer d
     end
 
   let export config doc out = 
@@ -174,4 +174,8 @@ $extraheader
   let data = (module D : Exporter)
 end
 
-let _ = Exporters.add (module E : Plugin with type interface = exporter)        
+module Config = struct
+  include L
+end
+include L
+let _ = Exporters.add (module L : Plugin with type interface = exporter)        
