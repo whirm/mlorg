@@ -10,12 +10,12 @@ install:
 	ocaml setup.ml -reinstall
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
-manual.html: all
-	./_build/main.native --filename manual.org --backend html
+%.html: all %.org
+	./_build/main.native --filename $^ --backend html
 
-web: manual.html doc
+web: index.html manual.html doc
 	mkdir -p $(WEBDESTDIR)/doc
-	cp manual.html $(WEBDESTDIR)/index.html
+	cp index.html manual.html $(WEBDESTDIR)
 	cp _build/mlorg.docdir/* $(WEBDESTDIR)/doc -Rf
 testorg:
 	cat $(FILE) | mlorg --backend org > 1.org

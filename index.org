@@ -1,0 +1,10 @@
+#+TITLE: mlorg
+#+AUTHOR: Simon Castellan
+#+EMAIL: simon.castellan@iuwt.fr
+
+=mlorg= is a text formatter written in OCaml that handles org-mode files and
+allows you to handle the contents of your document in an abstract way, as well
+as export it to common formats (html, latex).
+
+It is available on [[http://gitorious.org/mlorg/mlorg][gitorious]]. You can find the [[manual]] here and the documentation
+to the source code [[http:doc][here]].
