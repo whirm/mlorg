@@ -106,7 +106,10 @@ let parse_line st { Org_automaton.line; Org_automaton.parse; Org_automaton.conte
     let st = { st with last_line_empty = false } in
     match parse_first_line line with
     | None ->
-      if String.starts_with line "  " then
+      if String.starts_with line "   " then
+        context, Org_automaton.Partial
+          { st with current = String.lchop ~n:3 line :: st.current }
+      else if String.starts_with line "  " then
         context, Org_automaton.Partial
           { st with current = String.lchop ~n:2 line :: st.current }
       else
