@@ -45,7 +45,7 @@ module Make (T : Table) = struct
     in aux k
 
   let enclosing_delimiter string delimiter = 
-    if string.[0] <> delimiter then None
+    if String.length string = 0 || string.[0] <> delimiter then None
     else
       match closing_delimiter string ~k: 1 delimiter with
         | None -> None
