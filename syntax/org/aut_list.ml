@@ -16,6 +16,8 @@ type state = {
   (** Was it checked *)
   ordered : bool;
   (** Is the list ordered *)
+  indent: int option;
+  (** Indentation of the current item. *)
 }
 (** The state used for this automata *)
 
@@ -76,7 +78,7 @@ let is_start { Org_automaton.line; Org_automaton.context } =
       Some (context, 
             { items = []; last_line_empty = false;
               current = [BatSubstring.to_string contents]; 
-              format = format'; checkbox; ordered;
+              format = format'; checkbox; ordered; indent = None;
               number = compute_number ordered format 1;
             })
 (** is_start basically checks if the line is a valid star for an item *)
@@ -95,26 +97,36 @@ let interrupt context st parse =
   let context, items = update_current context parse st in
   context, [Block.List (List.rev items, st.ordered)]
 
+(* Saute les espaces au début d'une chaîne *)
+let rec skip k indent string = 
+  if indent = Some 0 then Some k, Some (String.lchop ~n: k string)
+  else if k = String.length string then Some k, Some ""
+  else if string.[k] = ' ' then
+    skip (k+1) (Option.map pred indent) string
+  else if indent = None then
+    Some k, Some (String.lchop ~n: k string)
+  else
+    indent, None
+
 let parse_line st { Org_automaton.line; Org_automaton.parse; Org_automaton.context } =
   if line = "" then 
     if st.last_line_empty then 
       let context, block = interrupt context st parse in
       context, Org_automaton.Done (block, false)
     else 
-      context, Org_automaton.Partial { st with last_line_empty = true }
+      context, Org_automaton.Partial { st with last_line_empty = true;
+				       current = "" :: st.current }
   else 
     let st = { st with last_line_empty = false } in
     match parse_first_line line with
     | None ->
-      if String.starts_with line "   " then
+      (match skip 0 st.indent line with
+      | indent, Some skipped ->
         context, Org_automaton.Partial
-          { st with current = String.lchop ~n:3 line :: st.current }
-      else if String.starts_with line "  " then
-        context, Org_automaton.Partial
-          { st with current = String.lchop ~n:2 line :: st.current }
-      else
+          { st with indent; current = skipped :: st.current }
+      | _, None ->
         let context, block = interrupt context st parse in
-        context, Org_automaton.Done (block, false)
+        context, Org_automaton.Done (block, false))
     | Some (_, checkbox, format, contents) ->
       let format' = Option.default st.format format in
       let number = Option.default 0 st.number in
@@ -123,7 +135,7 @@ let parse_line st { Org_automaton.line; Org_automaton.parse; Org_automaton.conte
         current = [BatSubstring.to_string contents];
         format = format'; checkbox;
         number = compute_number st.ordered format (number+1);
-        items
+	indent = None; items
       }
       in context, Org_automaton.Next st'
       
