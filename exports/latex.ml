@@ -39,7 +39,7 @@ $extraheader
   let assoc l s = try List.assoc s l with _ -> ""
 
   let escape_inside s = s
-  let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"]
+  let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"; "#"]
   let write_header config out doc =
     let vars = ["classname", escape_inside (Config.get config classname);
                 "packages", "";
@@ -109,8 +109,8 @@ $extraheader
                   else
                     Printf.fprintf out "\\ref{%s}" title
               | _, label ->
-                  Printf.fprintf out "\\hyperref[%s]{"
-                    (Inline.string_of_url url);
+                  Printf.fprintf out "\\href{%s}{"
+                    (tex_escape (Inline.string_of_url url));
                   self#inlines toc label;
                   Printf.fprintf out "}")
         | x -> super#inline toc x
