@@ -57,7 +57,7 @@ let gather config doc =
         let () = numbers := List.hd !numbers + 1 :: List.tl !numbers in
         let number = compute_number (List.rev !numbers) !appendix 
         and app = !appendix in
-        let () = numbers := 1 :: !numbers in
+        let () = numbers := 0 :: !numbers in
         let item = {
           name = t.Document.name;
           appendix = app; number; 
