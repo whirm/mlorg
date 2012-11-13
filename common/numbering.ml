@@ -31,9 +31,11 @@ let alphabetic_sys alphabet =
   in
   { encode; decode }
   
-let romain_sys [|one; five; ten; fifty; hundred|] = 
+let romain_sys sym =
+  let one, five, ten, fifty, hundred =
+    sym.(0), sym.(1), sym.(2), sym.(3), sym.(4) in
   let encode n = 
-    let below_ten [one; five; ten] = function
+    let below_ten (one, five, ten) = function
       | 1 -> [one] | 2 -> [one; one] | 3 -> [one; one; one]
       | 4 -> [one; five] | 5 -> [five] | 6 -> [five; one]
       | 7 -> [five; one; one] | 8 -> [five; one; one; one]
@@ -43,8 +45,8 @@ let romain_sys [|one; five; ten; fifty; hundred|] =
     String.concat ""
       (if n = 49 then [one; fifty]
        else
-          (below_ten [ten; fifty; hundred] (n/10)
-           @ below_ten [one; five; ten] (n mod 10)))
+          (below_ten (ten, fifty, hundred) (n/10)
+           @ below_ten (one, five, ten) (n mod 10)))
   in
   let decode s = 
     let map c = List.assoc c
