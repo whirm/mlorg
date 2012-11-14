@@ -24,7 +24,7 @@ val alphabetic_sys : string array -> system
     creates the decimal system *)
 
 val romain_sys : string array -> system
-(** Creates a romain system. For instance [romain_sys ["I"; "V"; "X"; "L"; "C"; "D"; "M"]]
+(** Creates a romain system. For instance [romain_sys [|"I"; "V"; "X"; "L"; "C"; "D"; "M"|]]
     creates the usual romain numbering. *)
 
 module Systems : ExtList.ExtList with type elt = system
