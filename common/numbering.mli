@@ -9,7 +9,7 @@
  *)
 
 (** {1 Numbering system} *)
-type system = { encode : int -> string; 
+type system = { encode : int -> string;
                 decode : string -> int option * string }
 (** A numbering system is just a way to (de)encode a number.  To decode, it
     should work only on partial strings and thus should return the non-used
@@ -24,7 +24,7 @@ val alphabetic_sys : string array -> system
     creates the decimal system *)
 
 val romain_sys : string array -> system
-(** Creates a romain system. For instance [romain_sys ["I"; "V"; "X"; "L"; "C"]]
+(** Creates a romain system. For instance [romain_sys ["I"; "V"; "X"; "L"; "C"; "D"; "M"]]
     creates the usual romain numbering. *)
 
 module Systems : ExtList.ExtList with type elt = system
@@ -34,7 +34,7 @@ module Systems : ExtList.ExtList with type elt = system
 
 
 val extract : string -> int list
-(** Extracts the number appearing in a string. 
+(** Extracts the number appearing in a string.
     For instance [extract "I.i"] returns [[1; 1]] *)
 
 val update : ?trunc : bool -> string -> int list -> string
