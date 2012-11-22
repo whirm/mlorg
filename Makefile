@@ -13,7 +13,7 @@ doc:
 %.html: all %.org
 	./_build/main.native --filename $^ --backend html
 
-web: index.html manual.html doc
+web: TUTORIAL.html index.html manual.html doc
 	mkdir -p $(WEBDESTDIR)/doc
 	cp index.html manual.html $(WEBDESTDIR)
 	cp _build/mlorg.docdir/* $(WEBDESTDIR)/doc -Rf

@@ -1,0 +1,173 @@
+#+TITLE: A short tutorial on writing org-mode document compatible with mlorg
+#+AUTHOR: Simon Castellan
+#+EMAIL: simon.castellan@iuwt.fr
+
+
+* =mlorg=, a short description
+=mlorg= is a preprocessing tool written in OCaml that can parse document in the
+format used by [[http://orgmode.org][org-mode]]. Its main advantage is not to depend on emacs and to be
+pretty fast. Although it is very far from having all the features of
+the main implementation, it is complete enough for you writing a document.
+
+Note that =mlorg= can have many more uses than just writing documents to be
+published. (=mlorg= can access to your org-mode agenda and expose it to you, for
+instance in XML).
+
+** Getting mlorg
+You can get the last version of =mlorg= on [[http://gitorious.org/mlorg/mlorg][gitorious]]. To compile it you will
+need the last revision of batteries. Then to compile it:
+
+: ocaml setup.ml -build
+: # To install
+: ocaml setup.ml -install
+
+* Writing org-mode documents
+This section is a little description of the possibilities of =mlorg=. =mlorg= is
+not completely compatible with org-mode, especially on directives.
+
+** Structure of a document.
+
+The classical structure for a document is as follows:
+
+: #+TITLE: Title of the document.
+: #+AUTHOR: Author of the document.
+: #+OTHER_META: VALUE
+: #+config_key: value
+:
+: Beginning of a document (abstract, and so on)
+
+: * First section
+: [...]
+: * Second section
+: [...]
+
+The first part is composed of /directives/ telling mlorg about the document
+(title and other metadatas) as well as how to process it (configurations for
+exporters) and so on.
+
+** General syntax
+The syntax is split into two groups:
+- /blocks/: bigger entities like paragraphs, list, and so on.
+- /inline content/: local markup like emphasis, links, ...
+
+
+*** Blocks
+**** Paragraph
+Paragraphs are the default blocks, they are used when no other blocks
+match. They are ended by an empty line.
+**** Horizontal line
+You can put an horizontal line (=<hr />= of HTML) in your document by typing a
+line starting with five dashes:
+
+: Some content
+: -----
+: Other content
+**** Directive
+They are used to specify information to =mlorg= about the document. Syntax:
+
+: #+KEY: VALUE
+**** Custom block
+Custom blocks are a very generic syntax tool in =org-mode= that can represent
+code blocks, quotations, and so on. The general syntax is:
+
+: #+begin_name options
+: contents
+: #+end_name
+
+Where =name= represents the name of the blocks. It can be any string but
+predefined blocks exist:
+
+- example: represents lines of code in a non specified language
+- src: represents lines of code (see [[#source-code][the section source code]])
+- quote: represents quotations
+
+The contents of a block is parsed recursively unless it is an example or src
+block.
+
+**** Drawers
+Drawers are used in org-mode to hide information. The general syntax is:
+
+: :DRAWER_NAME:
+: Drawer content.
+: :END:
+
+=mlorg= recognizes the specific drawer =PROPERTIES= which must have the
+following syntax:
+: :PROPERTIES:
+: :KEY: VALUE
+: :KEY: VALUE
+: :KEY: VALUE
+: :END:
+Then the defined properties are attached to the heading containing the drawer
+and can be retrieved and used by external tools.
+
+**** Latex environment
+You can use a plain latex environment in your file and it will be exported as is
+in LaTeX (and ignored in other non LaTeX-derived backends).
+
+**** Math block
+You can insert math blocks in =org-mode= via the syntax:
+
+: $$ foo $$
+**** Heading
+Heading are of the following form:
+: ** MARKER [#P] Title of the heading :tag1:tag2:
+
+The number of stars indicates the level of the heading (the less star there is,
+the more important the heading is). The MARKER can indicate the status of the
+heading (by default, is one of =TODO= and =DONE=, can be configured by a
+=MARKERS= directive). The =P= denotes the priority of the heading (one letter).
+
+Of course marker, tags, and priority are optional so the simplest form of
+heading (and the most common one) is:
+
+: *** My heading
+
+The headings are stored in =mlorg= as a tree representing the outline of the document.
+
+
+**** List
+List in org-mode can be either ordered or not. An unordered list is a list of
+item whose first line starts by either =-= or =+=. If the item spans over
+several lines, the lines after the first one have to be indented (of at least
+two spaces), and indentation must be consistent through the item. An example
+
+: - An item
+:     with an indentation
+:     of four spaces
+
+You can put empty lines in a list, it will then considered as if it was
+correctly indented (but still empty). Two adjacent empty lines ends the list
+though. A more detailed example:
+
+: - The first item.
+:   Its continuation.
+:
+: - Second item.
+:
+:   Stil the second item.
+
+Ordered list starts with a number followed by a dot, eg. =2.=, moreover you can
+add a format indication telling mlorg how you want your list to be numbered, by =[@format]=. Format can contain the following flags:
+- =1= : insert the item number in arab digits
+- =i= : insert the item number in roman digits
+- =I= : same as =i= but with uppercase characters
+- =a= : number with the latin alphabet (lowercase)
+- =a= : number with the latin alphabet (uppercase)
+- =α= : number with the greek alphabet (lowercase)
+- =Α= (it is an uppercase alpha) : number with the greek alphabet (uppercase)
+
+Moreover, you can set the number of the current item and the format by using
+this syntax. A little example:
+
+: 1. [@ii] This is second item
+: 2. [@i] And the first
+
+gives
+
+1. [@(ii)] This is second item
+2. [@(i)] And the first
+
+Finally, you can add a checkbox with =[ ]= and =[X]=.
+
+**** Tables
