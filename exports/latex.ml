@@ -42,7 +42,7 @@ $extraheader
   let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"; "#"]
   let write_header config out doc =
     let vars = ["classname", escape_inside (Config.get config classname);
-                "packages", "";
+                "packages", "\\usepackage{hyperref}";
                 "extraheader", Config.get config extraheader;
                 "title", escape_inside doc.title;
                 "author", escape_inside doc.author;
