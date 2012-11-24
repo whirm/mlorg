@@ -1,7 +1,12 @@
-OB#+TITLE: mlorg's Changelog
+#+TITLE: mlorg's Changelog
 
 
 
+* r8
+Release: <2012-11-24 sam.>
+- Improved the Numbering algorithms (Thibault Suzanne)
+- Fixed bugs in Aut_list (indentation)
+- Latex: fixed bugs in exporting (hyperref)
 * r7
 Release: <2012-09-16 dim.>
 - Introduced the pygments plugin to color code in the html output
