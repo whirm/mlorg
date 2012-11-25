@@ -164,8 +164,10 @@ let target_parser _ rest =
 
 (** {2 Verbatim parser} *)
 let verbatim_parser _ rest =
-  let contents, rest = inside_force '=' rest in
-  Some ([Verbatim (unescape ~l:['='] (BatSubstring.all contents))], rest)
+  if not (List.mem rest.[0] ['='; '~']) then assert false;
+  let c = rest.[0] in
+  let contents, rest = inside_force c rest in
+  Some ([Verbatim (unescape ~l:[c] (BatSubstring.all contents))], rest)
     
 (** {2 Subscript and Superscript parser} *)
 let subscript_parser, superscript_parser = 
