@@ -171,3 +171,35 @@ gives
 Finally, you can add a checkbox with =[ ]= and =[X]=.
 
 **** Tables
+Although tables are correctly parsed by =mlorg= no exporters handles them at the
+moment.
+
+The syntax is the following:
+
+: | col1 | ... | coln
+: | ..   | ... | ...
+
+You can use dotted lines to make a seperation, it will be ignored:
+
+: ---------
+
+You can put size indication in cells with =<n>=, you are telling org-mode that
+this column should not exceed =6= characters and text should be wrapped.
+
+=mlorg= also recognizes, /[[http://orgmode.org/manual/Column-groups.html#Column-groups][column groups]]/. At the end of a table you can put a
+=tblfm= directive specify the format of the table.
+
+*** Inline elements
+**** Emphasis
+There is three kind of emphasis:
+- *bold*: =*bold*=
+- _underline_: =_underline_=
+- /italic/ : =/italic/=
+
+You can nest them: */foo/*.
+**** Entity
+Used to insert extra characters : =\alpha= becomes \alpha. (Although using
+unicode is recommanded...)
+
+
+
