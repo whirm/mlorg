@@ -35,7 +35,7 @@ and t = item list
 
 let format format numbers = 
   Numbering.update ~trunc: true format numbers
-let shall_be_numbered = Document.has_tag "nonumber" |- not
+let shall_be_numbered = Document.has_tag "nonumber" %> not
 let contains_appendix = 
   List.exists (function
     | Custom ("appendix", _, _) -> true

@@ -15,7 +15,7 @@ let ( ||| ) f g = fun x -> f x || g x
 
 let has_property f = 
   fun h ->
-    List.exists (fst |- f) h.meta.properties
+    List.exists (fst %> f) h.meta.properties
 
 let prop_val name f = 
   fun h ->
@@ -52,5 +52,5 @@ let rec run_headings_sub f = function
     else l
 
 let run f d = run_headings_sub f d.headings
-let count f = run f |- List.length
-let count_headings f = run_headings f |- List.length
+let count f = run f %> List.length
+let count_headings f = run_headings f %> List.length

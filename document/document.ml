@@ -140,7 +140,7 @@ let collect =
       | Block.Property_Drawer p -> 
         { meta with properties = p @ meta.properties }
       | Block.Footnote_Definition (name, def) ->
-          if meta.footnotes |> List.exists (fst |- (=) name) then
+          if meta.footnotes |> List.exists (fst %> (=) name) then
             { meta with footnotes = meta.footnotes |> 
                 List.map (fun (name', v) -> 
                   name, if name' = name then def else v) }

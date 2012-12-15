@@ -80,11 +80,11 @@ end
   
 class virtual ['a] bottomUp = object(self)
   inherit ['a] Inline.bottomUp
-  method blocks = self#combine -| List.map self#block
+  method blocks = self#combine % List.map self#block
   method block = function
     | Heading h -> self#inlines h.title
     | Table t ->
-        let combine_arr f = self#combine -| Array.to_list -| Array.map f in
+        let combine_arr f = self#combine % Array.to_list % Array.map f in
         combine_arr (combine_arr self#inlines) t.rows 
     | List (l, b) -> self#combine (List.map self#list_item l)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines i 
@@ -98,11 +98,11 @@ end
 
 class virtual ['a, 'b] bottomUpWithArg = object(self)
   inherit ['a, 'b] Inline.bottomUpWithArg
-  method blocks arg = self#combine -| List.map (self#block arg)
+  method blocks arg = self#combine % List.map (self#block arg)
   method block arg = function
     | Heading h -> self#inlines arg h.title
     | Table t ->
-        let combine_arr f = self#combine -| Array.to_list -| Array.map f in
+        let combine_arr f = self#combine % Array.to_list % Array.map f in
         combine_arr (combine_arr (self#inlines arg)) t.rows 
     | List (l, b) -> self#combine (List.map (self#list_item arg) l)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines arg i 

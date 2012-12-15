@@ -91,7 +91,7 @@ module E = struct
     method timestamp {active; date; time; repetition} = 
       Xml.block "timestamp" ~attr:["active", if active then "true" else "false"]
         [self#date date; Option.map_default self#time Xml.empty time;
-         Option.map_default (Xml.block "repetition" -| (fun x -> [x]) -| self#date)
+         Option.map_default (Xml.block "repetition" % (fun x -> [x]) % self#date)
            Xml.empty repetition]
     method list_item x = 
       [Xml.block "item"
@@ -126,13 +126,13 @@ module E = struct
       | Property_Drawer _ -> []
       | Table t ->
           let index = Option.map_default
-            (Xml.block "sizes" -| Array.to_list -| 
+            (Xml.block "sizes" % Array.to_list % 
                 Array.mapi (fun i v -> Xml.block "index" 
                   ~attr: ["index", string_of_int i; "size", string_of_int v] []))
             Xml.empty t.align_line
           in
           let groups = Option.map_default
-            (Xml.block "groups" -| 
+            (Xml.block "groups" % 
                 List.mapi (fun i (start, stop) -> Xml.block "group" 
                   ~attr: ["index", string_of_int i; 
                           "start", string_of_int start;
@@ -141,8 +141,8 @@ module E = struct
           in
           let contents = Array.to_list
             (Array.map (Xml.block "row"
-                           -| Array.to_list 
-                           -| Array.map (Xml.block "cell" -| self#inlines))
+                           % Array.to_list 
+                           % Array.map (Xml.block "cell" % self#inlines))
             t.rows)
           in    
           [Xml.block "table" ~attr: (opt_attr "format" t.format)
@@ -161,7 +161,7 @@ module E = struct
         else Xml.block name (List.map f l)
       in
       let attr = ["level", string_of_int d.level] @ opt_attr "marker" d.marker 
-      @ opt_attr "priority" (Option.map string_of_char d.priority) in
+      @ opt_attr "priority" (Option.map (String.make 1) d.priority) in
       let children = Xml.block "meta"
         [Xml.block "name" (self#inlines d.name);
           mk_list "scheduled" self#timestamp d.meta.scheduled;

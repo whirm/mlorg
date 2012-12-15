@@ -149,7 +149,7 @@ let see s rest =
   else raise (Failure "")
 let skip ?(n = 1) rest = triml n rest
 let until pred rest = 
-  splitl (pred |- not) rest |> fun (x, y) -> Substring.to_string x, y
+  splitl (pred %> not) rest |> fun (x, y) -> Substring.to_string x, y
 let one_of l c = List.mem c l
 let ( ||| ) f g = fun x -> f x || g x
 let until_space f = until (Char.is_whitespace ||| f)
@@ -173,7 +173,7 @@ let entity_parser _ rest =
 (** {2 Export snippet parser} *)
 let export_snippet_parser _ rest = 
   let rest = see "@" rest in
-  let name, rest = until (Char.is_letter |- not) rest in
+  let name, rest = until (Char.is_letter %> not) rest in
   let contents, rest = inside obrace rest in
   match contents with
     | None -> None
@@ -441,7 +441,7 @@ class virtual ['a] bottomUp = object(self)
     | Target _
     | Export_Snippet _ 
     | Entity _ -> self#bot
-  method inlines = self#combine -| List.map self#inline
+  method inlines = self#combine % List.map self#inline
 end
 
 class virtual ['a, 'b] bottomUpWithArg = object(self)
@@ -468,7 +468,7 @@ class virtual ['a, 'b] bottomUpWithArg = object(self)
     | Target _
     | Export_Snippet _ 
     | Entity _ -> self#bot
-  method inlines arg = self#combine -| List.map (self#inline arg)
+  method inlines arg = self#combine % List.map (self#inline arg)
 end
 let string_of_url = function
   | File s | Search s -> s

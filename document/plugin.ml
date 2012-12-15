@@ -83,4 +83,4 @@ let global_config parameters =
   Config.make (get_global_interface ()) parameters
   
 let eprint_config_descr = 
-  get_global_interface |- Config.prettyprint stderr
+  get_global_interface %> Config.prettyprint stderr

@@ -41,7 +41,7 @@ let entity_parser _ rest =
 (** {2 Export snippet parser} *)
 let export_snippet_parser _ rest = 
   let rest = see "@" rest in
-  let name, rest = until (Char.is_letter |- not) rest in
+  let name, rest = until (Char.is_letter %> not) rest in
   let contents, rest = inside obrace rest in
   match contents with
     | None -> None

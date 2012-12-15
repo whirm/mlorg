@@ -159,7 +159,7 @@ let add (type u) ?(long = "") ?(vars = []) config name (typ : u serializable) de
   (module I : Item with type t = u)
     
 let concat configs = 
-  let lg = List.fold_left ( + ) 0 (List.map (snd |- Hashtbl.length) configs) in
+  let lg = List.fold_left ( + ) 0 (List.map (snd %> Hashtbl.length) configs) in
   let result = Hashtbl.create lg in
   List.iter (fun (plugin, config) ->
     Hashtbl.iter (fun _ i ->
@@ -220,7 +220,7 @@ let prettyprint out config =
       let module I = (val i : Item) in
       let s = I.T.show I.default in
       let l = lines s in
-      let pad s = List.map ((^) s) |- String.concat "\n" in
+      let pad s = List.map ((^) s) %> String.concat "\n" in
       let s' = if s = "" then ""
         else "=" ^ escape ["="] s ^ "="
       in

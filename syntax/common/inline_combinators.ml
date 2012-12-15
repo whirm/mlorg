@@ -66,7 +66,7 @@ let see s rest =
   else raise (Failure "")
 let skip ?(n = 1) rest = triml n rest
 let until pred rest = 
-  splitl (pred |- not) rest |> fun (x, y) -> Substring.to_string x, y
+  splitl (pred %> not) rest |> fun (x, y) -> Substring.to_string x, y
 let one_of l c = List.mem c l
 let ( ||| ) f g = fun x -> f x || g x
 let until_space f = until (Char.is_whitespace ||| f)

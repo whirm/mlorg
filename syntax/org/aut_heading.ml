@@ -40,8 +40,8 @@ let get_priority s =
 
 let get_title s = 
   let module String = BatSubstring in
-  let parse_inl = Org_inline.parse -| BatSubstring.to_string 
-    -| BatSubstring.trim in
+  let parse_inl = Org_inline.parse % BatSubstring.to_string 
+    % BatSubstring.trim in
   let title, tags = BatSubstring.splitr (fun c -> c = ':' 
   || Char.is_letter c || Char.is_digit c) s in
   if not (BatSubstring.is_empty tags) && 

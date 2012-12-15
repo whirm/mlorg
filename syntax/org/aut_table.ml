@@ -23,7 +23,7 @@ let split_into_columns s =
 
 let make_matrix = 
   List.rev
-  |- List.map (split_into_columns |- Array.of_list)
+  %> List.map (split_into_columns %> Array.of_list)
 type cell = 
   | Content of Inline.t list
   | Size of int
