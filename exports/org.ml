@@ -11,11 +11,69 @@ open Config
 module E = struct
   let name = "org"
   let config = Config.create ()
+  let wrap_bracket = Option.map_default
+    (fun s -> Printf.sprintf "{%s}" (escape ["{"; "}"] s)) ""
     
+  let range x = Timestamp.range_to_string x
+  let timestamp x = Timestamp.to_string x
+
+  let ws = Printf.sprintf
+  let rec inline = function
+    | Plain s -> 
+      ws "%s" (escape ["/"; "="; "*"; "_"; "{"; "["; "]"; "}"] s)
+    | Emphasis (kind, data) ->
+      let s = List.assoc kind [`Bold, "*"; `Italic, "/"; `Underline, "_"] in
+      ws "%s%s%s" s (inlines data) s
+    | Entity e -> ws "\\%s" e.Entity.name
+    | Export_Snippet (backend, text) ->
+      ws "@%s{%s}" backend (escape ["}"; "{"] text)
+    | Footnote_Reference {Inline.name; definition} ->
+      (match definition with
+      | Some def -> ws "[fn:%s:%s]" name (inlines def);
+          | None -> ws "[fn:%s]" name)
+    | Inline_Call {program; arguments; inside_headers; end_headers} ->
+        let arguments = List.map (fun (a, b) -> Printf.sprintf "%s=%s" a b) arguments
+    |> String.concat ", "
+        in
+        ws "call_%s%s(%s)%s" program 
+          (wrap_bracket inside_headers)
+          (escape ["("; ")"] arguments) (wrap_bracket end_headers)
+	  
+    | Inline_Source_Block {language; options; code} ->
+      ws "src_%s%s[%s]" language (wrap_bracket options) 
+        (escape ["["; "]"] code)
+    | Subscript t -> 
+      ws "_{%s}" (inlines t)
+    | Superscript t -> 
+      ws "^{%s}" (inlines t)
+    | Macro (name, args) -> 
+      ws "{{{%s(%s)}}}"
+        (escape ["{"; "}"] name)
+        (String.concat ", " (List.map (escape ["{"; "}"]) args))
+    | Latex_Fragment (Inline.Math s) -> 
+      ws "$%s$" (escape ["$"] s)
+	
+    | Latex_Fragment (Inline.Command (opt, s)) -> 
+      ws "\\%s%s" s (wrap_bracket (if opt = "" then None else Some opt))
+    | Link {url; label} ->
+      ws "[[%s][%s]]" (Inline.string_of_url url) (inlines label)
+     | Break_Line -> ws "\\\\\n"
+     | Target s -> ws "<<%s>>" s
+     | Radio_Target s -> ws "<<<%s>>>" s
+     | Cookie (Percent k) -> ws "[%d%%]" k
+     | Cookie (Absolute (k, k')) -> ws "[%d/%d]" k k'
+     | Timestamp (Scheduled t) -> ws "SCHEDULED: %s" (timestamp t)
+     | Timestamp (Deadline t) -> ws "DEADLINE: %s" (timestamp t)
+     | Timestamp (Date t) -> ws "%s" (timestamp t)
+     | Timestamp (Range t) -> ws "%s" (range t)
+     | Timestamp (Closed t) -> ws "CLOSED: %s" (timestamp t)
+     | Timestamp (Clock (Stopped t)) -> ws "CLOCK: %s\n" (range t)
+     | Timestamp (Clock (Started t)) -> ws "CLOCK: %s\n" (timestamp t)
+     | Verbatim s -> ws "=%s=" (escape ["="] s)
+  and inlines x = List.map inline x |> String.concat ""
+  let inline_to_string = inlines
   class orgExporter out = 
     let indent_level = ref 0 in
-    let wrap_bracket = Option.map_default
-      (fun s -> Printf.sprintf "{%s}" (escape ["{"; "}"] s)) "" in
     let ws fmt = Printf.kprintf (fun s -> match lines s with
       | [] -> ()
       | [t] -> IO.nwrite out t
@@ -29,67 +87,9 @@ module E = struct
     inherit [unit] Document.bottomUp as super
     method bot = ()
     method combine _ = ()
-    method inline = function
-      | Plain s -> 
-        ws "%s" (escape ["/"; "="; "*"; "_"; "{"; "["; "]"; "}"] s)
-      | Emphasis (kind, data) ->
-          let s = List.assoc kind [`Bold, "*"; `Italic, "/"; `Underline, "_"] in
-          IO.nwrite out s;
-          self#inlines data;
-          IO.nwrite out s;
-      | Entity e -> IO.nwrite out ("\\"^e.Entity.name)
-      | Export_Snippet (backend, text) ->
-        Printf.fprintf out "@%s{" backend;
-        ws "%s" (escape ["}"; "{"] text);
-        IO.nwrite out "}"
-      | Footnote_Reference {Inline.name; definition} ->
-        (match definition with
-          | Some def -> ws "[fn:%s:" name;
-            self#inlines def;
-            Printf.fprintf out "]"
-          | None -> ws "[fn:%s]" name)
-      | Inline_Call {program; arguments; inside_headers; end_headers} ->
-        let arguments = List.map (fun (a, b) -> Printf.sprintf "%s=%s" a b) arguments
-                        |> String.concat ", "
-        in
-        ws "call_%s%s(%s)%s" program 
-          (wrap_bracket inside_headers)
-          (escape ["("; ")"] arguments) (wrap_bracket end_headers)
-
-      | Inline_Source_Block {language; options; code} ->
-        ws "src_%s%s[%s]" language (wrap_bracket options) 
-          (escape ["["; "]"] code)
-      | Subscript t -> 
-        IO.nwrite out "_{"; self#inlines t; IO.nwrite out "}"
-      | Superscript t -> 
-        IO.nwrite out "^{"; self#inlines t; IO.nwrite out "}"
-      | Macro (name, args) -> 
-        ws "{{{%s(%s)}}}"
-          (escape ["{"; "}"] name)
-          (String.concat ", " (List.map (escape ["{"; "}"]) args))
-      | Latex_Fragment (Inline.Math s) -> 
-        ws "$%s$" (escape ["$"] s)
-
-      | Latex_Fragment (Inline.Command (opt, s)) -> 
-        ws "\\%s%s" s (wrap_bracket (if opt = "" then None else Some opt))
-      | Link {url; label} ->
-        ws "[[%s][" (Inline.string_of_url url); 
-        self#inlines label; ws "]]"
-     | Break_Line -> ws "\\\\\n"
-     | Target s -> ws "<<%s>>" s
-     | Radio_Target s -> ws "<<<%s>>>" s
-     | Cookie (Percent k) -> ws "[%d%%]" k
-     | Cookie (Absolute (k, k')) -> ws "[%d/%d]" k k'
-     | Timestamp (Scheduled t) -> ws "SCHEDULED: %s" (self#timestamp t)
-     | Timestamp (Deadline t) -> ws "DEADLINE: %s" (self#timestamp t)
-     | Timestamp (Date t) -> ws "%s" (self#timestamp t)
-     | Timestamp (Range t) -> ws "%s" (self#range t)
-     | Timestamp (Closed t) -> ws "CLOSED: %s" (self#timestamp t)
-     | Timestamp (Clock (Stopped t)) -> ws "CLOCK: %s\n" (self#range t)
-     | Timestamp (Clock (Started t)) -> ws "CLOCK: %s\n" (self#timestamp t)
-     | Verbatim s -> ws "=%s=" (escape ["="] s)
-    method range x = Timestamp.range_to_string x
-    method timestamp x = Timestamp.to_string x
+    method inline = inline %> ws "%s"
+    method range = range %> ws "%s"
+    method timestamp = timestamp %> ws "%s"
     method list_item x = (match x.number with
       | None -> ws "\n- "; 
       | Some number -> ws "1. [@%s] " number);
@@ -164,3 +164,10 @@ module Exp = struct
   let data = (module Exp : Exporter)
 end
 let _ = Exporters.add (module E : Plugin with type interface = exporter)        
+include E
+
+let export = Exp.export
+
+module Config = struct
+
+end
