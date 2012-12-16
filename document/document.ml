@@ -284,6 +284,8 @@ let from_chan filename channel =
 let from_file filename = 
     BatFile.with_file_in filename (from_chan filename)
 
+let from_fun filename f = 
+  Enum.from_while f |> Org_parser.parse |> snd |> from_blocks filename
 
 let rec descendants heading = 
   heading :: List.concat (List.map descendants heading.children)

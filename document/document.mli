@@ -113,6 +113,8 @@ val from_chan : string -> BatIO.input -> t
 (** From an input (the first argument is the filename) *)
 val from_file  : string -> t
 (** From a file *)
+val from_fun : string -> (unit -> string option) -> t
+(** From a function *)
 
 (** {1 Handling documents} *)
 
