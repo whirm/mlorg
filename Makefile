@@ -8,6 +8,9 @@ top: all
 
 install:
 	ocaml setup.ml -reinstall
+	cp _build/main.native $(PREFIX)/bin/mlorg
+	cp _build/main.byte $(PREFIX)/bin/mlorg.byte
+
 doc:
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
 %.html: all %.org
