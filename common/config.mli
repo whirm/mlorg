@@ -123,4 +123,7 @@ val from_comma : t -> string -> instance
 (** Make an instance out of a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
 
 val prettyprint : 'a BatIO.output -> t -> unit
-(** Prettyprint a configuration *)
+(** Prettyprint a configuration description *)
+
+val to_man : t -> Cmdliner.Manpage.block list
+(** Converts a configuration description to a block *)

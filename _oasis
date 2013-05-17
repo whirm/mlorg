@@ -5,7 +5,7 @@ Synopsis:    mlorg is a parser for org-mode files written in OCaml.
 Authors:     Simon Castellan <simon.castellan@iuwt.fr>
 License:     GPL
 Plugins:     META (0.2)
-BuildDepends: batteries,dynlink
+BuildDepends: batteries,dynlink,cmdliner
 
 
 Library mlorg

@@ -84,3 +84,6 @@ let global_config parameters =
   
 let eprint_config_descr = 
   get_global_interface %> Config.prettyprint stderr
+
+let options_man = 
+  get_global_interface %> Config.to_man

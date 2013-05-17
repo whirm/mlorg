@@ -1,4 +1,5 @@
 PKG batteries
+PKG cmdliner
 S common
 S syntax/org
 S syntax/common

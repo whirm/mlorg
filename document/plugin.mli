@@ -66,3 +66,6 @@ val global_config : (string * string) list -> Config.instance
     key-value terms. *)
 val eprint_config_descr : unit -> unit
 (** Prints on stderr the description of all the configuration items *)
+
+val options_man : unit -> Cmdliner.Manpage.block list
+(** Returns the options documentation in man format *)

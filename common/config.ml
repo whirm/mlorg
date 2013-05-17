@@ -243,3 +243,29 @@ let prettyprint out config =
     
     config
     
+let to_man config = 
+  Hashtbl.fold
+    (fun _ i acc ->
+      let spr = Printf.sprintf in
+      let module I = (val i : Item) in
+      let s = I.T.show I.default in
+      let l = lines s in
+      let esc = escape ["\\"] in
+      let s' = if s = "" then ""
+        else "=" ^ escape ["="] s ^ "="
+      in 
+      let variables = 
+        I.variables |> List.map (fun {var_name; var_descr} ->
+          `P (spr " $(i,%s): %s\n" (escape ["="] var_name) var_descr))
+      in
+      let man = 
+        [`I ((spr "$(b,%s) (type: $(b,%s))" I.name I.T.description),
+             esc I.description);
+         `Noblank;
+         `P (spr "$(i,Default value): %s" (esc s));
+         `P (esc I.long_description)]
+        @ variables
+      in acc @ man
+    )          
+    config []
+    
