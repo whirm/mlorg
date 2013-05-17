@@ -58,9 +58,9 @@ let parse_first_line s =
       match D.enclosing_delimiter s '[' with
         | None -> Some (ordered, None, None, s)
         | Some (s, rest) ->
-          let b = if s = " " then Some false 
-            else if s = "X" then Some true
-            else None
+          let b, rest = if s = " " then Some false, rest
+            else if s = "X" then Some true, rest
+            else None, BatSubstring.all s
           in
           if b = None then Some (ordered, None, parse_fmt s, rest)
           else
