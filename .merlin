@@ -1,0 +1,13 @@
+PKG batteries
+S common
+S syntax/org
+S syntax/common
+S documents
+S exports
+S plugins
+B _build/common
+B _build/syntax/org
+B _build/syntax/common
+B _build/exports
+B _build/plugins
+B _build/exports
