@@ -14,7 +14,7 @@ module Make (T : Table) = struct
   let closing c = try fst (List.assoc c T.table) with Not_found -> c
   let quote c = try snd (List.assoc c T.table) with Not_found -> false
 
-  
+
   let valid_delimiter s k = 
     let isspace c = c = ' ' || c = '\t' in
     (* tell if s.[k] is in the middle of spaces *)
@@ -64,4 +64,10 @@ module Make (T : Table) = struct
             | Some k ->
               aux (sub string k :: acc) (triml (k+1) string)
         in aux [] string
+  let closing_delimiter c = 
+    try Some (fst (List.assoc c T.table)) with Not_found -> None
+
+  let starting_delimiter c = 
+    try Some (fst (List.find (fun (_, (c', _)) -> c = c') T.table))
+    with Not_found -> None
 end

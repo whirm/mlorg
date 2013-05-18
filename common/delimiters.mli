@@ -31,4 +31,11 @@ module Make (T : Table) : sig
   val split : BatSubstring.t -> char -> string list
   (** [split sub c] will split [sub] along the closing delimiter corresponding
       to [c] *)
+
+  val closing_delimiter : char -> char option
+  (** Given a char [c] returns the corresponding closing delimiter
+      corresponding to [c] if it exists *)
+  val starting_delimiter : char -> char option
+  (** Given a char [c] returns the corresponding closing delimiter
+    corresponding to [c] if it exists *)
 end
