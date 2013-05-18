@@ -23,8 +23,7 @@ let rec run_parsers plain parsers string =
     if Substring.length s > 0 && Substring.get s 0 = '\\' then 
       2+skip_word (Substring.triml 2 s)
     else
-      skip_until (fun c -> not (Char.is_whitespace c && Char.is_newline c)) s
-        ~k: (skip_until ~k:1 (fun c -> not (Char.is_latin1 c || Char.is_digit c)) s) 
+      skip_until ~k:1 (fun c -> not (Char.is_latin1 c || Char.is_digit c)) s
   in
   let rec aux start acc substring = 
     let (_, current, _) = Substring.base substring in
@@ -35,7 +34,7 @@ let rec run_parsers plain parsers string =
         | [] -> 
             let lg = skip_word substring in
             aux start acc
-              (Substring.triml lg substring)
+              (Substring.trim (Substring.triml lg substring))
         | t :: q -> try 
                       match t myself substring with
                         | None -> try_parsers q
