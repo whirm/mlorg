@@ -80,8 +80,9 @@ module E = struct
     let ws fmt = Printf.kprintf (fun s -> match lines s with
       | [] -> ()
       | [t] -> IO.nwrite out t
-      | t :: q -> IO.nwrite out t; IO.write out '\n';
+      | t :: q -> IO.nwrite out t; 
         List.iter (fun s ->
+          IO.write out '\n';
           for k = 1 to !indent_level do IO.write out ' ' done;
           IO.nwrite out s)
           q) fmt
@@ -102,12 +103,16 @@ module E = struct
       indent_level := !indent_level + 2;
       self#blocks x.contents;
       indent_level := !indent_level - 2;
+    method blocks = function
+    | [] -> ()
+    | [t] -> self#block t
+    | t :: q -> self#block t; Printf.fprintf out "\n"; self#blocks q
     method block = function
-      | Paragraph l -> self#inlines l; Printf.fprintf out "\n\n"
+      | Paragraph l -> self#inlines l; Printf.fprintf out "\n"
       | Heading _ -> () (* heading is handled in the heading method *)
       | List (l, _) -> List.iter self#list_item l
       | Directive (a, b) -> ws "#+%s: %s\n" a b
-      | Math s -> ws "$$ %s $$" s
+      | Math s -> ws "$$ %s $$\n" s
       | Quote l ->
         ws "#+begin_quote\n";
         self#blocks l;
@@ -130,16 +135,16 @@ module E = struct
         self#blocks c;
         ws ":END:\n"
       | Property_Drawer l -> 
-        ws ":PROPERTY:\n";
-        List.iter (fun (name, v) -> ws " :%s: %s" name v) l;
+        ws ":PROPERTIES:\n";
+        List.iter (fun (name, v) -> ws ":%s: %s\n" name v) l;
         ws ":END:\n";
       | Table t ->
         let pr_row = Array.iter (fun x -> ws "| "; self#inlines x) in
         Array.iter (fun x -> pr_row x; ws " |\n") t.rows;
         Option.map_default (ws "#+tblfm: %s") () t.format
-      | Horizontal_Rule -> ws "-----"
+      | Horizontal_Rule -> ws "-----\n"
       | Latex_Environment (name, opts, contents) ->
-        ws "\\begin{%s}%s\n%s\n\b\\end{%s}" name opts
+        ws "\\begin{%s}%s\n%s\n\n\n\\end{%s}\n" name opts
           (String.concat "\n" contents) name
       | Footnote_Definition (name, contents) ->
         ws "[%s] " name;
