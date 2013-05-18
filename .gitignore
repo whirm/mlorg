@@ -13,3 +13,7 @@ _build
 /setup.log
 *.html
 *.tex
+/tests/parser/syntax-2.org
+/tests/parser/syntax-2.xml
+/tests/parser/syntax.diff
+/tests/parser/syntax.xml

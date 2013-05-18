@@ -11,9 +11,10 @@ open Config
 module E = struct
   let name = "org"
   let config = Config.create ()
-  let wrap_bracket = Option.map_default
-    (fun s -> Printf.sprintf "{%s}" (escape ["{"; "}"] s)) ""
-    
+
+  let wrap_brace ?(c1="{") ?(c2="}") = Option.map_default
+    (fun s -> Printf.sprintf "%s%s%s" c1 (escape [c1;c2] s) c2) ""
+  let wrap_bracket = wrap_brace ~c1:"[" ~c2:"]"
   let range x = Timestamp.range_to_string x
   let timestamp x = Timestamp.to_string x
 
@@ -33,15 +34,15 @@ module E = struct
           | None -> ws "[fn:%s]" name)
     | Inline_Call {program; arguments; inside_headers; end_headers} ->
         let arguments = List.map (fun (a, b) -> Printf.sprintf "%s=%s" a b) arguments
-    |> String.concat ", "
+    |> String.concat ","
         in
         ws "call_%s%s(%s)%s" program 
           (wrap_bracket inside_headers)
           (escape ["("; ")"] arguments) (wrap_bracket end_headers)
 	  
     | Inline_Source_Block {language; options; code} ->
-      ws "src_%s%s[%s]" language (wrap_bracket options) 
-        (escape ["["; "]"] code)
+      ws "src_%s%s%s" language (wrap_bracket options) 
+        (wrap_brace (Some code))
     | Subscript t -> 
       ws "_{%s}" (inlines t)
     | Superscript t -> 
@@ -54,7 +55,9 @@ module E = struct
       ws "$%s$" (escape ["$"] s)
 	
     | Latex_Fragment (Inline.Command (opt, s)) -> 
-      ws "\\%s%s" s (wrap_bracket (if opt = "" then None else Some opt))
+      ws "\\%s%s" s (wrap_brace (if opt = "" then None else Some opt))
+    | Link {url=Search search; label} when Inline.asciis label = search -> 
+      ws "[[%s]]" (inlines label)
     | Link {url; label} ->
       ws "[[%s][%s]]" (Inline.string_of_url url) (inlines label)
      | Break_Line -> ws "\\\\\n"
@@ -100,7 +103,7 @@ module E = struct
       self#blocks x.contents;
       indent_level := !indent_level - 2;
     method block = function
-      | Paragraph l -> self#inlines l; IO.write out '\n'
+      | Paragraph l -> self#inlines l; ws "\n"; Printf.fprintf out "\n"
       | Heading _ -> () (* heading is handled in the heading method *)
       | List (l, _) -> List.iter self#list_item l
       | Directive (a, b) -> ws "#+%s: %s\n" a b
