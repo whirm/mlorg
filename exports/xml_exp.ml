@@ -95,7 +95,7 @@ module E = struct
            Xml.empty repetition]
     method list_item x = 
       [Xml.block "item"
-        ~attr: (opt_attr "number" x.number)
+        ~attr: (opt_attr "number" x.number @ opt_attr "checked" (Option.map string_of_bool x.checkbox))
         (self#blocks x.contents)]
 
     method block = function
