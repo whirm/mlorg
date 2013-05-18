@@ -131,7 +131,8 @@ let link_parser parse rest =
 let link_inline_parser _ rest = 
   let protocol, rest = until_space ((=) ':') rest in
   let rest = see "://" rest in
-  let link, rest = until_space (fun x -> false) rest in
+  let pred = no_delim_capture delim_table in
+  let link, rest = until_space (fun c -> not (pred c)) rest in
   Some ([Link {label = [Plain (protocol ^ "://" ^ link)];
                url = Complex { protocol; link = "//"^link }}],
         rest)
