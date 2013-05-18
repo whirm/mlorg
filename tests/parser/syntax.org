@@ -1,0 +1,42 @@
+#+TITLE: Basic test
+#+AUTHOR: Me
+#+DIRECTIVE: Here
+
+This file is used to demonstrate org syntax support in org-mode.
+
+
+
+* Inline contents
+Mlorg handles a lot of inline contents: /emphasis/, *bold*,
+/nested *inline*/ contents that org does not support. [[file:links][Links]], =inline
+verbatim=. =inline verbatim *do not nest*=.
+
+You also have footnote reference: 
+- Named: [fn:name:] refers to the footnote =name= (See [[Footnote
+  definition for how to define footnotes]])
+- Anonymous [fn::Contents of my footnote right here]: creates a
+  footnote without a name.
+
+Babel syntax is handled although there is no support yet:
+call_program[conf1, conf2](arg1=value,arg2=value)[conf3, conf4]
+
+You can use inline source code with src: src_ocaml{let x = 3} and
+src_ocaml[options]{let x = 3}. You have also latex fragment $\mathscr
+L = \mathbb N \oplus \mathscr P(X)$. You can insert a break line with
+=\\= at the end of a line \\
+You can use inline links of the form protocol://foobar
+(eg. http://foobar).
+
+There is also macros {{{MACRO(ARG)}}}
+
+
+
+
+* Headings
+** Level2
+*** TODO Level 3
+*** DONE Level 4                                                :tag1:tag2:
+** Timestamp
+<2013-05-18 sam.>
+
+SCHEDULED:<2013-05-18 sam.>
