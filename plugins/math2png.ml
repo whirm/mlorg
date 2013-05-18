@@ -157,4 +157,4 @@ let transform conf doc =
       o#document () doc 
     else doc
   in
-  Printf.eprintf "\n"; doc'
+  doc'
