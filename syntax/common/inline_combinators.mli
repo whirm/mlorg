@@ -48,3 +48,14 @@ val ( ||| ) : ('a -> bool) -> ('a -> bool) -> 'a -> bool
 
 val until_space : (char -> bool) -> BatSubstring.t -> string * BatSubstring.t
 (** Same as {!until} but it may stop on space as well. *)
+
+val no_delim_capture : (char * (char * bool)) list -> char -> bool
+(** [no_delim_capture table] returns a char predicate that will return
+    true iff all the characters seen so far by the predicate form a
+    well-parenthesed string wrt the delimiters in table. It should be
+    used when you want to consume characters until space but you want
+    also to stop when a delimiter opened outside of the string was
+    opened. Eg. when parsing inline links, you want that in the string
+    [(some comment http://foo)] the links stop at the closing
+    parenthesis.
+*)

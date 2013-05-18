@@ -69,3 +69,14 @@ let until pred rest =
 let one_of l c = List.mem c l
 let ( ||| ) f g = fun x -> f x || g x
 let until_space f = until (Char.is_whitespace ||| f)
+let no_delim_capture table = 
+  let stack = ref [] in
+  let module D = Delimiters.Make (struct let table = table end) in
+  fun c -> Printf.printf "Char: %c. Stack: %s\n" c (String.implode !stack);
+ match !stack, D.starting_delimiter c, D.closing_delimiter c with
+  | head :: tail, Some _, _ -> stack := tail; head = c
+  | l, _, Some c -> stack := c :: l; true
+  | [], Some _, _ -> false
+  | _ -> true
+
+  
