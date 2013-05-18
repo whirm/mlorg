@@ -45,16 +45,39 @@ There's plenty of way to insert timestamps in your source:
 
 Of course those timestamp comes with time as well: <2013-05-18 sam. 10:00>.
 
-
-
-
-
-
-* Headings
-** Level2
+At last, you can have satistics cookie: [3/2] and [100%]. Org-mode
+updates them, =mlorg= doesn't.
+* Blocks
+** Headings
 *** TODO Level 3
 *** DONE Level 4                                                :tag1:tag2:
-** Timestamp
-<2013-05-18 sam.>
+** Math
+You can use
+$$ formula $$
+or
 
-SCHEDULED:<2013-05-18 sam.>
+\begin{environment}PARAM
+LaTeX code
+\end{environment}
+** Code and verbatim
+To enter verbatim code you can use
+
+: Code
+: Code
+or
+#+begin_example
+Code
+Code
+#+end_example
+
+To enter code, you can use
+#+BEGIN_SRC ocaml
+let x = 3
+#+END_SRC
+** Quotes
+Entered via
+#+BEGIN_QUOTE
+Some quote.
+#+END_QUOTE
+* Footnote definition for how to define footnotes
+[name] Here is the definition of the footnote

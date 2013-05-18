@@ -32,7 +32,6 @@ let interrupt context ((number, _, name, _) as x) y =
   Log.warning "Unterminated block %s started at line %d" name number;
   interrupt context x y
 
-(* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line; context } = 
   let re = Str.regexp "#\\+\\(begin\\|BEGIN\\)_\\([^ ]+\\)\\( +\\(.+\\)\\)?" in
   if Str.string_match re line 0 then
