@@ -30,19 +30,18 @@ let generate backend output opts filename =
     in
     let config = Plugin.global_config (opts @ doc.opts) in
     Plugin.Exporters.run export config doc fdout;
-    if output = "-" then IO.close_out fdout
-
+    if output <> "-" then IO.close_out fdout;
   with Sys_error msg -> Printf.eprintf "%s\n" msg
     | Not_found -> Printf.eprintf "Backend `%s' does not exist.\n" backend
 
 (* Cmd liner part *)
 let output = 
   let doc = "Write the generated file to $(docv). " in
-  Arg.(value & opt string "" & info ["-o"; "--output"] ~docv:"OUTPUT-FILE" ~doc)
+  Arg.(value & opt string "" & info ["o"; "output"] ~docv:"OUTPUT-FILE" ~doc)
 
 let backend = 
   let doc = "Uses $(docv) to generate the output. " in
-  Arg.(value & opt string "" & info ["-b"; "--backend"] ~docv:"BACKEND" ~doc)
+  Arg.(value & opt string "" & info ["b"; "backend"] ~docv:"BACKEND" ~doc)
 
 let filenames = 
   let doc = "The input filenames to use. " in
@@ -50,7 +49,7 @@ let filenames =
 
 let options = 
   let doc = "Extra options to use to configure the behaviour." in
-  Arg.(value & opt_all (pair ~sep:'=' string string) [] & info ["-o"; "--option"] ~docv: "OPTIONS" ~doc)
+  Arg.(value & opt_all (pair ~sep:'=' string string) [] & info ["o"; "option"] ~docv: "OPTIONS" ~doc)
 
 (*let get_directive s = 
   with_filename !filename
