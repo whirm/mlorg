@@ -52,32 +52,86 @@ updates them, =mlorg= doesn't.
 *** TODO Level 3
 *** DONE Level 4                                                :tag1:tag2:
 ** Math
+
 You can use
+
 $$ formula $$
+
 or
 
 \begin{environment}PARAM
 LaTeX code
 \end{environment}
+
 ** Code and verbatim
 To enter verbatim code you can use
 
 : Code
 : Code
+
 or
+
 #+begin_example
 Code
 Code
 #+end_example
 
-To enter code, you can use
+To typeset code belonging to a specific language, you can use:
+
 #+BEGIN_SRC ocaml
 let x = 3
 #+END_SRC
+
 ** Quotes
+
 Entered via
+
 #+BEGIN_QUOTE
 Some quote.
 #+END_QUOTE
+** Horizontal rules.
+Just use
+
+--------
+** Drawers
+You can use drawers to store information about a heading:
+
+:DRAWER:
+Drawer content
+:END:
+
+There is at the moment one special kind of drawers, properties drawers:
+
+:PROPERTIES:
+:KEY: Value
+:END:
+They directly get stored inside the headings for easier use by
+plugins.
+** Lists
+Most of org's list are supported.
+
+Regular lists:
+
+- Item 1
+- Item 2
+- [ ] Checkbox
+- [X] Checked checkbox
+
+Numbered lists:
+
+1. Item one
+2. Item two
+3. [@i] Item three (rendered as (iii))
+** Keywords and directives
+Org's keywords and directives are handled.
+
+#+DIRECTIVE: VALUE
+
+Special directive defined as keyword in org-mode are handled.
+
+#+NAME: foo
+A block named =foo=.
+
+
 * Footnote definition for how to define footnotes
 [name] Here is the definition of the footnote
