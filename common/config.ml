@@ -101,7 +101,7 @@ let list (type u) (s: u serializable) =
 
 let split c string = D.split (BatSubstring.all string) c
 let parse_keyvalue s = 
-  try Scanf.sscanf s "%[^=]=%[^\\00]" (fun key v -> (key, v))  
+  try Scanf.sscanf s " %[^=]=%[^\\00]" (fun key v -> (key, v))  
   with _ -> s, "yes"
 let parse_comma s = 
   split ',' s |> List.map parse_keyvalue
