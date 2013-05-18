@@ -69,7 +69,7 @@ let output ?(offset = 0) fd inlines prep_inlines exceptions space_significants t
   let rec write ?(ctx_inline = false) indent_level = function
     | Empty -> ()
     | Data s -> output_lines fd indent_level s
-    | Raw s -> IO.write_string fd s
+    | Raw s -> Printf.fprintf fd "%s" s
     | List l -> List.iter (write indent_level) l
     | Block (name, attribs, children) ->
 	let inline = List.mem name inlines in
