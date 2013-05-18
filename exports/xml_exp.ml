@@ -177,13 +177,19 @@ module E = struct
           (self#blocks d.content
            @ concatmap self#heading d.children)
       in [Xml.block "heading" ~attr children]
+    method meta d = 
+      let couple name (a, b) = Xml.block name ~attr:["name", a; "value", b] [] in
+      [Xml.block "opts" (List.map (couple "opt") d.opts);
+       Xml.block "directives" (List.map (couple "directive") d.directives);
+       Xml.block "extensions" (List.map (fun a -> Xml.block "ext" ~attr:["name", a] []) d.exts)]
     method document d =
       [Xml.block "document" 
           ~attr: ["title", d.title; "author", d.author;
                   "filename", d.filename]
-          (self#blocks d.beginning @
-             concatmap self#heading d.headings)]
-
+          [Xml.block "meta" (self#meta d);
+           Xml.block "content"
+             (self#blocks d.beginning @
+                concatmap self#heading d.headings)]]
   end
   let write out = Xml.output out
     ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
