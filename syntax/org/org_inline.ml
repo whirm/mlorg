@@ -224,9 +224,9 @@ let timestamp_parser _ rest =
 let parse = run_parsers (fun s -> Plain s)
   [emphasis_parser; entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
-   target_parser; inline_source_block_parser; latex_fragment_parser;
+   radio_target_parser; target_parser; inline_source_block_parser; latex_fragment_parser;
    break_line_parser; link_parser; link_inline_parser;
-   macro_parser; radio_target_parser; verbatim_parser; subscript_parser;
+   macro_parser; verbatim_parser; subscript_parser;
    superscript_parser; statistics_cookie_parser; 
    timestamp_parser
   ]
