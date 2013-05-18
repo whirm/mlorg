@@ -22,11 +22,11 @@ end
     and you don't have to look for delimiters inside.
 *)
 module Make (T : Table) : sig
-  val enclosing_delimiter : BatSubstring.t -> char -> (string * BatSubstring.t) option
+  val enclosing_delimiter : ?valid: bool -> BatSubstring.t -> char -> (string * BatSubstring.t) option
   (** [enclosing_delimiter s c] expects a substring starting by [c]. It will
       search for the end of the delimited string. On success it will return the
       delimited string along with rest of the substring following the closing
-      delimiter. Otherwise it will return [None] *)
+      delimiter. Otherwise it will return [None]. [valid] is used to tell if you require that the closing delimiter should be valid. *)
 
   val split : BatSubstring.t -> char -> string list
   (** [split sub c] will split [sub] along the closing delimiter corresponding

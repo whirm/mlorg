@@ -31,23 +31,24 @@ module Make (T : Table) = struct
   (* Given a string [s] and a character [c], returns the index of the closing
      delimiters associated to [c] (or None if not found). The optional parameter
      k tells where the search should start *)
-  let rec closing_delimiter  ?(k=0) s c =
+  let rec closing_delimiter ?(valid=true) ?(k=0) s c =
     let q = quote c in
     let c = closing c in
     let rec aux k = 
       if k = String.size s then None
-      else if s.[k] = c && valid_delimiter s k then Some k
-      else if not q && is_delimiter s.[k] && closing s.[k] <> s.[k]  && valid_delimiter s k then
+      else if s.[k] = c && (not valid || valid_delimiter s k) then Some k
+      else if not q && is_delimiter s.[k] && closing s.[k] <> s.[k]  
+          && (not valid || valid_delimiter s k) then
         match closing_delimiter ~k:(k+1) s s.[k] with
           | Some k' -> aux (1+k')
           | None ->    aux (k+1)
       else aux (k+1)
     in aux k
 
-  let enclosing_delimiter string delimiter = 
+  let enclosing_delimiter ?valid string delimiter = 
     if String.length string = 0 || string.[0] <> delimiter then None
     else
-      match closing_delimiter string ~k: 1 delimiter with
+      match closing_delimiter ?valid string ~k: 1 delimiter with
         | None -> None
         | Some k -> 
           let s, a, b = base string in
