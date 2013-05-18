@@ -7,7 +7,7 @@ type state = int * string list * string * string
 
 let interrupt ctx (number, lines, name, opts) parse = 
   let lines = List.rev lines in
-  match name with
+  match String.lowercase name with
     | "example" -> ctx, [Example (number, lines)]
     | "src" -> ctx, [Src (number, opts, lines)]
     | "quote" ->
