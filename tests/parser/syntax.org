@@ -9,7 +9,7 @@ This file is used to demonstrate org syntax support in org-mode.
 * Inline contents
 Mlorg handles a lot of inline contents: /emphasis/, *bold*,
 /nested *inline*/ contents that org does not support. [[file:links][Links]], =inline
-verbatim=. =inline verbatim *do not nest*=.
+verbatim= or ~inline~. =inline verbatim *do not nest*=.
 
 You also have footnote reference: 
 - Named: [fn:name:] refers to the footnote =name= (See [[Footnote
@@ -28,6 +28,24 @@ You can use inline links of the form protocol://foobar
 (eg. http://foobar).
 
 There is also macros {{{MACRO(ARG)}}}
+
+You can create anchor in your document <<<ANCHOR>>> and <<RADIO TARGET
+LINKS>>. You also have expnonents and subscripts: t_{1}^{1}.
+
+** Timestamps
+There's plenty of way to insert timestamps in your source:
+
+- <2013-05-18 sam.> : plain timestamps. Used to indicate that an event
+  is happening at a date.
+- <2013-05-18 sam.>--<2013-05-18 sam.>: timestamp ranges (same thing
+  as above but for events spanning over several days)
+- SCHEDULED: <2013-05-18 sam.>: to indicate that this task is scheduled to be done on the given date
+- DEADLINE: <2013-05-18 sam.>: indicates a deadline for the given date
+- Inactive timestamps: [2013-05-18 sam.] (don't show up in the agenda)
+
+Of course those timestamp comes with time as well: <2013-05-18 sam. 10:00>.
+
+
 
 
 

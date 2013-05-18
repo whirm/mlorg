@@ -94,7 +94,7 @@ module E = struct
     method range = range %> ws "%s"
     method timestamp = timestamp %> ws "%s"
     method list_item x = (match x.number with
-      | None -> ws "\n- "; 
+      | None -> ws "- "; 
       | Some number -> ws "1. [@%s] " number);
       (match x.checkbox with
         | Some b -> ws "[%c] " (if b then 'X' else ' ')
@@ -103,7 +103,7 @@ module E = struct
       self#blocks x.contents;
       indent_level := !indent_level - 2;
     method block = function
-      | Paragraph l -> self#inlines l; ws "\n"; Printf.fprintf out "\n"
+      | Paragraph l -> self#inlines l; Printf.fprintf out "\n\n"
       | Heading _ -> () (* heading is handled in the heading method *)
       | List (l, _) -> List.iter self#list_item l
       | Directive (a, b) -> ws "#+%s: %s\n" a b
