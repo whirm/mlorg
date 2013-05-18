@@ -1,3 +1,4 @@
+open Xml
 open Prelude
 open Entity
 open Batteries
@@ -6,7 +7,6 @@ open Block
 open Document
 open Plugin
 open Config
-open Xml
 module H = struct
   let name = "html"
   let config = Config.create ()
@@ -17,12 +17,16 @@ module H = struct
   let use_math2png =  Config.add config "use-math2png" boolean "Convert latex formulas to PNG using Math2png extension" true
   let image_extensions = Config.add config "image-extensions" (list string) "The list of extensions to be considered as images"
     [".png"; ".jpg"; ".jpeg"; ".gif"; ".bmp"]
-
+  let mathjax_url = Config.add config "mathjax-url" string "The URL of the MathJax script"
+    "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+  let js_files = Config.add config "javascript-files" (list string) "Javascript files to include in the page (URLs)" []
+  let inline_js = Config.add config "javascript" string "Inline javascript code to add in the <head> section" ""
   let use_pygments = Config.add config "use-pygments" boolean "Shall we use pygments to color code ?" true
 
   type interface = exporter
   let concatmap f l = List.concat (List.map f l)
   let assoc l s = try List.assoc s l with _ -> ""
+  let mathjax_used = ref false
   class htmlExporter config = object(self)
     inherit [Xml.t list] Document.bottomUp as super
     method bot = []
@@ -32,17 +36,25 @@ module H = struct
         [Xml.block "title" [Xml.data d.title];
          Xml.block "meta" ~attr: ["http-equiv", "Content-Type"; "content", "text/html";
                                   "charset", Config.get config encoding] [];
-         Xml.block "script" ~attr:["type","text/javascript"; 
-                                   "src","http://orgmode.org/mathjax/MathJax.js"] [Xml.data " "];
+         (if !mathjax_used then
+             Xml.block "script" ~attr:["type","text/javascript"; 
+                                       "src",Config.get config mathjax_url] 
+               []
+          else Xml.empty);
          Xml.block "style" ~attr:["type", "text/css"]
            [Xml.data 
                (if Config.get config use_pygments then
                    try Pygments.style_def config "html"
                    with _ -> ""
                 else "")];
+         Xml.list (flip List.map (Config.get config js_files)
+                     (fun filename -> Xml.block "script" ~attr: ["type", "text/javascript";
+                                                                 "src", filename] []));
+         Xml.block "script" ~attr:["type", "text/javascript"] 
+           [Xml.data (Config.get config inline_js)];
          Xml.block "link" 
            ~attr: ["rel", "stylesheet"; "href", Config.get config style;
-                                    "type", "text/css"; "media", "screen"] []]
+                   "type", "text/css"; "media", "screen"] []]
       in
       Xml.block "html"
         ~attr:["xmlns", "http://www.w3.org/1999/xhtml"]
@@ -72,7 +84,7 @@ module H = struct
           [Xml.block (List.assoc kind l) (self#inlines data)]
       | Entity e -> 
           [Xml.data e.html]
-      | Latex_Fragment (Inline.Math s) -> [Xml.data ("\\("^s^"\\)")]
+      | Latex_Fragment (Inline.Math s) -> mathjax_used := true; [Xml.data ("\\("^s^"\\)")]
       | Link {url; label} ->
           let href = Inline.string_of_url url in
           (* If it is an image *)
@@ -133,8 +145,12 @@ module H = struct
           [Xml.block "pre" [Xml.data (String.concat "\n" lines)]]
 
       | Custom (name, _, l) ->
-          [Xml.block "div" ~attr:["class", name] (self#blocks l)]
+        [Xml.block "div" ~attr:["class", name] (self#blocks l)]
 
+      | Math s ->
+        mathjax_used := true;
+        [Xml.block "div" ~attr:["class", "mathblcok"] 
+            [Xml.data ("$$" ^ s ^ "$$")]]
       | Quote l ->
           [Xml.block "blockquote" (self#blocks l)]
 
