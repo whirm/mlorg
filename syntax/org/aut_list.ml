@@ -55,19 +55,20 @@ let parse_first_line s =
       let open BatSubstring in
       let s = trim (triml k (all s)) in
       (* If we have the start of a list, we look for a checkbox, *)
-      match D.enclosing_delimiter s '[' with
-        | None -> Some (ordered, None, None, s)
-        | Some (s, rest) ->
-          let b, rest = if s = " " then Some false, rest
-            else if s = "X" then Some true, rest
-            else None, BatSubstring.all s
+      match D.enclosing_delimiter ~valid: false s '[' with
+        | None -> print_endline (to_string s); Some (ordered, None, None, s)
+        | Some (marker, rest) ->
+          let b, rest = if marker = " " then Some false, rest
+            else if marker = "X" then Some true, rest
+            else None, s
           in
-          if b = None then Some (ordered, None, parse_fmt s, rest)
+          let rest = BatSubstring.trim rest in
+          if b = None then Some (ordered, None, parse_fmt marker, rest)
           else
             (* and then a format *)
-            match D.enclosing_delimiter (trim rest) '[' with
+            match D.enclosing_delimiter rest '[' with
               | None -> Some (ordered, b, None, rest)
-              | Some (fmt, rest) -> Some (ordered, b, parse_fmt fmt, rest)
+              | Some (fmt, rest) -> Some (ordered, b, parse_fmt fmt, trim rest)
 (** Parse the first line of an item *)
 
 let is_start { Org_automaton.line; Org_automaton.context } = 
