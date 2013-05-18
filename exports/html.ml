@@ -51,7 +51,7 @@ module H = struct
                      (fun filename -> Xml.block "script" ~attr: ["type", "text/javascript";
                                                                  "src", filename] []));
          Xml.block "script" ~attr:["type", "text/javascript"] 
-           [Xml.data (Config.get config inline_js)];
+           [Xml.raw (Config.get config inline_js)];
          Xml.block "link" 
            ~attr: ["rel", "stylesheet"; "href", Config.get config style;
                    "type", "text/css"; "media", "screen"] []]
