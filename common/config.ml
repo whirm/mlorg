@@ -243,9 +243,12 @@ let prettyprint out config =
     
     config
     
+let name (module I : Item) = I.name
+
 let to_man config = 
-  Hashtbl.fold
-    (fun _ i acc ->
+  Hashtbl.values config |> List.of_enum |>
+      List.sort (fun i i' -> compare (name i) (name i')) |> List.fold_left
+    (fun acc i ->
       let spr = Printf.sprintf in
       let module I = (val i : Item) in
       let s = I.T.show I.default in
@@ -267,5 +270,5 @@ let to_man config =
         @ variables
       in acc @ man
     )          
-    config []
+    []
     
