@@ -7,11 +7,16 @@ type t =
   | Data of string
   | Block of string * (string * string) list * t list
   | Raw of string
+  | List of t list
+
 let empty = Empty
 let block ?(attr = []) name children = 
   Block (name, attr, children)
 let data s = Data s
 let raw s = Raw s
+let list = function
+  | [] -> Empty
+  | l -> List l
   
 let quote, _ = '"', '"'
 let output_string_rewrite fd s = 
@@ -65,6 +70,7 @@ let output ?(offset = 0) fd inlines prep_inlines exceptions space_significants t
     | Empty -> ()
     | Data s -> output_lines fd indent_level s
     | Raw s -> IO.write_string fd s
+    | List l -> List.iter (write indent_level) l
     | Block (name, attribs, children) ->
 	let inline = List.mem name inlines in
 	let close_tag = children = [] && not (List.mem name exceptions) in
