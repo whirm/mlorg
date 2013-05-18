@@ -1,10 +1,9 @@
 #use "topfind";;
 #require "mlorg";;
 open Batteries;;
+open Mlorg;;
 open Prelude;;
 open Timestamp;;
-open Inline;;
-open Parser;;
 open Document;;
 open Filter;;
 let _ = Printexc.record_backtrace true;;
