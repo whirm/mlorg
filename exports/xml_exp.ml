@@ -193,6 +193,7 @@ module E = struct
   end
   let write out = Xml.output out
     ["underline"; "bold"; "italic"; "math"; "link"; "verbatim-inline";
+     "subscript"; "superscript"; "target";
      "math-inline"; "footnote-reference"; "inline-source"; "inline-call"]
     ["paragraph"; "name"; "named-block"]
     []
