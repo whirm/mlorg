@@ -119,7 +119,7 @@ let output ?(offset = 0) fd inlines prep_inlines exceptions space_significants t
 
 let output_xhtml ?offset chan = 
   output chan ?offset
-    ["i"; "em"; "b"; "img"; "a"; "code"; "sup"; "sub"; "abbr"; "span"]
+    ["u"; "i"; "em"; "b"; "img"; "a"; "code"; "sup"; "sub"; "abbr"; "span"]
     ["p"; "li"; "ol"; "dt"; "td"; "h1"; "h2"; "h3"; "h4"; "h5"; "hr"; "th"; "ul"; "title"]
     ["div"; "span"; "ul"]
     ["pre"; "code"]
