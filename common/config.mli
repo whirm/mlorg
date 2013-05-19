@@ -110,8 +110,8 @@ val get : ?vars : (string * string) list -> instance -> 'a item -> 'a
 val make : t -> (string * string) list -> instance
 (** Make an instance out of an t and a few defined values *)
 
-val append : t -> (string * string) list -> (instance -> instance)
-(** [append t values instance] will create a new instance which will be defined on values
+val append : (string * string) list -> (instance -> instance)
+(** [append values instance] will create a new instance which will be defined on values
     of [instance] and on values appearing in [values] *)
 
 (** {2 Parsing strings} *)

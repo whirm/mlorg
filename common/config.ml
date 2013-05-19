@@ -127,7 +127,8 @@ type 'a item = (module Item with type t = 'a)
 type t = (int, (module Item)) Hashtbl.t
 
 type instance = 
-    {get : 'a. ?vars: (string * string) list -> 'a item -> 'a option}
+    {get : 'a. ?vars: (string * string) list -> 'a item -> 'a option;
+     config: t}
 
 let update_default (type u) (i : u item) v = 
   let module I' = struct
@@ -177,7 +178,7 @@ let concat configs =
 (* this takes a config and a list of string * string 
    an existing instance, and create a composed instance *)
 
-let append config list instance = 
+let append list ({config} as instance) = 
   let hashtbl = Hashtbl.create (Hashtbl.length config) in
   let compute (type u) (item: u item) vars = 
     let module I = (val item : Item with type t = u) in
@@ -206,10 +207,12 @@ let append config list instance =
     try Hashtbl.find hashtbl I.index (); !I.tmp
     with Not_found -> compute item vars
   in
-  {get = fun (type u) ?(vars = []) item -> lookup item vars}
+  {get = (fun (type u) ?(vars = []) item -> lookup item vars);
+   config}
     
-let make config list = append config list
-  {get = (fun (type u) ?(vars=[]) i -> None)
+let make config list = append list
+  {get = (fun (type u) ?(vars=[]) i -> None);
+   config
   }
 let from_comma config s = parse_comma s |> make config
       
