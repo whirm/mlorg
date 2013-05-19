@@ -22,6 +22,7 @@ module E = struct
     method bot = []
     method combine = List.concat
     method inline = function
+      | Inline.List l -> self#inlines l
       | Plain s -> [Xml.data s]
       | Emphasis (kind, data) ->
           let l = [`Bold, "bold"; `Italic, "italic"; `Underline, "underline"] in

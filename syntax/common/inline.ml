@@ -69,6 +69,7 @@ and t =
   | Verbatim of string
   | Cookie of stats_cookie
   | Timestamp of timestamp
+  | List of t list
   | Plain of string
 
 (* *)
@@ -97,6 +98,7 @@ class ['a] mapper = object(self)
     | Break_Line 
     | Export_Snippet _ 
     | Entity _) as x -> x
+    | List l -> List (self#inlines v l)
   method inlines v = List.map (self#inline v)
 end
 
@@ -104,6 +106,7 @@ class ['a] folder = object(self)
   method inline (v:'a) = function
     | Emphasis (a, b) ->
       self#inlines v b
+    | List l -> self#inlines v l
     | Footnote_Reference ref ->
       Option.map_default (self#inlines v) v ref.definition
     | Link l ->
@@ -131,6 +134,7 @@ class virtual ['a] bottomUp = object(self)
   method virtual bot : 'a
   method virtual combine : 'a list -> 'a
   method inline = function
+    | List l -> self#inlines l
     | Emphasis (a, b) ->
         self#inlines b
     | Footnote_Reference ref ->
@@ -159,6 +163,7 @@ class virtual ['a, 'b] bottomUpWithArg = object(self)
   method virtual bot : 'a
   method virtual combine : 'a list -> 'a
   method inline (arg: 'b) = function
+    | List l -> self#inlines arg l
     | Emphasis (a, b) ->
         self#inlines arg b
     | Footnote_Reference ref ->
@@ -185,6 +190,7 @@ let string_of_url = function
   | File s | Search s -> s
   | Complex {link; protocol} -> protocol ^ ":" ^ link
 let rec ascii = function
+  | List l -> asciis l
   | Footnote_Reference ref -> 
     Option.map_default asciis "" ref.definition
   | Link l -> asciis l.label

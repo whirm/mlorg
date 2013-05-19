@@ -20,6 +20,7 @@ module E = struct
 
   let ws = Printf.sprintf
   let rec inline = function
+    | Inline.List l -> inlines l
     | Plain s -> 
       ws "%s" (escape ["/"; "="; "*"; "_"; "{"; "["; "]"; "}"] s)
     | Emphasis (kind, data) ->

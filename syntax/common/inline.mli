@@ -162,6 +162,7 @@ and t =
   | Verbatim of string
   | Cookie of stats_cookie
   | Timestamp of timestamp
+  | List of t list
   | Plain of string
 
 (** {1 Mappers and folders} *)
