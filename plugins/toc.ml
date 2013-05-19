@@ -98,6 +98,7 @@ let transform config doc =
   let global_toc = gather config doc in
   let footnotes = Document.footnotes doc 
         |> List.mapi (fun i (a, b) -> (a, (i, b))) in
+  List.iter print_endline (List.map fst footnotes);
   let footnotes_seen = ref [] in
   let format_footnote k = 
     format (Config.get config footnote_format) [1+k]
@@ -163,19 +164,18 @@ let transform config doc =
       else
         { t with Document.content = t.Document.content @ ft_contents }
     method document (_, toc) doc = 
-      let open Document in
-      let () = footnotes_seen := doc.beg_meta.footnotes in
+      let () = footnotes_seen := Document.(doc.beg_meta.footnotes) in
       let footnotes = 
         if Config.get config rewrite_footnotes then self#flush_footnotes () 
         else [] 
       in
       if Config.get config number_heading then
         {doc with 
-          headings = 
-            List.mapi (fun k i -> self#heading ([1+k], toc) i) doc.headings;
-          beginning = self#blocks ([], toc) doc.beginning @ footnotes}
+          Document.headings = 
+            List.mapi (fun k i -> self#heading ([1+k], toc) i) doc.Document.headings;
+          Document.beginning = self#blocks ([], toc) doc.Document.beginning @ footnotes}
       else
-        { doc with beginning = doc.beginning @ footnotes }
+        { doc with Document.beginning = doc.Document.beginning @ footnotes }
     method block l = function
       | Custom ("tableofcontents", opts, contents) ->
           Custom ("tableofcontents", opts,

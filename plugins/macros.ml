@@ -28,7 +28,7 @@ let substitute_macro doc name arguments =
         let buff = Buffer.create (String.length value) in
         Buffer.add_substitute buff (fun v -> try
                                                List.nth arguments (int_of_string v - 1)
-          with _ -> v);
+          with _ -> v) value;
         Buffer.contents buff
     with Not_found -> Log.warning "Macro %s not found" name; ""
 
