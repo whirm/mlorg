@@ -76,7 +76,8 @@ let get_global_interface () =
     [
       "exporters", Exporters.config ();
       "general", General.config ();
-      "mlorg", Global.config
+      "mlorg", Global.config;
+      "document", Document.config
     ]
 
 let global_config parameters = 
