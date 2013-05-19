@@ -167,7 +167,7 @@ module E = struct
 module Exp = struct
     let export _ doc out = 
       (new orgExporter out)#document doc
-    let default_filename = change_ext "org"
+    let default_filename = change_ext "_org"
   end
   type interface = exporter
   let data = (module Exp : Exporter)
