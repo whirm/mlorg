@@ -35,7 +35,7 @@ let emphasis_parser parse sub =
 (** {2 Entity parser} *)
 let entity_parser _ rest = 
   let rest = see "\\" rest in
-  let name, rest = until_space (fun _ -> false) rest in
+  let name, rest = until (Char.is_letter %> not) rest in
   Some ([Entity (Entity.find name)], rest)
 
 (** {2 Export snippet parser} *)
