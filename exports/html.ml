@@ -83,7 +83,7 @@ module H = struct
           let l = [`Bold, "b"; `Italic, "i"; `Underline, "u"] in
           [Xml.block (List.assoc kind l) (self#inlines data)]
       | Entity e -> 
-          [Xml.data e.html]
+          [Xml.raw e.html]
       | Latex_Fragment (Inline.Math s) -> mathjax_used := true; [Xml.data ("\\("^s^"\\)")]
       | Link {url; label} ->
           let href = Inline.string_of_url url in
@@ -100,6 +100,8 @@ module H = struct
                 (self#inlines label)]
       | Verbatim s -> 
           [Xml.block "code" [Xml.data s]]
+      | Inline_Source_Block x -> [Xml.block "code" [Xml.data x.code]]
+      | Export_Snippet ("html", s) -> [Xml.raw s]
       | x -> super#inline x
     method list_item x = 
       let contents = match x.contents with
