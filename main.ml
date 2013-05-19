@@ -29,7 +29,7 @@ let generate backend output opts filename =
         Document.from_file filename
     in
     let config = Plugin.global_config (opts @ doc.opts) in
-    Plugin.Exporters.run export config doc fdout;
+    Plugin.Exporters.run export config (Macros.transform doc) fdout;
     if output <> "-" then IO.close_out fdout;
   with Sys_error msg -> Printf.eprintf "%s\n" msg
     | Not_found -> Printf.eprintf "Backend `%s' does not exist.\n" backend
