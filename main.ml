@@ -23,12 +23,12 @@ let generate backend output opts filename =
       else
         File.open_out output
     in
-    let doc = if filename = "-" then 
-        Document.from_chan "<stdin>" stdin
+    let config = Plugin.global_config opts in
+    let doc, config = if filename = "-" then 
+        Document.from_chan config "<stdin>" stdin
       else 
-        Document.from_file filename
+        Document.from_file config filename
     in
-    let config = Plugin.global_config (opts @ doc.opts) in
     Plugin.Exporters.run export config (Macros.transform doc) fdout;
     if output <> "-" then IO.close_out fdout;
   with Sys_error msg -> Printf.eprintf "%s\n" msg

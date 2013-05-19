@@ -107,13 +107,26 @@ class virtual ['a, 'b] bottomUpWithArg : object
 end
 (** BottomUp traversal with an argument which is passed top-down *)
 
+(** {1 Configuration} *)
+
+val config : Config.t
+(** The configuration for the from_* functions *)
+
 (** {1 Parsing documents} *)    
 
-val from_chan : string -> BatIO.input -> t
-(** From an input (the first argument is the filename) *)
-val from_file  : string -> t
+val directives : Block.t list -> (string * string) list
+(** Return the directives of a list of blocks *)
+
+val opts : Block.t list -> (string * string) list
+(** Return the options set in a list of blocks *)
+
+val from_chan : Config.instance -> string -> BatIO.input -> t * Config.instance
+(** From an input (the second argument is the filename).
+    Returns a new instance updated with the parameter defined in the document.
+ *)
+val from_file  : Config.instance -> string -> t * Config.instance
 (** From a file *)
-val from_fun : string -> (unit -> string option) -> t
+val from_fun : Config.instance -> string -> (unit -> string option) -> t * Config.instance
 (** From a function *)
 
 (** {1 Handling documents} *)

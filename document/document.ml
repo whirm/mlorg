@@ -71,7 +71,11 @@ type t = {
     - the options for extensions on this document. Note that this cover as well
       options for exporters that do not appear in [exts]
 *)
-    
+
+
+(* config *)
+let config = Config.create ()
+let expand_macros = Config.add config "expand-macros" Config.boolean "Expand macros" true
 (** {1 Mapping and folding} *)
 let map f v l = List.map (f v) l
 class ['a] mapper = object(self)
@@ -201,10 +205,44 @@ let handle_directives doc =
     opts = List.filter (fun (s, _) -> String.exists s ".") doc.directives
  }
 
+let directives = 
+  List.filter_map 
+    (function Block.Directive (a, b) -> Some (a, b) | _ -> None) 
+let opts = 
+  List.filter_map 
+    (function Block.Directive (a, b) when String.contains a '.' -> Some (a, b) | _ -> None)
+
+(* Macro substitution *)
+let substitute_macro directives name arguments = 
+  let macros = 
+    directives |> List.filter (fst %> String.uppercase %> (=) "MACRO")
+      |> List.map (snd %> String.split ~by:" ")
+  in
+  try List.assoc name directives
+  with Not_found ->
+    try let value = List.assoc name macros in
+        let buff = Buffer.create (String.length value) in
+        Buffer.add_substitute buff (fun v -> try
+                                               List.nth arguments (int_of_string v - 1)
+          with _ -> v) value;
+        Buffer.contents buff
+    with Not_found -> Log.warning "Macro %s not found" name; ""
+
+let macro_substitution directives = 
+  let o = object (self)
+    inherit [unit] mapper as super
+    method inline () = function
+      | Inline.Macro (name, arguments) -> 
+        Inline.List (self#inlines () 
+                       (Org_inline.parse (substitute_macro directives name arguments)))
+      | t -> super#inline () t
+  end in o#blocks ()
 
 (* [from_blocks filename blocks] transforms the list of blocks [blocks] into a
    structured document corresponding to filename [filename]. *)
-let from_blocks filename blocks = 
+let from_blocks config filename blocks = 
+  let opts = opts blocks in
+  let config = Config.append opts config in
   (* [leave_heading] is called when the end of a heading is found, it updates the
      fields that need to be : the metadata, and the children (that are in reverse
      order). It takes an extra parameter which is the content of the heading. *)
@@ -276,16 +314,16 @@ let from_blocks filename blocks =
          filename;
        })
 (** {1 Parsing from files} *)
-let from_chan filename channel = 
+let from_chan config filename channel = 
     BatIO.lines_of channel |> 
     Org_parser.parse |> snd |>
-    from_blocks filename
+    from_blocks config filename
 
-let from_file filename = 
-    BatFile.with_file_in filename (from_chan filename)
+let from_file config filename = 
+    BatFile.with_file_in filename (from_chan config filename)
 
-let from_fun filename f = 
-  Enum.from_while f |> Org_parser.parse |> snd |> from_blocks filename
+let from_fun config filename f = 
+  Enum.from_while f |> Org_parser.parse |> snd |> from_blocks config filename
 
 let rec descendants heading = 
   heading :: List.concat (List.map descendants heading.children)
