@@ -1,0 +1,93 @@
+#+TITLE: Syntax recognized by mlorg
+#+AUTHOR: Simon Castellan
+#+EMAIL: simon.castellan@iuwt.fr
+#+MACRO: demo =$1= ($1)
+
+#+begin_abstract
+=mlorg= is a parser written in OCaml for =org-mode=. It attempts to
+recognize most of the syntax handled by the original =org-mode= code.
+#+end_abstract
+This document presents the syntax recognized by =mlorg= as well the
+intended semantics (that exporters should respect) and comments on
+specific exporters if it is relevant, and how the data looks like in
+ML. (Although one can look at the file =syntax/common/block.ml= and
+=syntax/common/inline.ml= for a documentation)
+
+#+begin_tableofcontents
+Table of contents:
+#+end_tableofcontents
+* A quick comment on parsing
+The parsing of an org-mode file is split into two things: parsing
+/block/ content (toplevel constructions such as paragraphs, lists,
+tables, ...) and parsing /inline/ content contained in those blocks
+(emphasis, links). The two aspects are handled completely seperately.
+** Parsing blocks
+The parsing of blocks is automata-based: each construction the
+language gets an automata, and the parsing is line-based. When we have
+no selected automaton (eg. at the beginning), we /elect/ one by
+picking the first (with highest priority) that accepts the current
+line and we let it run until it signals that he is done, eg. when
+encoutering an empty line. However, to handle more complex documents,
+automata can be interrupted when they say so, and then at each line,
+one checks if an automata of higher priority is able to take it from
+there. This allows to parse things like that:
+
+: That is a paragraph. Paragraphs normally ends with an empty line, but they can
+: be interrupted at any time.
+: - This is the beginning of a list item, that will interrupt the paragraph.
+
+Without interruption, one would have to add an empty line between the
+paragraph and the list.
+** Parsing inline contents
+The parsing of inline contents is done a bit in the same way, each
+construct gets a parsing function, and the parser tries to find the
+best match at current point and let this match run until it's
+done. There is no interruption, and free form text (ie. normal text)
+is not scanned character by character but word by word (which is only
+a bit more efficient). This is needed to handle constructs like [[inline
+links]]. However, this could be improved by creating a lookahead table
+mapping characters to parsers able to start from this character.
+* Inline constructions
+Inline constructions are represented in ML by the type src_ocaml{Inline.t}
+** Plain
+This is free form text without formatting. It is represente by a value
+of the form src_ocaml{Plain "contents"}
+** Emphasis
+=mlorg= recognizes three kind of emphasis:
+
+- bold, introduced by =*=: {{{demo(*foo*)}}}
+- italics, introduced by =/=: {{{demo(/foo/)}}}
+- underline, introduced by =_=: {{{demo(_foo_)}}}
+
+
+The text inside the delimiters is recursively parsed so you can nest
+emphasis and other things /like *that*/. This is represented in ML by
+src_ocaml{Emphasis(kind, contents)} where =kind= is among =`Bold=,
+=`Italic= and =`Underline=.
+** Entities
+Entities allow you to enter unicode character by typing their LaTeX
+counterpart. Entities are defined in =syntax/common/entity.ml=. In ML,
+they are represented by sr_ocaml {Entity e} where =e= is a record
+containing various representations of the entity (LaTeX, unicode, HTML
+entity). In LaTeX, they are left as is, and in HTML exported as
+entity.
+
+Example: =\alpha= (\alpha)
+
+** Export snippets
+Export snippets allow you to insert a specific code for a specific
+exporter. This exporter should export the string *as is* and other
+exporters should ignore this. Example: {{{demo(@html{<b>html
+bold</b>})}}}.
+
+** Footnotes
+Footnotes allow you to delay a comment. Their syntax is
+=[fn:name:Inline definitions]=. The name and the inline definition can
+be omitted (but not both of course).
+
+Examples
+- Reference to a footnote named =name= defined elsewhere: {{{demo([fn:name])}}}
+- Anonymous footnote: {{{demo([fn::I have no name])}}}
+- Define and make a reference to a footnote: {{{demo([fn:name:This is
+  the definition of the footnote ~name~])}}}
+
