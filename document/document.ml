@@ -243,6 +243,10 @@ let macro_substitution directives =
 let from_blocks config filename blocks = 
   let opts = opts blocks in
   let config = Config.append opts config in
+  let blocks = if Config.get config expand_macros then
+      macro_substitution (directives blocks) blocks
+    else blocks
+  in
   (* [leave_heading] is called when the end of a heading is found, it updates the
      fields that need to be : the metadata, and the children (that are in reverse
      order). It takes an extra parameter which is the content of the heading. *)
@@ -312,7 +316,7 @@ let from_blocks config filename blocks =
          title = (try List.assoc "TITLE" directives with _ -> "");
          author = (try List.assoc "AUTHOR" directives with _ -> "");
          filename;
-       })
+       }), config
 (** {1 Parsing from files} *)
 let from_chan config filename channel = 
     BatIO.lines_of channel |> 
