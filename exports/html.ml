@@ -102,6 +102,7 @@ module H = struct
           [Xml.block "code" [Xml.data s]]
       | Inline_Source_Block x -> [Xml.block "code" [Xml.data x.code]]
       | Export_Snippet ("html", s) -> [Xml.raw s]
+      | Break_Line -> [Xml.block "br" []]
       | x -> super#inline x
     method list_item x = 
       let contents = match x.contents with
