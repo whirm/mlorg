@@ -94,11 +94,17 @@ let generate config toc =
       Block.number }) l, Config.get config number_toc)
   in aux [] toc
 
+let clean table footnotes = 
+  let on f g = fun x y -> f (g x) (g y) in
+  footnotes 
+  |> List.filter (snd %> (<>) [])
+  |> List.unique ~eq: (on (=) fst)
+  |> List.sort (on compare (flip List.assoc table % fst))
+      
 let transform config doc =
   let global_toc = gather config doc in
   let footnotes = Document.footnotes doc 
         |> List.mapi (fun i (a, b) -> (a, (i, b))) in
-  List.iter print_endline (List.map fst footnotes);
   let footnotes_seen = ref [] in
   let format_footnote k = 
     format (Config.get config footnote_format) [1+k]
@@ -108,6 +114,7 @@ let transform config doc =
     method make_footnote_label n = "_footnote_"^n
     method flush_footnotes () = 
       if !footnotes_seen <> [] then
+        let footnotes_uniq = clean footnotes !footnotes_seen in
         let b = Horizontal_Rule :: 
           List.map (fun (name, contents) ->
             let number, _ = List.assoc name footnotes in
@@ -115,7 +122,7 @@ let transform config doc =
             Paragraph (Target (self#make_footnote_label name) ::
                          Superscript [Plain s] ::
                          Plain " " ::
-                         contents)) !footnotes_seen
+                         contents)) footnotes_uniq
         in (footnotes_seen := []; b)
       else []
     method inline (numbers, toc) = function
