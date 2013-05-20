@@ -129,7 +129,7 @@ let link_parser parse rest =
   Some ([Link {label = parse descr; url}], rest)
 
 let link_inline_parser _ rest = 
-  let protocol, rest = until_space ((=) ':') rest in
+  let protocol, rest = until_space (fun c -> c = ':' || not (Char.is_letter c)) rest in
   let rest = see "://" rest in
   let pred = no_delim_capture delim_table in
   let link, rest = until_space (fun c -> not (pred c)) rest in
@@ -222,12 +222,12 @@ let timestamp_parser _ rest =
 
 
 let parse = run_parsers (fun s -> Plain s)
-  [emphasis_parser; entity_parser; export_snippet_parser;
+  [entity_parser; export_snippet_parser;
    footnote_reference_parser; inline_call_parser;
    radio_target_parser; target_parser; inline_source_block_parser; latex_fragment_parser;
    break_line_parser; link_parser; link_inline_parser;
    macro_parser; verbatim_parser; subscript_parser;
    superscript_parser; statistics_cookie_parser; 
-   timestamp_parser
+   emphasis_parser; timestamp_parser
   ]
   
