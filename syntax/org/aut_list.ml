@@ -56,7 +56,7 @@ let parse_first_line s =
       let s = trim (triml k (all s)) in
       (* If we have the start of a list, we look for a checkbox, *)
       match D.enclosing_delimiter ~valid: false s '[' with
-        | None -> print_endline (to_string s); Some (ordered, None, None, s)
+        | None -> Some (ordered, None, None, s)
         | Some (marker, rest) ->
           let b, rest = if marker = " " then Some false, rest
             else if marker = "X" then Some true, rest
