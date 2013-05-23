@@ -19,9 +19,11 @@ type system = { encode : int -> string;
 
 (** We provide here two main ways to define systems : alphabetical and romain *)
 
-val alphabetic_sys : string array -> system
+val alphabetic_sys : ?nozero: bool -> string array -> system
 (** Creates an alphabetic system. For instance [alphabetic_sys ["0"; ..; "9"]]
-    creates the decimal system *)
+    creates the decimal system.
+    @param nozero: tell whether 0 is an reachable value (for instance, with the usual alphabet, you don't want it since you want a = 1)
+ *)
 
 val romain_sys : string array -> system
 (** Creates a romain system. For instance [romain_sys [|"I"; "V"; "X"; "L"; "C"; "D"; "M"|]]

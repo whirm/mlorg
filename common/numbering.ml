@@ -2,13 +2,14 @@ open Batteries
 
 type system = { encode : int -> string;
                 decode : string -> int option * string }
-let alphabetic_sys alphabet =
+let alphabetic_sys ?(nozero = false) alphabet =
   let lg = String.length alphabet.(0) in
   let base = Array.length alphabet in
   let decode string =
+    let ret = if nozero then succ else identity in
     let rec aux n k =
       if k >= String.length string then
-        (if k = 0 then None else Some n), ""
+        (if k = 0 then None else Some (ret n)), ""
       else
         let s = String.sub string k (String.length string - k) in
         try
@@ -19,12 +20,13 @@ let alphabetic_sys alphabet =
           aux (n * base + n') (k + lg)
         with Not_found ->
           if k = 0 then None, s
-          else Some n, s
+          else Some (ret n), s
     in aux 0 0
   in
   let encode n =
+    let n = if nozero then n -1 else n in
     let rec aux acc n =
-      if n < base then alphabet.(max 0 (n-1)) :: acc
+      if n < base then alphabet.(max 0 n) :: acc
       else aux (alphabet.(n mod base) :: acc) (n/base)
     in
     String.concat "" (aux [] n)
@@ -79,16 +81,16 @@ module Systems = ExtList.Make (struct
        with _ -> None, s};
     romain_sys [|"i"; "v"; "x"; "l"; "c"; "d"; "m"|];
     romain_sys [|"I"; "V"; "X"; "L"; "C"; "D"; "M"|];
-    alphabetic_sys
+    alphabetic_sys ~nozero: true
       [|"a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"; "k"; "l"; "m"; "n"; "o";
         "p"; "q"; "r"; "s"; "t"; "u"; "v"; "w"; "x"; "y"; "z"|];
-    alphabetic_sys
+    alphabetic_sys ~nozero: true
       [|"A"; "B"; "C"; "D"; "E"; "F"; "G"; "H"; "I"; "J"; "K"; "L"; "M"; "N"; "O";
         "P"; "Q"; "R"; "S"; "T"; "U"; "V"; "W"; "X"; "Y"; "Z"|];
-    alphabetic_sys
+    alphabetic_sys ~nozero: true
       [|"α"; "β"; "γ"; "δ"; "ε"; "ζ"; "η"; "θ"; "ι"; "κ"; "λ"; "μ"; "ν"; "ξ"; "ο";
         "π"; "ρ"; "σ"; "τ"; "υ"; "φ"; "χ"; "ψ"; "ω"|];
-    alphabetic_sys
+    alphabetic_sys ~nozero: true
       [|"Α"; "Β"; "Γ"; "Δ"; "Ε"; "Ζ"; "Η"; "Θ"; "Ι"; "Κ"; "Λ"; "Μ"; "Ν"; "Ξ"; "Ο";
         "Π"; "Ρ"; "Σ"; "Τ"; "Υ"; "Φ"; "Ψ"; "Ω"|];
   ]
