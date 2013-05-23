@@ -2,6 +2,7 @@ open Xml
 open Prelude
 open Entity
 open Batteries
+
 open Inline
 open Block
 open Document
@@ -32,6 +33,13 @@ module H = struct
     method bot = []
     method combine = List.concat
     method wrap d contents = 
+      let style_file = Config.get config style ::
+        List.filter_map (fun (a, b) -> if a = "STYLE" then Some b else None) d.directives
+      in
+      let make_style url = Xml.block "link" []
+        ~attr: ["rel", "stylesheet"; "href", url;
+                "type", "text/css"; "media", "screen"]
+      in
       let head = Xml.block "head"
         [Xml.block "title" [Xml.data d.title];
          Xml.block "meta" ~attr: ["http-equiv", "Content-Type"; "content", "text/html";
@@ -50,11 +58,9 @@ module H = struct
          Xml.list (flip List.map (Config.get config js_files)
                      (fun filename -> Xml.block "script" ~attr: ["type", "text/javascript";
                                                                  "src", filename] []));
+         Xml.list (List.map make_style (style_file));
          Xml.block "script" ~attr:["type", "text/javascript"] 
-           [Xml.raw (Config.get config inline_js)];
-         Xml.block "link" 
-           ~attr: ["rel", "stylesheet"; "href", Config.get config style;
-                   "type", "text/css"; "media", "screen"] []]
+           [Xml.raw (Config.get config inline_js)]]
       in
       Xml.block "html"
         ~attr:["xmlns", "http://www.w3.org/1999/xhtml"]
