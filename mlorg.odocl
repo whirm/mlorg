@@ -12,5 +12,6 @@ syntax/common/Parser
 document/Document
 document/Filter
 document/Plugin
+exports/Xml
 exports/Html
 exports/Latex
