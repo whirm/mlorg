@@ -122,10 +122,10 @@ let parse_line st { Org_automaton.line; Org_automaton.parse; Org_automaton.conte
     match parse_first_line line with
     | None ->
       (match skip 0 st.indent line with
-      | indent, Some skipped ->
+      | Some indent, Some skipped when indent >= 2 ->
         context, Org_automaton.Partial
-          { st with indent; current = skipped :: st.current }
-      | _, None ->
+          { st with indent = Some indent; current = skipped :: st.current }
+      | _ ->
         let context, block = interrupt context st parse in
         context, Org_automaton.Done (block, false))
     | Some (_, checkbox, format, contents) ->
