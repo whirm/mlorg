@@ -76,7 +76,7 @@ let math2png config formulas =
     formulas 
   in
   let pwd = Sys.getcwd () in
-  let () = try Unix.mkdir (Config.get config dir) 0o640 
+  let () = try Unix.mkdir (Config.get config dir) 0o755 
     with _ -> () in
   let () = Sys.chdir (Config.get config dir) in
   let texfile = "_tmp.tex" in
