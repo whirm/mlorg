@@ -95,8 +95,14 @@ module E = struct
          Option.map_default (Xml.block "repetition" % (fun x -> [x]) % self#date)
            Xml.empty repetition]
     method list_item x = 
+      let number = match Option.map Numbering.extract x.number with
+        | Some (n :: _) -> Some (string_of_int n)
+        | _ -> None
+      in
       [Xml.block "item"
-        ~attr: (opt_attr "number" x.number @ opt_attr "checked" (Option.map string_of_bool x.checkbox))
+        ~attr: (opt_attr "label" x.number @ 
+                  opt_attr "checked" (Option.map string_of_bool x.checkbox) @
+                  opt_attr "number" number)
         (self#blocks x.contents)]
 
     method block = function
