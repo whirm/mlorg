@@ -273,11 +273,14 @@ like. If so it will set up the number item to this number. (If they
 are several number, the first one is picked)
 #+BEGIN_EXAMPLE
 1. [@(i)] Lower case latin
+2. Two
 1. [@III.] Upper case latin
-1. [@{α}] Lower case greek
-1. [@<β>] Upper case greek
-1. [@1.] Regular number
-1. [@i ii γ Δ 1] yay
+1. Four
+1. [@{δ}] What's after δ ?
+1. ε !
+1. [@42.] Numbers
+1. [@1 ii III δ] Who will win ?
+1. Did you guess right ?
 #+END_EXAMPLE
 #+BEGIN_QUOTE
 1. [@(i)] Lower case latin
@@ -290,3 +293,68 @@ are several number, the first one is picked)
 1. [@1 ii III δ] Who will win ?
 1. Did you guess right ?
 #+END_QUOTE
+** Custom blocks
+Custom blocks are of the form:
+: #+begin_name options
+: Contents
+: #+end_name
+Contents are not parsed (and are seen as raw strings). Custom blocks
+represent special environment whose formatting can be customized by
+the environment. They are exported to div with =class= the name of the
+block in HTML and as an environment of that name in LaTeX. There are
+several special custom blocks that are handled separately:
+
+- Example blocks. Represents verbatim data, can also be inserted this way:
+  : : Contents
+  : : Contents
+  : : Contents
+  gives
+  : Contents
+  : Contents
+  : Contents
+- Source code block. They expect a language and should be colored in
+  the output:
+  #+BEGIN_SRC ocaml
+  let string = "Hello, World" in
+  print_endline string
+  #+END_SRC
+  Options will be useful when babel will be supported
+
+- Quote block: generates quote. *This is the only custom blocks whose
+  contents is parsed*:
+  : #+BEGIN_QUOTE
+  : This is a quote
+  : - with a list
+  :   #+BEGIN_QUOTE
+  :   and a quote inside duh
+  :   #+END_QUOTE
+  : #+END_QUOTE
+  gives
+  #+BEGIN_QUOTE
+  This is a quote
+  - with a list
+    #+BEGIN_QUOTE
+    and a quote inside duh
+    #+END_QUOTE
+  #+END_QUOTE
+
+
+** Tables
+Tables are very versatile. =mlorg= only recognizes a subset of
+what is possible in =org-mode=.
+Simple tables look like that:
+
+|--------------+----------|
+| (1, 1)       | (2, 1)   |
+| still (1, 1) | /inline/ |
+|--------------+----------|
+| (1, 2)       | (2, 2)   |
+|--------------+----------|
+
+is typeset via
+: |--------------+----------|
+: | (1, 1)       | (2, 1)   |
+: | still (1, 1) | /inline/ |
+: |--------------+----------|
+: | (1, 2)       | (2, 2)   |
+: |--------------+----------|
