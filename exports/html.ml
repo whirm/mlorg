@@ -33,7 +33,7 @@ module H = struct
     method bot = []
     method combine = List.concat
     method wrap d contents = 
-      let style_file = Config.get config style ::
+      let style_files = Config.get config style ::
         List.filter_map (fun (a, b) -> if a = "STYLE" then Some b else None) d.directives
       in
       let make_style url = Xml.block "link" []
@@ -58,7 +58,7 @@ module H = struct
          Xml.list (flip List.map (Config.get config js_files)
                      (fun filename -> Xml.block "script" ~attr: ["type", "text/javascript";
                                                                  "src", filename] []));
-         Xml.list (List.map make_style (style_file));
+         Xml.list (List.map make_style style_files);
          Xml.block "script" ~attr:["type", "text/javascript"] 
            [Xml.raw (Config.get config inline_js)]]
       in
