@@ -11,11 +11,11 @@ install:
 	cp _build/main.native $(PREFIX)/bin/mlorg
 	cp _build/main.byte $(PREFIX)/bin/mlorg.byte
 
-doc:
+doc: 
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
-%.html: all %.org
-	./_build/main.native --filename $^ --backend html
-
+%.html: %.org all
+	./_build/main.native -o $@ --backend html $< --option=general.math2png.inline=yes
+	mv lxtpng/* docs/lxtpng/
 web: TUTORIAL.html index.html manual.html doc
 	mkdir -p $(WEBDESTDIR)/doc
 	cp index.html manual.html $(WEBDESTDIR)
@@ -25,5 +25,3 @@ testorg:
 	cat 1.org | mlorg --backend org > 2.org
 	diff 1.org 2.org
 
-README.html: all README.org
-	./_build/mlorg --filename README.org --backend html
