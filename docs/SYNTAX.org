@@ -338,23 +338,26 @@ several special custom blocks that are handled separately:
     #+END_QUOTE
   #+END_QUOTE
 
-
 ** Tables
 Tables are very versatile. =mlorg= only recognizes a subset of
 what is possible in =org-mode=.
 Simple tables look like that:
 
-|--------------+----------|
-| (1, 1)       | (2, 1)   |
-| still (1, 1) | /inline/ |
-|--------------+----------|
-| (1, 2)       | (2, 2)   |
-|--------------+----------|
+|--------------------------------+---------------------|
+| (1, 1)                         | (2, 1) and /inline/ |
+| Second line, first group       | =stuff=             |
+|--------------------------------+---------------------|
+| First line of the second group | *bold*              |
+|--------------------------------+---------------------|
 
 is typeset via
-: |--------------+----------|
-: | (1, 1)       | (2, 1)   |
-: | still (1, 1) | /inline/ |
-: |--------------+----------|
-: | (1, 2)       | (2, 2)   |
-: |--------------+----------|
+: |--------------------------------+---------------------|
+: | (1, 1)                         | (2, 1) and /inline/ |
+: | Second line, first group       | =stuff=             |
+: |--------------------------------+---------------------|
+: | First line of the second group | *bold*              |
+: |--------------------------------+---------------------|
+
+More formally, tables are composed of two type of lines
+- Seperation lines: of the form =|-....= where =...= can be anything.
+- Rows: of the form =| Col 1 | Col2 | ... |=
