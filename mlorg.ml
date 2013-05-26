@@ -1,5 +1,6 @@
 module Document = Document
 module Block = Block
+module Delimiters = Delimiters
 module Inline = Inline
 module Config = Config
 module Plugin = Plugin
