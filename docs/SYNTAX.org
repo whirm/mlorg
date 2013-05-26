@@ -2,7 +2,8 @@
 #+AUTHOR: Simon Castellan
 #+EMAIL: simon.castellan@iuwt.fr
 #+MACRO: demo =$1= ($1)
-
+#+MACRO: doc [[http://kiwi.iuwt.fr/~asmanur/projects/mlorg.docdir/$1.html][$1]]
+#+STYLE: /~asmanur/local.css
 #+begin_abstract
 =mlorg= is a parser written in OCaml for =org-mode=. It attempts to
 recognize most of the syntax handled by the original =org-mode= code.
@@ -66,7 +67,8 @@ Entities allow you to enter unicode character by typing their LaTeX
 counterpart. Entities are defined in =syntax/common/entity.ml=. In
 LaTeX, they are left as is, and in HTML exported as entity.
 
-Example: =\alpha= (\alpha)
+Example: =\alpha= (\alpha). For more information, consult the
+{{{doc(Entity)}}} module.
 
 ** Export snippets
 Export snippets allow you to insert a specific code for a specific
@@ -121,6 +123,9 @@ You can also insert basic LaTeX commands with the following
 ** Break line
 To insert a break line, use =\\= at the end of line.\\
 This line is broken.
+** Macros
+Macros allow you to perform preprocessing. Macros are called like that
+={{{macro(arg1, ..., argn)}}}=. To define macros, see [[Directives][directives]]. Example: ={{{TITLE()}}}= gives {{{TITLE()}}}.
 ** Links
 The general form of links in org-mode is: =[[url][description]]=. Example:
 {{{demo([[http://google.fr][Google]])}}}. You can omit the URL, and it is then a link to an
@@ -164,6 +169,12 @@ date). There are several ways to insert such timestamps in a document:
 - =SCHEDULED: timestamp= to say that the task (heading) is scheduled to that day,
 - =DEADLINE: timestamp= to say that the task (heading) is due for that
   day.
+- =CLOSED: timestamp= to say that the task (heading) was done on that
+  day.
+
+Moreover each timestamp can be either active or inactive depending if
+it uses brackets or chevrons: =<2013-05-26 sun.>= is active but
+[2013-05-26 dim.] is not.
 * Block construction
 As said above, blocks should be separated by empty lines.
 ** Paragraph
@@ -293,6 +304,8 @@ are several number, the first one is picked)
 1. [@1 ii III δ] Who will win ?
 1. Did you guess right ?
 #+END_QUOTE
+
+See the module {{{doc(Numbering)}}} for more information.
 ** Custom blocks
 Custom blocks are of the form:
 : #+begin_name options
@@ -361,3 +374,112 @@ is typeset via
 More formally, tables are composed of two type of lines
 - Seperation lines: of the form =|-....= where =...= can be anything.
 - Rows: of the form =| Col 1 | Col2 | ... |=
+
+Moreover, size specifier of org-mode are recognized (use =<size>= as
+only content of cell). And the grouping construct as well:
+
+: |---+-------------+-------------------+---+---+--------------+---|
+: | = | <           |                   | > | < |              | > |
+: |   | First group | Still first group |   |   | Second group |   |
+
+However the exporters do not handle it right now.
+
+** Horizontal rules
+Any line starting by fives dashes creates an horizontal rule. Meaning
+can depend on the exporters but it should either mean "go to next page" or "draw in horizontal rule to make a seperation". Example
+: -----
+gives:
+-----
+** Directives
+Directives are a way to put metadata into your document, for instance
+the title and the author:
+#+BEGIN_EXAMPLE
+#+TITLE: Test
+#+AUTHOR: Testman
+#+END_EXAMPLE
+There is no list of directive name, you can do whatever it is (as long
+as it is not a [[Keywords][keyword]]). You can refer to them after in the document
+by a [[Macros][macro]] ={{{DIRECTIVE_NAME()}}}=.
+
+Moreover the special directive =MACRO= is used to define a new macro. Its syntax is
+: #+MACRO: macro-name Contents which can refer to argument using $1, ..., $k
+
+Example:
+: #+MACRO: test Some /$1/ *$2*
+: {{{test(Macro, invocation)}}}
+gives
+#+MACRO: test Some /$1/ *$2*
+{{{test(Macro, invocation)}}}
+
+Macro management is case-insensitive.
+** Keywords
+Keywords are a way to attach metadata to blocks (such as name). They
+follow the same syntax as [[Directives][directives]] and should be placed before a
+block.
+
+: #+NAME: Some name
+: This paragraph is named. Isn't it nice ?
+
+Exporters ignore all keywords at the moment and they may be used to
+retrieve special blocks in the document.
+
+List of accepted keywords: =ATTR_ASCII=, =ATTR_DOCBOOK=, =ATTR_HTML=,
+=ATTR_LATEX=, =ATTR_ODT=, =CAPTION=, =DATA=, =HEADER=, =HEADERS=,
+=LABEL=, =NAME=, =PLOT=, =RESNAME=, =RESULT=, =RESULTS=, =SOURCE=,
+=SRCNAME= and =TBLNAME=.
+
+On top of that, one has the following translation (if you enter a
+keyword on the left, it will be as if you typed the corresponding
+keyword):
+- =DATA= -> =NAME=
+- =LABEL= -> =NAME=
+- =RESNAME= -> =NAME=
+- =SOURCE= -> =NAME=
+- =SRCNAME= -> =NAME=
+- =TBLNAME= -> =NAME=
+- =RESULT= -> =RESULTS=
+- =HEADERS= -> =HEADER=
+** Drawers
+Drawers a way to hide information in =org-mode=. The syntax is:
+: :DRAWERNAME:
+: Contents of the drawer (socks for instance)
+: :END:
+
+There is a special kind of drawer that =mlorg= recognizes, it is the
+/PROPERTY/ drawer, which look like:
+: :PROPERTIES:
+: :KEY: Value
+: :KEY: Value
+: :KEY: Value
+: :END:
+They are used to store information about a heading and can be used to
+filter on them. (Exporters don't use them as of today)
+** LaTeX
+You can insert LaTeX blocks by:
+
+: $$Your big formulas$$
+
+eg,
+
+$$ \sum_{k=1}^{+\infty} \frac 1 {k^2} = \frac{\pi^2} 6$$
+
+or you can insert plain LaTeX environment
+
+: \begin{env}options
+: Contents
+: \end{env}
+
+Whenever possible, you should use [[Custom%20blocks][custom blocks]], that get exported to
+latex environment in LaTeX-based outputs, and are more portable (in
+HTML, they are exported as div that you can style or script).
+* Conclusion
+Most syntactical constructs of =org-mode= should be documented
+here. However =org-mode= is very complex and evolves rapidly. If you
+think that there is a missing construct or that a construct is not
+handled the way it should, please send an email.
+
+
+#+NAME: test
+#+BEGIN_SRC ocaml
+fun {title} out -> fprintf out "%s" title
+#+END_SRC
