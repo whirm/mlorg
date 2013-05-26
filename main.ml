@@ -53,7 +53,7 @@ let filename =
 
 let options = 
   let doc = "Extra option to use to configure the behaviour. (Can be used multiple times)" in
-  Arg.(value & opt_all (pair ~sep:'=' string string) [] & info ["o"; "option"] ~docv: "OPTIONS" ~doc)
+  Arg.(value & opt_all (pair ~sep:'=' string string) [] & info ["x"; "option"] ~docv: "OPTIONS" ~doc)
 
 (*let get_directive s = 
   with_filename !filename
@@ -66,8 +66,8 @@ let options =
 *)
 
 let cmd = 
-  Term.(pure (fun a b c -> List.map (generate a b c)) 
-          $ backend $ output $ options $ filenames)
+  Term.(pure generate 
+          $ backend $ output $ options $ filename)
 
 let doc = "converts org-mode files into various formats"
 let options = [
