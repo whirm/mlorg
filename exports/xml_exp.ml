@@ -1,3 +1,4 @@
+
 open Timestamp
 open Prelude
 open Entity
@@ -146,12 +147,12 @@ module E = struct
                           "stop", string_of_int stop] []))
             Xml.empty t.groups
           in
-          let contents = Array.to_list
-            (Array.map (Xml.block "row"
-                           % Array.to_list 
-                           % Array.map (Xml.block "cell" % self#inlines))
-            t.rows)
-          in    
+          let lmap name f = Array.to_list % Array.map (Xml.block name % f) in
+          let contents = 
+            lmap "rowgroup" 
+              (lmap "row" 
+                 (lmap "cell" self#inlines)) t.rows
+          in
           [Xml.block "table" ~attr: (opt_attr "format" t.format)
               (index :: groups :: contents)]
      | Horizontal_Rule -> [Xml.block "horizontal-rule" []]

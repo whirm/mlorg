@@ -19,7 +19,9 @@ let is_valid line =
 
 let split_into_columns s = 
   let module D = Delimiters.Make (struct let table = ['|', ('|', false)] end) in
-  D.split (BatSubstring.all s) '|' |> List.tl
+  match D.split ~valid: false (BatSubstring.all s) '|' with
+  | [] -> []
+  | t :: q -> q
 
 let make_matrix = 
   List.rev
@@ -43,7 +45,8 @@ let compile_matrix matrix =
       with _ -> Content (Org_inline.parse s)))
     matrix
 let analyse_line (table, rows) row = 
-  if Array.for_all
+  if row = [||] then table, row :: rows
+  else if Array.for_all
     (fun t -> List.mem t [StartGroupLine; Empty; BeginGroup; EndGroup])
     row
   then
@@ -69,10 +72,24 @@ let analyse_line (table, rows) row =
     table, row :: rows
 
 let remove_first_col list = 
-  if List.for_all (fun row -> List.mem row.(0) [StartGroupLine; Empty]) list then
-    List.map (fun a -> Array.sub a 1 (Array.length a - 1)) list
+  if List.for_all (fun row -> 
+    row = [||] || List.mem row.(0) [StartGroupLine; Empty]) list 
+  then
+    List.map (fun a -> 
+      if a = [||] then a 
+      else 
+Array.sub a 1 (Array.length a - 1)) list
   else 
     list
+
+let rec split_rows ?(group = []) ?(groups = []) = 
+  let groups' () = if group = [] then groups else 
+      Array.of_list group :: groups in
+  function
+  | [] -> groups' ()
+  | [||] :: q -> split_rows ~groups: (groups' ()) q
+  | t :: q -> split_rows q ~group: (t :: group) ~groups
+
 let build lines = 
   let matrix = make_matrix lines in
   let table, rows = List.fold_left analyse_line
@@ -83,6 +100,7 @@ let build lines =
   let rows = remove_first_col rows 
   |> List.map (Array.map (function Content c -> c | _ -> [Inline.Plain ""]))
   in
+  let rows = split_rows rows in
   { table with rows = Array.of_list rows }
 
 let is_start { context; line } = match is_valid line with
@@ -95,7 +113,7 @@ let interrupt context lines r =
 
 let parse_line lines ({ line; context } as r) = match is_valid line with
   | None -> 
-      let pattern = "#+tblfm:" in
+    let pattern = "#+tblfm:" in
       if String.starts_with (String.lowercase line) pattern then
         let n = String.length pattern in
         let table = build lines in
@@ -104,7 +122,7 @@ let parse_line lines ({ line; context } as r) = match is_valid line with
         let context, blocks = interrupt context lines r in
         context, Done (blocks, false)
   | Some None ->
-      context, Next lines
+      context, Next ("" :: lines)
   | Some (Some line) ->
       context, Next (line :: lines)
 

@@ -17,8 +17,8 @@ and table = {
   (** List of columns to group. A list of couple (start, stop) *)
   align_line : int array option;
   (** The size of each columns wanted by the user*)
-  rows: Inline.t list array array;
-  (** THe rows *)
+  rows: Inline.t list array array array;
+  (** The rows, split in groups *)
   format : string option
   (** The table's format *)
 }
@@ -46,7 +46,7 @@ class ['a] mapper = object(self)
   method block (v:'a) = function
     | List (l, b) -> List (map self#list_item v l, b)
     | Table t -> Table
-        { t with rows = Array.map (Array.map (self#inlines v)) t.rows }
+        { t with rows = Array.map (Array.map (Array.map (self#inlines v))) t.rows }
     | Heading h -> Heading { h with title = self#inlines v h.title }
     | Paragraph i -> Paragraph (self#inlines v i)
     | Footnote_Definition (s, i) -> Footnote_Definition (s, self#inlines v i)
@@ -66,7 +66,7 @@ class ['a] folder = object(self)
   method block (v:'a) = function
     | Heading h -> self#inlines v h.title
     | Table t ->
-        Array.fold_left (Array.fold_left self#inlines)
+        Array.fold_left (Array.fold_left (Array.fold_left self#inlines))
           v t.rows
     | List (l, b) -> List.fold_left self#list_item v l
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines v i 
@@ -85,7 +85,7 @@ class virtual ['a] bottomUp = object(self)
     | Heading h -> self#inlines h.title
     | Table t ->
         let combine_arr f = self#combine % Array.to_list % Array.map f in
-        combine_arr (combine_arr self#inlines) t.rows 
+        combine_arr (combine_arr (combine_arr self#inlines)) t.rows 
     | List (l, b) -> self#combine (List.map self#list_item l)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines i 
     | With_Keywords (_, t) -> self#block t
@@ -103,7 +103,7 @@ class virtual ['a, 'b] bottomUpWithArg = object(self)
     | Heading h -> self#inlines arg h.title
     | Table t ->
         let combine_arr f = self#combine % Array.to_list % Array.map f in
-        combine_arr (combine_arr (self#inlines arg)) t.rows 
+        combine_arr (combine_arr (combine_arr (self#inlines arg))) t.rows 
     | List (l, b) -> self#combine (List.map (self#list_item arg) l)
     | Paragraph i | Footnote_Definition (_, i) -> self#inlines arg i 
     | With_Keywords (_, t) -> self#block arg t

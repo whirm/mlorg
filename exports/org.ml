@@ -141,7 +141,8 @@ module E = struct
         ws ":END:\n";
       | Table t ->
         let pr_row = Array.iter (fun x -> ws "| "; self#inlines x) in
-        Array.iter (fun x -> pr_row x; ws " |\n") t.rows;
+        Array.iter (fun a -> Array.iter (fun x -> pr_row x; ws " |\n") a; ws "|----")
+          t.rows;
         Option.map_default (ws "#+tblfm: %s") () t.format
       | Horizontal_Rule -> ws "-----\n"
       | Latex_Environment (name, opts, contents) ->

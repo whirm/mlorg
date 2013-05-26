@@ -42,9 +42,11 @@ and table = {
   groups : (int * int) list option;
   (** List of columns to group. A list of couple (start, stop) *)
   align_line : int array option;
-  (** The size of each columns wanted by the user*)
-  rows: Inline.t list array array;
-  (** The rows *)
+  (** The size of each columns wanted by the user.  The size refers to
+      the size of the column in character the editor should preserve
+      when reformatting the table *)
+  rows: Inline.t list array array array;
+  (** The rows, grouped *)
   format : string option
   (** The table's format *)
 }

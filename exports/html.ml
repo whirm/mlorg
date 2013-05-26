@@ -162,7 +162,12 @@ module H = struct
             [Xml.data ("$$" ^ s ^ "$$")]]
       | Quote l ->
           [Xml.block "blockquote" (self#blocks l)]
-
+      | Table {rows} ->
+        let lmap name f arr = 
+          Array.to_list (Array.map (Xml.block name % f) arr)
+        in
+          [Xml.block ~attr:["border", "1"] "table" 
+              (lmap "colgroup" (lmap "tr" (lmap "td" self#inlines)) rows)]
       | x -> super#block x
     method heading d = 
       (Xml.block (Printf.sprintf "h%d" d.level)
