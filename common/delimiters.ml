@@ -55,11 +55,11 @@ module Make (T : Table) = struct
           Some (Batteries.String.sub s (a+1) (k-1), 
                 triml (k+1) string)
 
-  let split string delimiter = 
+  let split ?valid string delimiter = 
     let open Prelude in
         let sub s l = to_string (trimr (size s - l) s) in
         let rec aux acc string = 
-          match closing_delimiter string delimiter with
+          match closing_delimiter ?valid string delimiter with
             | None -> List.rev (if is_empty string then acc 
               else to_string string :: acc)
             | Some k ->

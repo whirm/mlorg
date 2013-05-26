@@ -28,7 +28,7 @@ module Make (T : Table) : sig
       delimited string along with rest of the substring following the closing
       delimiter. Otherwise it will return [None]. [valid] is used to tell if you require that the closing delimiter should be valid. *)
 
-  val split : BatSubstring.t -> char -> string list
+  val split : ?valid: bool -> BatSubstring.t -> char -> string list
   (** [split sub c] will split [sub] along the closing delimiter corresponding
       to [c] *)
 
