@@ -1,3 +1,4 @@
+Mlorg
 common/Prelude
 common/Log
 common/Delimiters
@@ -15,3 +16,6 @@ document/Plugin
 exports/Xml
 exports/Html
 exports/Latex
+plugins/Math2png
+plugins/Toc
+plugins/Dynamic
