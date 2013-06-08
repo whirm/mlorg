@@ -1,3 +1,8 @@
+mlorg's dependancy:
+
+- Batteries
+- Cmdliner
+
 To compile mlorg:
 - make
 

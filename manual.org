@@ -1,12 +1,13 @@
 #+TITLE: mlorg's reference manual
 #+AUTHOR: Simon Castellan
 #+EMAIL: simon.castellan@iuwt.fr
+
 #+begin_abstract
 =mlorg= is a parser written in OCaml for =org-mode= files. It focuses on letting
 the user interact with the user by means of OCaml source code, and is designed
 to be easily extendable.
 #+end_abstract
-Last updated: <2012-08-08 mer.>
+
 #+begin_tableofcontents
 Table of contents:
 #+end_tableofcontents
