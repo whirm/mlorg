@@ -18,7 +18,7 @@ let interrupt context lines _ = match List.rev lines with
   | (head :: tail) as lines ->
       let parse lines = Org_inline.parse (String.concat "\n" lines) in
       (* We check for a footnote definition in the first line *)
-      try Scanf.sscanf head "[%[^][]] %[^\n]" (fun name rest ->
+      try Scanf.sscanf head "[%[^[][]] %[^\n]" (fun name rest ->
         (* NB: we want to ignore [[... because they are links often *)
         if name.[0] = '[' then failwith "";
         (* If it matches, we return a footnote definition *)
