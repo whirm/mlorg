@@ -25,12 +25,14 @@ end) : sig
       clean is used to know whether we should remove [file] and the
       generated files. NB: the name of the generated object file is
       deduced from the filename. *)
+
   val load : ?ml_source : string -> Config.instance -> string list -> string -> int -> F.t option
 (** [load config lines filename linenumber] compiles the source code
     [lines] coming from [filename] and starting at [linenumber], and
     loads it, returing the registered value. The optional parameter if
     set may be used not to use a temporary file (It is then the path
     to the ML file the source code should be written in *)
+
   val load_source : Config.instance -> string -> Document.t -> F.t option
   (** [load_source config source doc] parses and compile a source code whose form can be:
       - [block:name]: then it refers to the content of the block [name] in the document
@@ -39,12 +41,17 @@ end) : sig
       
 
 end
-
-(** This modules given a name and a type will return a generic loader of dynamic
+(** This module given a name and a type will return a generic loader of dynamic
     module.  The name should be the name of the Make(...) module so that
     [name.register] points to the returned register function (used in the source
     during the compilation)
 *)
+
+(** {2 Effectful plugins} *)
+(** Below is the signature of [Make(struct let name = "Dynamic" type t
+    = unit)]. You can use it whenever you need the user to be able to
+    register unit values *)
+
 val register : unit -> unit
 (** Register a unit value *)
 val load : ?ml_source : string -> Config.instance -> string list -> string -> int -> unit option

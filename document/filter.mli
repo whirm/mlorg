@@ -6,6 +6,7 @@ type t = Document.heading -> bool
 (** The type of a filter *)
 
 (** {3 String matcher} *)
+
 type string_matcher = string -> bool
 (** The type of a string matcher: a function matching strings *)
 

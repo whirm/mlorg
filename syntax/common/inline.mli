@@ -60,79 +60,72 @@ and entity = Entity.t
 and export_snippet = string * string
 
 (** {2 Footnote reference} *)
-(** A footnote reference contains:
-    - a name (if not specified, generated)
-    - a definition (optional) *)
 
 and footnote_reference = {
   name : string;
   definition : t list option;
 }
+(** A footnote reference contains:
+    - a name (if not specified, generated)
+    - a definition (optional) *)
 
 (** {2 Inline call} *)
-(** An inline call consists in
-    - The name of the block to call
-    - The arguments
-    - Inside header arguments
-    - End header arguments.
-    Cf org's doc for more information
-*)
-
 and inline_call = {
-  program : string;
-  arguments : (string * string) list;
-  inside_headers : string option;
-  end_headers : string option;
+  program : string; (** The name of the block to call *)
+  arguments : (string * string) list; (** The arguments to the block *)
+  inside_headers : string option; (** The inside header arguments *)
+  end_headers : string option; (** The end header arguments *)
 }
+(** See org's documentation for more information *)
 
 (** {2 Inline source block} *)
 
 and inline_source_block = {
-  language: string;
-  options: string option;
-  code: string;
+  language: string; (** The language of the code block *)
+  options: string option; (** The options *)
+  code: string; (** The code *)
 }
 
 (** {2 Latex fragments} *)
 
 and latex_fragment = 
-  | Math of string
-  | Command of string * string
-(** A latex fragment is either math contents [$foo$] or commands [$\ref{x}$] *)
+  | Math of string (** A formula: $x+1$ *)
+  | Command of string * string (** A command: [\command{argument}] *)
 
 (** {2 Links} *)
 (** Links are composed of two parts : an url and a label.
     An url may be pointed to a file, to a search or to an actual url *)
+
 and url = 
-  | File of string
-  | Search of string
-  | Complex of complex
+  | File of string (** The link refers to a local file *)
+  | Search of string (** The link refers to a heading in the document *)
+  | Complex of complex (** The link refers to an URI *)
 and complex = {
-  protocol: string;
-  link: string
+  protocol: string; (** The protocol of the URI *)
+  link: string (** The data *)
 }
     
 and link = {
-  url: url;
-  label: t list;
+  url: url; (** URL which the link refers to. *)
+  label: t list; (** The label, containing inline contents *)
 }
 
 (** {2 Cookies} *)
 
+(** Cookies are a way to indicate the progress of a task. 
+    They can be of two form : percentage or absolute value *)
 and stats_cookie = 
   | Percent of int
   | Absolute of int * int (** current, max *)
-(** Cookies are a way to indicate the progress of a task. 
-    They can be of two form : percentage or absolute value *)
 
 
 (** {2 Timestamps} *)
 
+(** A clock item-- either stopped or 
+    started *)
 and clock_item = 
   | Started of Timestamp.t
   | Stopped of Timestamp.range
-(** A clock item-- either stopped or 
-    started *)
 
 and timestamp = 
   | Scheduled of Timestamp.t

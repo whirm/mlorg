@@ -1,3 +1,5 @@
+(** Entry point of the mlorg library *)
+
 module Document = Document
 module Block = Block
 module Delimiters = Delimiters

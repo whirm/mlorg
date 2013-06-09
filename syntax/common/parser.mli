@@ -1,4 +1,7 @@
 (** The parser for blocks *)
+
+(** This functors expects a context containg a field [number] to track line number *)
+
 module Make (C : sig type context
                      val number : context -> int
                      val set_number : context -> int -> context
@@ -9,7 +12,7 @@ module Make (C : sig type context
   (** Parse a bunch of lines *)
 
   val parse_lazy : Automaton.t list -> context -> string Batteries.Enum.t -> Block.t BatEnum.t
-  (** Parse lazily a bunch of lines *)
+  (** Parse lazily a bunch of lines. Note that you cannot get the context at this point *)
 
 end
 (** As for {!Automaton}, this module is actually a functor

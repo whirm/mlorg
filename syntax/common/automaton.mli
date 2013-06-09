@@ -1,12 +1,17 @@
 (** Automata definition to parse block *)
 
-(** {!Block} parsing is done using custom automata which can carry its own state.
+(** {!Block} parsing is done using custom automata which can carry their own state.
 
     A syntax is then a list of automata from which the {!Parser} module create a full parser which
     try every automata in the right order.
 
-    Since this is a common module, it is parametrized over a global type, the type of [contexts]
-    which represents the global state of the parser, passed along the different automata *)
+    Since this is a common module, it is parametrized over a global
+    type, the type of [contexts] which represents the global state of
+    the parser, passed along the different automata. This is quite
+    powerful and is meant to handle the heavy dependance to context
+    when parsing an org-mode files.
+
+*)
 open Prelude
 open Batteries
 module Make (C : sig type context end) : sig

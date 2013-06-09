@@ -1,8 +1,8 @@
-(** XML export *)
+(** Defining XML trees and outputs for XML trees. *)
 open Batteries
 
 type t
-(** The type of xml data, constructed with {!block}
+(** The type of xml data, constructed with {!block}, {!raw}, {!list}, {!empty}
     and {!data} *)
 
 val data : string -> t

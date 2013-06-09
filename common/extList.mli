@@ -6,7 +6,7 @@
 
     This module defines what is an extendable list.
 
-    This is done through /extendable lists/. An extendable list is a list that
+    This is done through extendable lists. An extendable list is a list that
     extensions may complete.
 
     An extendable list will be a module:

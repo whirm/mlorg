@@ -12,11 +12,11 @@
 (** {2 Description of the implementation} *)
 
 (** The implementation is as follows. Configuration items are based on
-    {!SerializableType}s: types with[show]/[read] functions. Each item has such
+    {!SerializableType}s: types with [show]/[read] functions. Each item has such
     a type, a name, a description, and a default value of this type.
     
     Then an interface is basically a list of those items. A realization is a
-    polymorphic function of type 'a. 'a Item -> 'a that for any item returns a
+    polymorphic function of type ['a. 'a Item -> 'a] that for any item returns a
     value of that type. The intuition is that for items on which the instance is
     defined it will return the custom value set by the user, otherwise it
     returns the default value
@@ -122,6 +122,7 @@ val parse_comma : string -> (string * string) list
 val from_comma : t -> string -> instance
 (** Make an instance out of a comma-separated keyvalue string : [foo=bar, bar=foo]...*)
 
+(** {2 Prettyprinting} *)
 val prettyprint : 'a BatIO.output -> t -> unit
 (** Prettyprint a configuration description *)
 

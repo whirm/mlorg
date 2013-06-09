@@ -95,7 +95,7 @@ bar
 (** A block *)
 
 (** {1 Mapper and folders} *)
-(** See document for a description *)
+(** See {!Document} for a description *)
 
 class ['a] mapper : object
   inherit ['a] Inline.mapper

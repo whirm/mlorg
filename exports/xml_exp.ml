@@ -215,4 +215,6 @@ module E = struct
   type interface = exporter
   let data = (module D : Exporter)
 end
+include E
+include D
 let _ = Exporters.add (module E : Plugin with type interface = exporter)
