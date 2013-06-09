@@ -1,0 +1,213 @@
+#+TITLE: mlorg manual
+#+MACRO: doc [[http://kiwi.iuwt.fr/~asmanur/projects/mlorg/mlorg.docdir/$1.html#$2][$3]]
+#+begin_abstract
+=mlorg= is a parser written in OCaml for =org-mode= files. It focuses on letting
+the user interact with the user by means of OCaml source code, and is designed
+to be easily extendable.
+#+end_abstract
+
+#+begin_tableofcontents
+Table of contents:
+#+end_tableofcontents
+* Installing mlorg
+** From OPAM
+The simplest way of installing mlorg is through [[http://opam.ocamlpro.com/][opam]].
+
+: opam install mlorg
+
+** Git repository
+The source code of mlorg is available on [[http://kiwi.iuwt.fr/git/index.cgi/projets/mlorg][cgit]].
+** Compiling =mlorg= and installing.
+
+=mlorg= uses [[http://oasis.forge.ocamlcore.org/][oasis]] to build. The default commands to compile =mlorg= is thus:
+
+: ocaml setup.ml -configure
+: ocaml setup.ml -build
+
+Note that you will need a very recent version of batteries to compile it. To
+install it (having a version installed is needed to dynamically load modules), type
+
+: ocaml setup.ml -install
+
+The =Makefile= provides aliases for this two commands. See the documentation of
+oasis to customize the build process.
+** How to use mlorg
+=mlorg= is designed to be used in several ways:
+
+- As a standalone program that allows you to convert your org-mode files to
+  several formats such as HTML, LaTeX, and so on.
+
+- As a library that lets you parse and easily manipulate org-mode files.
+
+* The =mlorg= binary
+The =mlorg= binary is used to convert org-mode files to several others
+formats such as HTML, LaTeX, Bibtex. It can convert mathematical
+fragments to images and generate table of contents. Type =mlorg
+--help= to have an overview of the usage. Typically =mlorg= is invoked
+like this:
+
+: mlorg --backend <backend> <input-file> -o <output-file>
+
+The conversion is done in three step:
+
+- Parsing the document, yielding a value of type
+  {{{doc(Document,TYPEt, Document.t)}}}.
+- Running a few extensions (depending on the chosen backends), such as
+  {{{doc(Math2png, , Math2png)}}} or {{{doc(Toc, , Toc)}}}.
+- Exporting the document using the chosen backend.
+
+In the following we describe the existing extensions and backends
+** Extensions
+*** Math2png
+This extensions is responsible for converting LaTeX fragments and
+blocks to png images to be included in the document. The method is as
+follows:
+
+- Collect all LaTeX code to convert
+- Run LaTeX in preview mode to generate one page by equation
+- Run dvipng to generate one image per page
+- Rename those images so that the name of an image is the md5 hash of
+  the formula.
+
+All of this is done in a subdirectory (=lxtpng= by default). The
+advantages of this methods over JS-based methods (such as MathJax
+which is supported by mlorg's html backend):
+
+- It is more convenient for your user in terms of speed (On my
+  netbook, long articles with mathjax take forever to load)
+
+- You can use your favorite LaTeX packages without having to think by
+  setting the variable =general.math2png.header=.
+
+However, as though =mlorg= tries to take =dvipng='s vertical alignment
+hints, the rendering is not as smooth as it is with MathJax. This is
+the reason why it is enabled by default for block (where typically you
+want to do heavy stuff such as xy diagrams or inference rules for
+instance) and not for inline.
+
+*** Pygments
+Although pygments is not run in the middle but is called specifically
+by each formatter that needs it, it is an extension. It is responsible
+for coloring source code using the binary =pygmentize=. See =mlorg
+--options= for more information.
+
+*** Toc
+This modules is responsible for generating table of contents,
+replacing footnotes, and numbering headings. You can customize the way
+the table of contents, the headings and the footnotes are numbered
+using =Numbering= format describred [[./SYNTAX.html#Numbered_lists][here]] and
+{{{doc(Numbering,,here)}}}.
+
+**** Table of contents
+The table of contents is inserted in any custom block named
+=tableofcontents= (see the [[./MANUAL.org.html][source]] of this file for an
+example). Specifically, it is inserted after the contents of the
+block, allowing you to do things like:
+
+: #+begin_tableofcontents
+: Table of contents:
+: #+end_tableofcontents
+
+NB: the table of contents handles the appendix directive of LaTeX. Just put an
+
+: #+begin_appendix
+: #+begin_appendix
+
+in your document, and it will notice that and change the numerotation
+(as well as start over).
+
+**** Footnotes
+Footnotes are compiled as usual to a superscript number link toward an
+anchor. The question of where to put footnote definitions is
+important. The definitions are inserted after the heading of a certain
+depth. A footnote belong the heading of its definition. To control the
+depth at which footnote definitions should be inserted use the
+variable =general.toc.footnotes-level= (a number starting at 1).
+
+** Exporters
+*** HTML
+The HTML exporter can either generate full pages or HTML fragment to
+be inserted inside pages (=exporters.html.wrap=). The exporter
+generate a Xml tree that is then output. LaTeX formulas can be
+rendered using MathJax or can be converted with the [[Math2png]] plugin.
+*** LaTeX exporter
+The LaTeX exporter outputs a LaTeX document. Code coloration is not
+yet handled.
+*** Beamer exporter
+The beamer exports your document to beamer slides. It reuses most of
+the LaTeX exporter's code. Slides are heading without any children,
+others headings are exported as headings.
+*** Quote exporter
+The quote exporter allows you to "quote" your document, that is give
+it to some ML functions of type =Document.t → IO.output → unit= that
+are responsible for exporting the document. There is three possible
+sources for the exporter function:
+
+- A named source block in your document
+- A ML file
+- Inline code
+
+This is controlled by the variable =exporters.quote.source= that is parsed like that:
+
+- If the contents of the variable denotes an existing file then the source is that file
+- If the contents of the variable refer to an existing block in the
+  document, then the source for this block is used. Example, if you put this in =file.org=
+  : #+NAME: agenda
+  : #+begin_src ocaml
+  : fun doc out -> print_int (F.(count (marker (s "TODO") &&& scheduled (Timestamp.today ())) doc))
+  : #+end_src ocaml
+
+  Then, run =mlorg --backend quote -x exporters.quote.source=agenda
+  file.org=, it will print the number of TODO items scheduled for
+  today.
+
+- If the contents is =block:name=, the source is the contents of the block named =name=
+- If the contents is =ml:code=, then the source is =code=.
+
+In order to register your exporting function in a ML file, you need to
+call the function =Backends.Quote.Dynamic.register=, for instance:
+
+#+BEGIN_SRC ocaml
+let () = Backends.Quote.Dynamic.register
+    (fun document out -> print_endline document.Mlorg.Document.title)
+#+END_SRC
+
+This exporter outputs the document's title. Using source block or
+inline source code, you don't need to do that, eg. a similar effect is
+achieved by
+
+: mlorg --backend quote -x exporters.quote.source='fun doc out -> print_endline (doc.title)'
+
+(The exporter automatically compiles the code in a scope where most
+important Mlorg modules are opened.)
+
+You can also tell mlorg to write this inline code to a file to avoid
+subsequent compilations if you are to run mlorg several times.
+
+To know more about the API, see the [[http://kiwi.iuwt.fr/~asmanur/projects/mlorg/mlorg.docdir][documentation]].
+
+*Note*: to use this backend you need to have installed =mlorg= so that
+the findlib package =mlorg= is available.
+** Org
+The org backend allows you to output back to org-mode. This can be
+used to generate some structure (Toc, Math2png, and so on), or to
+filter a document. Note that the composite =parsing=; =output= is not
+the identity and this impossible since =mlorg='s AST abstracts away
+stuff like character escaping, spaces, and so on.
+** Xml
+The backend xml outputs a description of the AST in XML so that you
+can write your processing in an other language if you like.
+
+* The =mlorg= library
+
+When installed, =mlorg= offer a library you can use to integrate the
+parser or the exporters code to your program. Example can be:
+
+- Do complex transformations on documents and output back to
+  =org-mode= (thanks to the [[Org]] backend)
+
+- Derive a custom exporter from the one available
+
+- And so much more !
+
+Please consult the [[http://kiwi.iuwt.fr/~asmanur/projects/mlorg/mlorg.docdir][documentation]] to have more information.

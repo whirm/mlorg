@@ -479,7 +479,3 @@ think that there is a missing construct or that a construct is not
 handled the way it should, please send an email.
 
 
-#+NAME: test
-#+BEGIN_SRC ocaml
-fun {title} out -> fprintf out "%s" title
-#+END_SRC
