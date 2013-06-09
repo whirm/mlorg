@@ -60,7 +60,7 @@ let parse_first_line s =
         | Some (marker, rest) ->
           let b, rest = if marker = " " then Some false, rest
             else if marker = "X" then Some true, rest
-            else None, rest
+            else None, s
           in
           let rest = BatSubstring.trim rest in
           if b = None then Some (ordered, None, parse_fmt marker, rest)
