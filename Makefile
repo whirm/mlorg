@@ -16,6 +16,12 @@ doc:
 %.html: %.org all
 	./_build/main.native -o $@ --backend html $< --option=general.math2png.inline=yes
 	mv lxtpng/* docs/lxtpng/
+%.pdf: %.tex
+	pdflatex $<
+
+%.tex: %.org all
+	./_build/main.native -o $@ --backend latex $< 
+
 web: TUTORIAL.html index.html manual.html doc
 	mkdir -p $(WEBDESTDIR)/doc
 	cp index.html manual.html $(WEBDESTDIR)
