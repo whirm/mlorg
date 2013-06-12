@@ -17,7 +17,7 @@ doc:
 	./_build/main.native -o $@ --backend html $< --option=general.math2png.inline=yes
 	mv lxtpng/* docs/lxtpng/
 %.pdf: %.tex
-	pdflatex $<
+	pdflatex --output-directory=$$(dirname $<) $< 
 
 %.tex: %.org all
 	./_build/main.native -o $@ --backend latex $< 
