@@ -40,7 +40,7 @@ $extraheader
   let assoc l s = try List.assoc s l with _ -> ""
 
   let escape_inside s = s
-  let tex_escape = escape ["}"; "{"; "$"; "\\"; "["; "]"; "#"]
+  let tex_escape = escape ["}"; "{"; "$"; "\\"; "#"; "_"; "%";"^";]
   let write_header config out doc =
     let vars = ["classname", escape_inside (Config.get config classname);
                 "packages", "\\usepackage{hyperref}";
@@ -99,18 +99,21 @@ $extraheader
         | Latex_Fragment (Command (name, "")) ->
           Printf.fprintf out "\\%s" name
         | Latex_Fragment (Command (name, option)) ->
-          Printf.fprintf out "\\%s{%s}" name (escape_inside option)
+          Printf.fprintf out "\\%s{%s}" name (tex_escape option)
         | Verbatim s -> 
-          Printf.fprintf out "\\texttt{%s}" (escape ["}"] s)
+          Printf.fprintf out "\\texttt{%s}" (tex_escape s)
         | Target s ->
           Printf.fprintf out "\\label{%s}" (Toc.link s)
         | Link {url; label} ->
             (match url, label with
               | Search title, _ ->
+                Printf.fprintf out "\\hyperref"; 
                   if Toc.mem title toc then
-                    Printf.fprintf out "\\ref{sec:%s}" (Toc.link title)
+                    Printf.fprintf out "[sec:%s]" (Toc.link title)
                   else
-                    Printf.fprintf out "\\ref{%s}" title
+                    Printf.fprintf out "[%s]" (snd (String.replace ~str:title ~sub: "%20" ~by: " "));
+                  Printf.fprintf out "{"; self#inlines toc label;
+                  Printf.fprintf out "}"
               | _, label ->
                   Printf.fprintf out "\\href{%s}{"
                     (tex_escape (Inline.string_of_url url));
