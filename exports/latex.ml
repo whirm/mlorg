@@ -35,7 +35,8 @@ $extraheader
   let sections = add config "sections" (list string)
     "The name of the sections"
     ["section"; "subsection"; "subsubsection"; "paragraph"; "subparagraph"]
-
+  let pdfmeta = add config "pdf-meta" boolean
+    "Insert PDF metadata for the author and the title (if set)" true
   let assoc l s = try List.assoc s l with _ -> ""
 
   let escape_inside s = s
@@ -48,7 +49,9 @@ $extraheader
                 "author", escape_inside doc.author;
                ]
     in
-    IO.nwrite out (substitute (assoc vars) (Config.get config header))
+    let meta s s' = if s' = "" then "" else Printf.sprintf "%s={%s}" s (tex_escape s') in
+    IO.nwrite out (substitute (assoc vars) (Config.get config header));
+    Printf.fprintf out "\\hypersetup{%s,%s}\n" (meta "pdftitle" doc.title) (meta "pdfauthor" doc.author)
 
   class latexExporter config out = object(self)
       inherit [unit, Toc.t] Document.bottomUpWithArg as super
