@@ -19,6 +19,9 @@ val r: Str.regexp -> string_matcher
 val rs: string -> string_matcher
 (** [rs "regexp"] matches only what [Str.regexp "regexp"] matches *)
 
+val rsi: string -> string_matcher
+(** [rsi "regexp"] matches only what [Str.regexp_case_fold "regexp"] matches *)
+
 (** {3 Basic filters} *)
 val has_property : string_matcher -> t
 (** Selects only headings with the given property *)
@@ -69,6 +72,15 @@ val run_headings : t -> (Document.heading list -> Document.heading list)
 val run_headings_sub : t -> (Document.heading list -> Document.heading list)
 (** Run on a list of headings and their children *)
 
+val modify : t -> Document.t -> (Document.heading -> Document.heading) -> Document.t
+
+(** [modify filter doc f] runs [f] on each heading matched by [filter]
+    in [doc], and returns the document thus modified. 
+
+    Note that [f] is given a heading where the children have /already/
+    been filtered.
+*)
+    
 val count : t -> Document.t -> int
 (** Count the results (on a documet) *)
 

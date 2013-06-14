@@ -6,9 +6,10 @@ type string_matcher = string -> bool
 
 (** The type of a string matcher: a function matching strings *)
 
-let s s = (=) s
-let r r s = Str.string_partial_match r s 0
-let rs re s = Printf.printf "Matching %s and %s\n" s re; r (Str.regexp re) s
+let s s = fun s' -> s = s'
+let r r s = Str.string_match r s 0
+let rs re s = r (Str.regexp re) s
+let rsi re s = r (Str.regexp_case_fold re) s
 
 let ( &&& ) f g = fun x -> f x && g x
 let ( ||| ) f g = fun x -> f x || g x
@@ -57,3 +58,12 @@ let rec run_headings_sub f = function
 let run f d = run_headings_sub f d.headings
 let count f = run f %> List.length
 let count_headings f = run_headings f %> List.length
+
+let modify filter doc f = 
+  let o = object(self)
+    inherit [unit] Document.mapper as super
+    method heading () h = 
+      let h = { h with children = List.map (self#heading ()) h.children } in
+      if filter h then f h else h
+  end
+  in o#document () doc

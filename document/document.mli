@@ -198,7 +198,15 @@ val heading: ?timestamps: Timestamp.t list ->
   ?tags: string list ->
   ?children: heading list ->
   level: int -> Inline.t list -> heading
-(** Create a heading *)
+(** Create a heading.
+
+    NB: If you specify any of the optional attribute, this function
+    will create the corresponding blocks. For instance if you specify
+    [properties], a property drawer will be created and appended to
+    [content]. So, make sure [content] does not contain already a
+    property drawer. (Otherwise you will have two of them)
+*)
+
 
 
 
