@@ -16,8 +16,5 @@ class orgExporter : unit Batteries.IO.output -> object
 end
 (** The exporter class for org *)
 
-module Config : sig
-
-end
 (** Configuration items declared by this exporter *)
 
