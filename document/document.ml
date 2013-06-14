@@ -410,10 +410,20 @@ let document ?(filename="") ?(beginning=[]) ?(directives=[]) ?(opts = [])
 let heading ?(timestamps=[]) ?(ranges = []) ?(scheduled = []) ?(deadlines = [])
     ?(properties = []) ?(footnotes=[]) ?(clocks = []) ?current_clock ?father
     ?priority ?(anchor="") ?(content=[]) ?marker ?(tags=[]) ?(children=[]) ~level name =
-  { name; level; content; father; children; tags;
+  let inline = Inline.(List.concat [
+    List.map (fun a -> Timestamp (Date a)) timestamps;
+    List.map (fun a -> Timestamp (Scheduled a)) scheduled;
+    List.map (fun a -> Timestamp (Deadline a)) deadlines;
+    List.map (fun a -> Timestamp (Clock (Stopped a))) clocks;
+    (match current_clock with Some x -> [Timestamp (Clock (Started x))] | _ -> []);
+  ]) in
+  let body = 
+    (if inline <> [] then [Block.Paragraph inline] else [])
+    @ (if properties <> [] then [Block.Property_Drawer properties] else [])
+  in
+  { name; level; content = body @ content; father; children; tags;
     marker; priority; meta = { timestamps; ranges; scheduled; deadlines; properties; footnotes; clocks;
                                current_clock };
     anchor }
 
-let foo = ()
     
