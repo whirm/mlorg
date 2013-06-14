@@ -30,3 +30,6 @@ module Pygments = Pygments
 module Xml = Xml
 
 module Utils = Utils
+
+let org_parse_inline = Syntaxes.Org.Inline.parse
+(** Alias for [Syntaxes.Org.Inline.parse] *)
