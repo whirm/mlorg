@@ -241,7 +241,7 @@ let macro_substitution directives =
 (* [from_blocks filename blocks] transforms the list of blocks [blocks] into a
    structured document corresponding to filename [filename]. *)
 let from_blocks ?config: conf filename blocks =
-let opts = opts blocks in
+  let opts = opts blocks in
   let config = Option.default (Config.default config) conf in
   let config = Config.append opts config in
   let blocks = if Config.get config expand_macros then
@@ -402,3 +402,18 @@ let footnotes doc =
   in
   doc.beg_meta.footnotes @ List.concat (List.map handle_heading doc.headings)
   
+
+let document ?(filename="") ?(beginning=[]) ?(directives=[]) ?(opts = [])
+    ?(beg_meta=empty_meta) ?(exts=[]) ?(title="") ?(author="") ~headings =
+  { filename; beginning; directives; beg_meta; exts; title; author; headings; opts }
+
+let heading ?(timestamps=[]) ?(ranges = []) ?(scheduled = []) ?(deadlines = [])
+    ?(properties = []) ?(footnotes=[]) ?(clocks = []) ?current_clock ?father
+    ?priority ?(anchor="") ?(content=[]) ?marker ?(tags=[]) ~name ~level ~children  =
+  { name; level; content; father; children; tags;
+    marker; priority; meta = { timestamps; ranges; scheduled; deadlines; properties; footnotes; clocks;
+                               current_clock };
+    anchor }
+
+let foo = ()
+    

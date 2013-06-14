@@ -172,3 +172,12 @@ val has_tag : string -> heading -> bool
 val footnotes : t -> (string * Inline.t list) list
 (** [footnotes document] returns all the footnotes present in a document by order of first reference. *)
 
+(** {3 Smart constructors} *)
+val document: ?filename:string ->
+  ?beginning:Block.t list ->
+  ?directives:(string * string) list ->
+  ?opts:(string * string) list ->
+  ?beg_meta:meta ->
+  ?exts:string list ->
+  ?title:string -> ?author:string -> headings:heading list -> t
+(** Create a document *)
