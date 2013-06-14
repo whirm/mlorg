@@ -179,7 +179,7 @@ val document: ?filename:string ->
   ?opts:(string * string) list ->
   ?beg_meta:meta ->
   ?exts:string list ->
-  ?title:string -> ?author:string -> headings:heading list -> t
+  ?title:string -> ?author:string -> heading list -> t
 (** Create a document *)
 
 val heading: ?timestamps: Timestamp.t list ->
@@ -197,8 +197,7 @@ val heading: ?timestamps: Timestamp.t list ->
   ?marker: string ->
   ?tags: string list ->
   ?children: heading list ->
-  name: Inline.t list ->
-  level: int -> heading
+  level: int -> Inline.t list -> heading
 (** Create a heading *)
 
 

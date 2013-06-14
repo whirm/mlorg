@@ -404,12 +404,12 @@ let footnotes doc =
   
 
 let document ?(filename="") ?(beginning=[]) ?(directives=[]) ?(opts = [])
-    ?(beg_meta=empty_meta) ?(exts=[]) ?(title="") ?(author="") ~headings =
+    ?(beg_meta=empty_meta) ?(exts=[]) ?(title="") ?(author="") headings =
   { filename; beginning; directives; beg_meta; exts; title; author; headings; opts }
 
 let heading ?(timestamps=[]) ?(ranges = []) ?(scheduled = []) ?(deadlines = [])
     ?(properties = []) ?(footnotes=[]) ?(clocks = []) ?current_clock ?father
-    ?priority ?(anchor="") ?(content=[]) ?marker ?(tags=[]) ?(children=[]) ~name ~level   =
+    ?priority ?(anchor="") ?(content=[]) ?marker ?(tags=[]) ?(children=[]) ~level name =
   { name; level; content; father; children; tags;
     marker; priority; meta = { timestamps; ranges; scheduled; deadlines; properties; footnotes; clocks;
                                current_clock };
