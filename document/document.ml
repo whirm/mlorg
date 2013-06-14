@@ -409,7 +409,7 @@ let document ?(filename="") ?(beginning=[]) ?(directives=[]) ?(opts = [])
 
 let heading ?(timestamps=[]) ?(ranges = []) ?(scheduled = []) ?(deadlines = [])
     ?(properties = []) ?(footnotes=[]) ?(clocks = []) ?current_clock ?father
-    ?priority ?(anchor="") ?(content=[]) ?marker ?(tags=[]) ~name ~level ~children  =
+    ?priority ?(anchor="") ?(content=[]) ?marker ?(tags=[]) ?(children=[]) ~name ~level   =
   { name; level; content; father; children; tags;
     marker; priority; meta = { timestamps; ranges; scheduled; deadlines; properties; footnotes; clocks;
                                current_clock };

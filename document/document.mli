@@ -181,3 +181,25 @@ val document: ?filename:string ->
   ?exts:string list ->
   ?title:string -> ?author:string -> headings:heading list -> t
 (** Create a document *)
+
+val heading: ?timestamps: Timestamp.t list ->
+  ?ranges: Timestamp.range list ->
+  ?scheduled: Timestamp.t list ->
+  ?deadlines: Timestamp.t list ->
+  ?properties: (string * string) list ->
+  ?footnotes: (string * Inline.t list) list ->
+  ?clocks: Timestamp.range list ->
+  ?current_clock: Timestamp.t ->
+  ?father: heading ->
+  ?priority: char ->
+  ?anchor: string ->
+  ?content: Block.t list ->
+  ?marker: string ->
+  ?tags: string list ->
+  ?children: heading list ->
+  name: Inline.t list ->
+  level: int -> heading
+(** Create a heading *)
+
+
+
