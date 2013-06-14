@@ -12,9 +12,9 @@ let with_filename s f =
 let with_document opts source f =
   let config = Plugin.global_config opts in
   if source = "-" then
-    f (Document.from_chan config "<stdin>" stdin)
+    f (Document.from_chan ~config "<stdin>" stdin)
   else
-    f (Document.from_file config source)
+    f (Document.from_file ~config source)
 
 let generate backend output opts filename = 
   try

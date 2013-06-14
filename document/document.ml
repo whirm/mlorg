@@ -240,8 +240,9 @@ let macro_substitution directives =
 
 (* [from_blocks filename blocks] transforms the list of blocks [blocks] into a
    structured document corresponding to filename [filename]. *)
-let from_blocks config filename blocks = 
-  let opts = opts blocks in
+let from_blocks ?config: conf filename blocks =
+let opts = opts blocks in
+  let config = Option.default (Config.default config) conf in
   let config = Config.append opts config in
   let blocks = if Config.get config expand_macros then
       macro_substitution (directives blocks) blocks
@@ -318,16 +319,16 @@ let from_blocks config filename blocks =
          filename;
        }), config
 (** {1 Parsing from files} *)
-let from_chan config filename channel = 
+let from_chan ?config filename channel = 
     BatIO.lines_of channel |> 
     Org_parser.parse |> snd |>
-    from_blocks config filename
+    from_blocks ?config filename
 
-let from_file config filename = 
-    BatFile.with_file_in filename (from_chan config filename)
+let from_file ?config filename = 
+    BatFile.with_file_in filename (from_chan ?config filename)
 
-let from_fun config filename f = 
-  Enum.from_while f |> Org_parser.parse |> snd |> from_blocks config filename
+let from_fun ?config filename f = 
+  Enum.from_while f |> Org_parser.parse |> snd |> from_blocks ?config filename
 
 let rec descendants heading = 
   heading :: List.concat (List.map descendants heading.children)

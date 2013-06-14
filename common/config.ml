@@ -209,11 +209,14 @@ let append list ({config} as instance) =
   in
   {get = (fun (type u) ?(vars = []) item -> lookup item vars);
    config}
-    
-let make config list = append list
+
+let default config =     
   {get = (fun (type u) ?(vars=[]) i -> None);
    config
   }
+
+let make config list = append list (default config)
+
 let from_comma config s = parse_comma s |> make config
       
 

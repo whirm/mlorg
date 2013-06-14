@@ -107,6 +107,9 @@ val get : ?vars : (string * string) list -> instance -> 'a item -> 'a
     The optional parameter [vars] defines the values of the variable of that
     item. Default: empty *)
 
+val default : t -> instance
+(** Return the default instance corresponding to a configuration. *)
+
 val make : t -> (string * string) list -> instance
 (** Make an instance out of an t and a few defined values *)
 

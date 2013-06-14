@@ -120,13 +120,13 @@ val directives : Block.t list -> (string * string) list
 val opts : Block.t list -> (string * string) list
 (** Return the options set in a list of blocks *)
 
-val from_chan : Config.instance -> string -> BatIO.input -> t * Config.instance
+val from_chan : ?config: Config.instance -> string -> BatIO.input -> t * Config.instance
 (** From an input (the second argument is the filename).
     Returns a new instance updated with the parameter defined in the document.
  *)
-val from_file  : Config.instance -> string -> t * Config.instance
+val from_file  : ?config: Config.instance -> string -> t * Config.instance
 (** From a file *)
-val from_fun : Config.instance -> string -> (unit -> string option) -> t * Config.instance
+val from_fun : ?config: Config.instance -> string -> (unit -> string option) -> t * Config.instance
 (** From a function *)
 
 (** {1 Handling documents} *)
