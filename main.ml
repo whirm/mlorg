@@ -45,7 +45,7 @@ let output =
 
 let backend = 
   let doc = "Uses $(docv) to generate the output. (`-` for stdout)" in
-  Arg.(value & opt string "backend" & info ["b"; "backend"] ~docv:"BACKEND" ~doc)
+  Arg.(value & opt string "html" & info ["b"; "backend"] ~docv:"BACKEND" ~doc)
 
 let filename = 
   let doc = "The input filename to use. (`-` for stdin) " in
