@@ -11,6 +11,10 @@ install:
 	cp _build/main.native $(PREFIX)/bin/mlorg
 	cp _build/main.byte $(PREFIX)/bin/mlorg.byte
 
+uninstall:
+	ocaml setup.ml -uninstall
+	rm -f $(PREFIX)/bin/mlorg*
+
 doc: 
 	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
 %.html: %.org all
