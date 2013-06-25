@@ -1,12 +1,14 @@
 mlorg's dependancy:
 
-- Batteries
+- Batteries (≥ 2.0.0)
 - Cmdliner
 
 To compile mlorg:
-- make
+
+: ocaml setup.ml -configure --prefix=prefix
+: make 
 
 To install mlorg:
-- sudo make install
+- sudo make install PREFIX=prefix
 
-You can build the doc via `make doc'.
+You can build the doc via =make doc=.

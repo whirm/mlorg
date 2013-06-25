@@ -2,6 +2,11 @@
 
 
 
+* v0.1
+Release: <2013-06-24 lun.>
+- Fixed many bugs in parser and in exporters
+- Use Cmdliner to deal with command line parameters
+- Added functions in Document and Filter
 * r8
 Release: <2012-11-24 sam.>
 - Improved the Numbering algorithms (Thibault Suzanne)
