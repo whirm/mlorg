@@ -44,6 +44,8 @@ val deadline : Timestamp.t -> t
 val happens : Timestamp.t -> t
 (** Selects happening on the given day (ie. with a timestamp equal to the given day) *)
 
+val leaf : t
+(** Selects leaf headings (ie. headings with no children) *)
 
 (** {3 Combinators} *)
 

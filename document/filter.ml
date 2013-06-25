@@ -34,6 +34,9 @@ let marker f = fun h -> Option.map_default f false h.marker
 let name f =
   fun h -> f (Inline.asciis h.name)
 
+let leaf = 
+  fun {children} -> children = []
+
 let scheduled t = 
   fun h -> List.exists (Timestamp.covers t) h.meta.scheduled
 let deadline t = 
