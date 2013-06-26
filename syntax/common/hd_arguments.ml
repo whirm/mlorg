@@ -5,6 +5,7 @@ type value =
 
 
 and t = {
+  arguments: (string * string list) list;
   vars: (string * value option) list;
   collection: [ `Value | `Output ];
   typ: [ `Table | `List | `Scalar | `FileLink] option;
@@ -88,6 +89,7 @@ let default = {
   shebang = None;
   eval = `Yes;
   wrap = "RESULTS";
+  arguments = [];
 }
   
 let delimiters_table = 
@@ -149,8 +151,14 @@ let get_args s =
   
   
 let whd l x = if l = [] then x else List.hd l
-let whd_opt l x = if l = [] then x else Some (List.hd l)
+let whd_map f l x = if l = [] then x else try f (List.hd l) with _ -> x
+let whd_ table l x = 
+  if l = [] then x else try List.assoc (List.hd l) table with Not_found -> 
+    Log.warning "Expected value among: %s. Got: %s." 
+      (String.concat ", " (List.map fst table)) (List.hd l); x
 
+let whd_opt l x = if l = [] then x else Some (List.hd l)
+let whd_bool = whd_map (function "yes" -> true | "no" -> false)
 let ( @|@ ) g f = fun l x -> g x (f l)
 let options = [
   "var", update_vars @|@ (fun l y -> List.map (all %> parse_binding_opt) l @ y);
@@ -176,14 +184,51 @@ let options = [
       | _ -> x
     in List.fold_left handle_word x l);
   "file", update_file @|@ whd_opt;
+  "file-desc", update_filedescr @|@ whd_opt;
+  "dir", update_dir @|@ whd_opt;
+  "exports", update_exports 
+    @|@ whd_ ["code", [`Code]; "none", []; 
+              "results", [`Results]; "both", [`Code; `Results]] ;
+  "tangle", update_tangle @|@ whd_map (function "no" -> `No | "yes" -> `Yes | s -> `File s);
+  "mkdirp", update_mkdirp @|@ whd_bool;
+  "comments", update_comments @|@ whd_
+  ["no", `No; "link", `Link; "yes", `Yes; "org", `Org; "both", `Both;
+   "noweb", `Noweb];
+  "padline", update_padline @|@ whd_bool;
+  "no_expand", update_expand @|@ (fun _ _ -> false);
+  "session", update_session @|@ (fun l _ -> if l = [] then Some "" else Some (List.hd l));
+  "noweb", update_noweb @|@ whd_
+      ["no", `No; "yes", `Yes; "tangle", `Tangle; "no-export", `No_export;
+       "strip-export", `Strip_export; "eval", `Eval];
+  "noweb-ref", update_noweb_ref @|@ whd_opt;
+  "noweb-sep", update_noweb_sep @|@ whd;
+  "cache", update_cache @|@ whd_bool;
+  "sep", update_sep @|@ whd_opt;
+  "hlines", update_hlines @|@ whd_bool;
+  "colnames", update_colnames @|@ whd_map (function "yes" -> Some true | "no" -> Some false);
+  "rownames", update_rownames @|@ whd_bool;
+  "shebang", update_shebang @|@ whd_opt;
+  "eval", update_eval @|@ whd_
+      ["never", `No; "no", `No; "query", `Query; "never-export", `No; "no-export", `No;
+       "query-export", `Query];
+  "wrap", update_wrap @|@ whd
 ]
-
+  
+  
+  
+  
+      
 let parse string = 
   let args = get_args string in
   List.fold_left (fun x (name, args) ->
     try
       List.assoc name options args x
-    with Not_found -> print_endline ":("; x
-    | Failure s -> x) default args
-    
-    
+    with Not_found -> Log.warning "Ignored unkonwn option %s" name; x
+    | _ -> x) { default with arguments = args } args
+
+let to_string x = 
+  String.concat " "
+    (List.map (fun (a, b) ->
+      Printf.sprintf ":%s %s" a 
+        (String.concat " " b))
+       x.arguments)

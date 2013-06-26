@@ -139,20 +139,20 @@ module H = struct
       | Example (_, l) ->
           [Xml.block "pre" [Xml.data (String.concat "\n" l)]]
 
-      | Src (_, lang, lines) ->
+      | Src {language; lines} ->
         if Config.get config use_pygments then
           let options = 
             if Config.get config number_lines then [Pygments.Lineno]
             else []
           in
           try
-            [Xml.raw (Pygments.color ~options config lang "html" lines)]
+            [Xml.raw (Pygments.color ~options config language "html" (List.map fst lines))]
           with Command.Failed (command, message) ->
             Log.warning "While running pygments (%s): %s" command message;
-            [Xml.block "pre" [Xml.data (String.concat "\n" lines)]]
+            [Xml.block "pre" [Xml.data (String.concat "\n" (List.map fst lines))]]
             
         else
-          [Xml.block "pre" [Xml.data (String.concat "\n" lines)]]
+          [Xml.block "pre" [Xml.data (String.concat "\n" (List.map fst lines))]]
 
       | Custom (name, _, l) ->
         [Xml.block "div" ~attr:["class", name] (self#blocks l)]

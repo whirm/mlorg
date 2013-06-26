@@ -41,8 +41,8 @@ module E = struct
           (wrap_bracket inside_headers)
           (escape ["("; ")"] arguments) (wrap_bracket end_headers)
 	  
-    | Inline_Source_Block {language; options; code} ->
-      ws "src_%s%s%s" language (wrap_bracket options) 
+    | Inline.Inline_Source_Block {Inline.language; options; code} ->
+      ws "src_[%s]%s%s" language (Hd_arguments.to_string options)
         (wrap_brace (Some code))
     | Subscript t -> 
       ws "_{%s}" (inlines t)
@@ -123,9 +123,17 @@ module E = struct
         self#block b
       | Example (_, lines) ->
         List.iter (ws ": %s\n") lines
-      | Src (number, opts, lines) ->
-        ws "#+begin_src %s\n" opts;
-        List.iter (ws "%s\n") lines;
+      | Src src ->
+        let pr_line (a, b) = 
+          ws "%s" a;
+          (match b with
+          | Some s -> ws " "; ws "%s" (Printf.sprintf src.ref_format s)
+          | None -> ());
+          ws "\n"
+        in
+        ws "#+begin_src %s %s\n" src.language 
+        (Hd_arguments.to_string src.header_arguments);
+        List.iter pr_line src.lines;
         ws "#+end_src\n"
       | Custom (name, opt, contents) ->
         ws "#+begin_%s %s\n" name opt;

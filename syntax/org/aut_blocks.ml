@@ -5,11 +5,22 @@ open Org_automaton
 type state = int * string list * string * string
 (* The state : the linenumber, the lines seen so far, the name and options *)
 
+let make_src (number, lines, name, opts) = 
+  let (name, opts) = String.split ~by: " " name in
+  Src
+    {
+      numbering = None;
+      lines = List.map (fun x -> x, None) lines;
+      ref_format = "(%s)";
+      header_arguments = Hd_arguments.parse opts;
+      language = name; linenumber = number;
+    }
+
 let interrupt ctx (number, lines, name, opts) parse = 
   let lines = List.rev lines in
   match String.lowercase name with
     | "example" -> ctx, [Example (number, lines)]
-    | "src" -> ctx, [Src (number, opts, lines)]
+    | "src" -> ctx, [make_src (number, lines, opts, name)]
     | "quote" ->
       let ctx', blocks = parse ctx (List.enum lines) in
       ctx', [Quote blocks]

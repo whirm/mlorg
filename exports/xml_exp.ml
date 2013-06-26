@@ -44,9 +44,9 @@ module E = struct
                 Xml.block "parameter" ~attr:["key", k; "value", v] [])
                  arguments)]
 
-      | Inline_Source_Block {language; options; code} ->
-          [Xml.block "inline-source" ~attr:(["language", language]
-                                            @ opt_attr "options" options)
+      | Inline_Source_Block {Inline.language; options; code} ->
+          [Xml.block "inline-source" ~attr:["language", language;
+                                            "options", Hd_arguments.to_string options]
               [Xml.data code]]
 
             
@@ -119,9 +119,14 @@ module E = struct
       | Example (line, l) ->
           [Xml.block "example" ~attr: ["linenumber", string_of_int line]
               [Xml.data (String.concat "\n" l)]]
-      | Src (number, opts, lines) ->
-          [Xml.block "source" ~attr:["options", opts; "linenumber", string_of_int number]
-              [Xml.data (String.concat "\n" lines)]]
+      | Src {linenumber; header_arguments; lines; language} ->
+          [Xml.block "source" ~attr:["options", Hd_arguments.to_string header_arguments; 
+                                     "linenumber", string_of_int linenumber]
+              (List.map (fun (a, b) -> 
+                let attr = match b with
+                  | None -> [] | Some s -> ["ref", s]
+                in
+                Xml.block ~attr "line" [Xml.data a]) lines)]
       | Custom (name, opt, contents) ->
           [Xml.block "custom" ~attr:["name", name; "options", opt]
               (self#blocks contents)]

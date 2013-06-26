@@ -15,6 +15,7 @@ type value =
 
 (** A var, used to specify the value of variable *)
 and t = {
+  arguments: (string * string list) list;
   vars: (string * value option) list;
   collection: [ `Value | `Output ];
   typ: [ `Table | `List | `Scalar | `FileLink] option;
@@ -48,3 +49,6 @@ val parse_var : BatSubstring.t -> value * BatSubstring.t
 
 val parse: string -> t
 (** Parse the header arguments of a code *)
+
+val to_string : t -> string
+(** Outputs arguments to string *)

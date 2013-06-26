@@ -88,11 +88,15 @@ let inline_source_block_parser _ rest =
   let rest = see "src_" rest in
   let language, rest = until_space (one_of [obracket; obrace]) rest in
   let options, rest = inside obracket rest in
+  let options = match options with
+    | None -> Hd_arguments.parse ""
+    | Some s -> Hd_arguments.parse s
+  in
   let code, rest = inside obrace rest in
   match code with
     | None -> None
     | Some code ->
-      Some ([Inline_Source_Block {language; options; code}], rest)
+      Some ([Inline_Source_Block {language; options = options; code}], rest)
 
 (** {2 Latex Fragment parser} *)
 let latex_fragment_parser _ rest = 

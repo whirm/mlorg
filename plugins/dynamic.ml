@@ -90,7 +90,8 @@ let _ = %s.register (
         load ?ml_source config lines file number in
       let file source = compile ~clean: false config ~file: source in
       let block ml_source = function
-        | Block.Src (number, _, lines) -> ret ?ml_source doc.Document.filename lines number
+        | Block.Src {Block.linenumber; lines} -> 
+          ret ?ml_source doc.Document.filename (List.map fst lines) linenumber
         | _ -> Log.warning "Denoted block is not a source block."; None
       in 
       let lines ml_source code = ret ?ml_source "<command-line>" 

@@ -30,7 +30,7 @@ let parse_line st { context } =
 (* To know if we are in the beginning of a paragraph, it's easy: it's always the case ! *)
 let is_start { line; context } = 
   try
-    Scanf.sscanf line "#+%[^:]: %[^\n]" 
+    Scanf.sscanf line "#+%[^: ]: %[^\n]" 
       (fun key value -> Some (context, (key, value)))
   with _ -> None
 

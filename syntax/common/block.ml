@@ -23,10 +23,12 @@ and table = {
   (** The table's format *)
 }
 and code_block = {
-  numbered: [ `Yes | `Keep] option;
-  contents: (string * string option) list;
-  format: 'a 'b 'c. (string -> 'a, 'b, 'c) format ;
+  numbering: [ `Yes | `Keep] option;
+  lines: (string * string option) list;
+  ref_format: 'a 'b. (string -> 'a, 'b, 'a, 'a) format4 ; (** The format used to parse ref *)
   header_arguments: Hd_arguments.t;
+  language: string;
+  linenumber: int;
 }
 
 
@@ -40,7 +42,7 @@ and t =
   | Quote of t list
   | With_Keywords of (string * string) list * t
   | Example of int * string list
-  | Src of int * string * string list
+  | Src of code_block
   | Custom of string * string * t list
   | Latex_Environment of string * string * string list
   | Drawer of string * t list

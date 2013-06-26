@@ -82,7 +82,7 @@ and inline_call = {
 
 and inline_source_block = {
   language: string; (** The language of the code block *)
-  options: string option; (** The options *)
+  options: Hd_arguments.t; (** The options *)
   code: string; (** The code *)
 }
 

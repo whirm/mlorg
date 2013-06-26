@@ -19,7 +19,7 @@ and inline_call = {
 }
 and inline_source_block = {
   language: string;
-  options: string option;
+  options: Hd_arguments.t;
   code: string;
 }
 and url = 
