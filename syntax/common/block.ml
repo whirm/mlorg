@@ -22,6 +22,15 @@ and table = {
   format : string option
   (** The table's format *)
 }
+and code_block = {
+  numbered: [ `Yes | `Keep] option;
+  contents: (string * string option) list;
+  format: 'a 'b 'c. (string -> 'a, 'b, 'c) format ;
+  header_arguments: Hd_arguments.t;
+}
+
+
+  
 and t = 
   | Paragraph of Inline.t list
   | Heading of heading
