@@ -30,4 +30,4 @@ let is_start { line; context; } =
         (fun l -> Some (context, (handle_line ([], false) l, context.Org_context.number)))
   with _ -> None
 
-let priority = 10
+let priority = 2

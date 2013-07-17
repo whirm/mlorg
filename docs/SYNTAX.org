@@ -2,7 +2,7 @@
 #+AUTHOR: Simon Castellan
 #+EMAIL: simon.castellan@iuwt.fr
 #+MACRO: demo =$1= ($1)
-#+MACRO: doc [[http://kiwi.iuwt.fr/~asmanur/projects/mlorg.docdir/$1.html][$1]]
+#+MACRO: doc [[http://kiwi.iuwt.fr/~asmanur/projects/mlorg/mlorg.docdir/$1.html][$1]]
 #+STYLE: /~asmanur/local.css
 #+begin_abstract
 =mlorg= is a parser written in OCaml for =org-mode=. It attempts to
