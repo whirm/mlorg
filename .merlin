@@ -6,9 +6,11 @@ S syntax/common
 S document
 S exports
 S plugins
+S .
 B _build/common
 B _build/syntax/org
 B _build/syntax/common
 B _build/exports
 B _build/plugins
 B _build/document
+B _build

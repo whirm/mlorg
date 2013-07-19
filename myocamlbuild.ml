@@ -397,6 +397,8 @@ module MyOCamlbuildBase = struct
 
         | After_rules -> 
             (* Declare OCaml libraries *)
+            flag ["ocaml"; "compile"; "bin-annot"] & A"-bin-annot";
+
             List.iter 
               (function
                  | nm, [] ->

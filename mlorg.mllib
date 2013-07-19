@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: fa6037f64115f34d3e3bd7edbacd5343)
+# DO NOT EDIT (digest: 9067768ceb97e6a12f300f52185cc96f)
 Mlorg
 common/Prelude
 common/Log
@@ -9,6 +9,7 @@ common/Numbering
 common/ExtList
 common/Delimiters
 syntax/common/Entity
+syntax/common/Hd_arguments
 syntax/common/Inline
 syntax/common/Block
 syntax/common/Automaton

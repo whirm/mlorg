@@ -45,3 +45,4 @@
 <*.ml{,i}>: pkg_dynlink
 <*.ml{,i}>: pkg_cmdliner
 # OASIS_STOP
+true: bin-annot
