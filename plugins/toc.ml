@@ -139,9 +139,6 @@ let transform config doc =
           Log.warning "Reference to unknown footnote `%s' (It is defined in the same section?)" name;
           x)
       | x -> super#inline (numbers, toc) x
-    method block (numbers, toc) = function
-      | Footnote_Definition _ -> Paragraph []
-      | x -> super#block (numbers, toc) x
     method heading (numbers, toc) t = 
       let () = footnotes_seen := !footnotes_seen @ 
         Document.(t.meta.footnotes) in
@@ -184,6 +181,7 @@ let transform config doc =
       else
         { doc with Document.beginning = doc.Document.beginning @ footnotes }
     method block l = function
+      | Footnote_Definition _ -> Paragraph []
       | Custom ("tableofcontents", opts, contents) ->
           Custom ("tableofcontents", opts,
                   contents @ [self#block l (generate config global_toc)])
