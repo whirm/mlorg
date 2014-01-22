@@ -142,7 +142,7 @@ $extraheader
         | Custom ("tableofcontents", _, _) ->
             Printf.fprintf out "\\tableofcontents\n"
         | Custom (name, opts, l) ->
-          Printf.fprintf out "\\begin{%s}{%s}\n" (escape_inside name)
+          Printf.fprintf out "\\begin{%s}%s\n" (escape_inside name)
             (escape_inside opts);
           self#blocks toc l;
           Printf.fprintf out "\\end{%s}\n" (escape_inside name)
