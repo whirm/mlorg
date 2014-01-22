@@ -188,6 +188,7 @@ class virtual ['a, 'b] bottomUpWithArg = object(self)
 end
 let string_of_url = function
   | File s | Search s -> s
+  | Complex {link; protocol="file"} -> link
   | Complex {link; protocol} -> protocol ^ ":" ^ link
 let rec ascii = function
   | List l -> asciis l
