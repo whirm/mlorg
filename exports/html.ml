@@ -47,7 +47,7 @@ module H = struct
          (if !mathjax_used then
              Xml.block "script" ~attr:["type","text/javascript"; 
                                        "src",Config.get config mathjax_url] 
-               []
+               [Xml.raw ""]
           else Xml.empty);
          Xml.block "style" ~attr:["type", "text/css"]
            [Xml.data 
@@ -57,7 +57,7 @@ module H = struct
                 else "")];
          Xml.list (flip List.map (Config.get config js_files)
                      (fun filename -> Xml.block "script" ~attr: ["type", "text/javascript";
-                                                                 "src", filename] []));
+                                                                 "src", filename] [Xml.raw ""]));
          Xml.list (List.map make_style style_files);
          Xml.block "script" ~attr:["type", "text/javascript"] 
            [Xml.raw (Config.get config inline_js)]]
