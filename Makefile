@@ -1,38 +1,46 @@
-INC=-I common -I syntax/inline -I syntax/blocks -I document -I exports
--include setup.data
-all:
-	ocaml setup.ml -build
+# OASIS_START
+# DO NOT EDIT (digest: 4c293511860bb966e727ba6f0ecc8197)
 
-top: all
-	rlwrap ocaml -I _build/common -I _build/syntax/inline -I _build/document -I _build/exports -I _build/syntax/blocks -I _build/document/ $(INC) -init ocaml.init
+SETUP = ./setup.exe
 
-install:
-	cp _build/main.native $(prefix)/bin/mlorg
-	cp _build/main.byte $(prefix)/bin/mlorg.byte
-	ocaml setup.ml -reinstall
+build: setup.data $(SETUP)
+	$(SETUP) -build $(BUILDFLAGS)
 
-uninstall:
-	ocaml setup.ml -uninstall
-	rm -f $(prefix)/bin/mlorg*
+doc: setup.data $(SETUP) build
+	$(SETUP) -doc $(DOCFLAGS)
 
-doc: 
-	ocamlbuild $(OCAMLBUILDFLAGS) mlorg.docdir/index.html
-%.html: %.org all
-	./_build/main.native -o $@ --backend html $< --option=general.math2png.inline=yes
-	mv lxtpng/* docs/lxtpng/
-%.pdf: %.tex
-	pdflatex --output-directory=$$(dirname $<) $< 
+test: setup.data $(SETUP) build
+	$(SETUP) -test $(TESTFLAGS)
 
-%.tex: %.org all
-	./_build/main.native -o $@ --backend latex $< 
+all: $(SETUP)
+	$(SETUP) -all $(ALLFLAGS)
 
-web: TUTORIAL.html index.html manual.html doc
-	mkdir -p $(WEBDESTDIR)/doc
-	cp index.html manual.html $(WEBDESTDIR)
-	cp _build/mlorg.docdir/* $(WEBDESTDIR)/doc -Rf
-testorg:
-	cat $(FILE) | mlorg --backend org > 1.org
-	cat 1.org | mlorg --backend org > 2.org
-	diff 1.org 2.org
+install: setup.data $(SETUP)
+	$(SETUP) -install $(INSTALLFLAGS)
 
-.PHONY: install uninstall
+uninstall: setup.data $(SETUP)
+	$(SETUP) -uninstall $(UNINSTALLFLAGS)
+
+reinstall: setup.data $(SETUP)
+	$(SETUP) -reinstall $(REINSTALLFLAGS)
+
+clean: $(SETUP)
+	$(SETUP) -clean $(CLEANFLAGS)
+
+distclean: $(SETUP)
+	$(SETUP) -distclean $(DISTCLEANFLAGS)
+	$(RM) $(SETUP)
+
+setup.data: $(SETUP)
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+configure: $(SETUP)
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+setup.exe: setup.ml _oasis
+	ocamlfind ocamlopt -o $@ -linkpkg -package oasis.dynrun setup.ml || ocamlfind ocamlc -o $@ -linkpkg -package oasis.dynrun setup.ml || true
+	$(RM) setup.cmi setup.cmo setup.cmx setup.o
+
+.PHONY: build doc test all install uninstall reinstall clean distclean configure
+
+# OASIS_STOP

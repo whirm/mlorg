@@ -1,36 +1,57 @@
-OASISFormat: 0.3
+OASISFormat: 0.4
 Name:        mlorg
 Version:     0
 Synopsis:    mlorg is a parser for org-mode files written in OCaml.
 Authors:     Simon Castellan <simon.castellan@iuwt.fr>
 License:     GPL
-Plugins:     META (0.2)
+Plugins:     META (0.4), DevFiles (0.4), StdFiles (0.4)
 BuildDepends: batteries,dynlink,cmdliner
+AlphaFeatures: ocamlbuild_more_args, compiled_setup_ml, stdfiles_markdown
 
 
 Library mlorg
-  Path:             .
-  InternalModules:  common/Prelude, common/Log, common/Config, common/Timestamp, common/Numbering,common/ExtList,common/Delimiters, syntax/common/Entity, syntax/common/Hd_arguments, syntax/common/Inline, syntax/common/Block, syntax/common/Automaton, syntax/common/Parser, syntax/common/Inline, syntax/common/Inline_combinators, syntax/org/Org_inline, syntax/org/Org_context, syntax/org/Org_automaton, syntax/org/Aut_blocks, syntax/org/Aut_table, syntax/org/Aut_directive, syntax/org/Aut_drawers, syntax/org/Aut_heading, syntax/org/Aut_list, syntax/org/Aut_math, syntax/org/Aut_hr, syntax/org/Aut_latex_env, syntax/org/Aut_paragraph, syntax/org/Aut_verbatim, syntax/org/Org_parser, document/Document, document/Filter, document/Plugin, plugins/Toc, exports/Org, exports/Xml, exports/Html, exports/Latex, exports/Xml_exp, exports/Quote, exports/Beamer, plugins/Math2png, plugins/Dynamic, plugins/Command, plugins/Pygments, Utils
-  Modules:          Mlorg
-  CompiledObject:   best
-  BuildTools:       ocamlbuild
+  Path:       .
+  BuildTools: ocamlbuild
+  Modules:    Mlorg
+  InternalModules:common/Prelude, common/Log, common/Config,
+    common/Timestamp, common/Numbering, common/ExtList, common/Delimiters,
+    syntax/common/Entity, syntax/common/Hd_arguments, syntax/common/Inline,
+    syntax/common/Block, syntax/common/Automaton, syntax/common/Parser,
+    syntax/common/Inline, syntax/common/Inline_combinators,
+    syntax/org/Org_inline, syntax/org/Org_context, syntax/org/Org_automaton,
+    syntax/org/Aut_blocks, syntax/org/Aut_table, syntax/org/Aut_directive,
+    syntax/org/Aut_drawers, syntax/org/Aut_heading, syntax/org/Aut_list,
+    syntax/org/Aut_math, syntax/org/Aut_hr, syntax/org/Aut_latex_env,
+    syntax/org/Aut_paragraph, syntax/org/Aut_verbatim, syntax/org/Org_parser,
+    document/Document, document/Filter, document/Plugin, plugins/Toc,
+    exports/Org, exports/Xml, exports/Html, exports/Latex, exports/Xml_exp,
+    exports/Quote, exports/Beamer, plugins/Math2png, plugins/Dynamic,
+    plugins/Command, plugins/Pygments, Utils
 
 Executable mlorg
   Path:       .
-  MainIs:     main.ml
   BuildTools: ocamlbuild
+  MainIs:     main.ml
+  CompiledObject: best
 
 Executable "mlorg.opt"
-  Path:           .
-  MainIs:         main.ml
-  CompiledObject: native
-  BuildTools:     ocamlbuild
+  Path:       .
+  BuildTools: ocamlbuild
+  MainIs:     main.ml
 
 Document mlorg
   Title:                API reference for mlorg
-  InstallDir:           $htmldir/mlorg
-  BuildTools:           ocamlbuild
-  BuildTools+:          ocamldoc
-  Type:                 ocamlbuild (0.3)
-  XOCamlbuildPath:      ./
+  Type: ocamlbuild (0.4)
+  BuildTools: ocamlbuild, ocamldoc
+
+  XOCamlbuildPath: .
+  XOCamlbuildExtraArgs:
+    "-docflags '-colorize-code -short-functors -charset utf-8'"
   XOCamlbuildLibraries: mlorg
+
+
+SourceRepository master
+  Type: git
+  Location: https://github.com/whirm/mlorg.git
+  Branch: master
+  Browser: https://github.com/whirm/mlorg
